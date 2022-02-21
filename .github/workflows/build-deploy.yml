@@ -7,7 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  SHA: ${{ GITHUB_SHA::7 }}
+  SHA: ${{ github.sha::7 }}
 
 jobs:
 
