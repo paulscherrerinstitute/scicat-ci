@@ -12,9 +12,14 @@ jobs:
 
   build:
 
+
     runs-on: ubuntu-latest
 
     steps:
+    - name: Set outputs
+      id: vars
+      run: echo "::set-output name=sha_short::${GITHUB_SHA::7}"
+
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -34,7 +39,7 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=match,pattern=^\d{7}[a-zA-Z0-9],value=${{github.event.pull_request.head.sha}}
+          type=match,value=${{steps.vars.outputs.sha_short}}
     
     - name: Build and push Docker image
       id: build-and-push
