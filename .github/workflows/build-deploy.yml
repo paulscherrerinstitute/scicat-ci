@@ -39,7 +39,7 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=sha
+          type=raw,value=${{steps.vars.outputs.sha_short}},prefix=sha-
     
     - name: Build and push Docker image
       id: build-and-push
