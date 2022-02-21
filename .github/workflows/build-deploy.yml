@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Set outputs
       id: vars
-      run: echo "::set-output name=sha_short::${{ github.event.pull_request.head.sha }})"
+      run: echo "::set-output name=sha_short::$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)"
 
     - name: Checkout repository
       uses: actions/checkout@v2
