@@ -34,7 +34,7 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=match,pattern=^.{0,7},value=${{github.event.pull_request.head.sha}}
+          type=match,pattern=^\d{7}[a-zA-Z0-9],value=${{github.event.pull_request.head.sha}}
     
     - name: Build and push Docker image
       id: build-and-push
