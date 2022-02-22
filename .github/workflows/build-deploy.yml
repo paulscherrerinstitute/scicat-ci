@@ -41,7 +41,7 @@ jobs:
     - name: Set helm configmaps
       id: helm_configmaps
       run: |
-        echo ${{steps.helm_vars}}
+        echo ${{steps.helm_vars.image}}
         configMaps=$(cat <<-EOF
         {
           "catamel-cm":
