@@ -36,6 +36,7 @@ jobs:
     - name: Set helm configmaps
       id: helm_configmaps
       run: |
+        ls
         configMaps=$(cat <<-EOF
         {
           "catamel-cm":
