@@ -59,7 +59,7 @@ jobs:
 
     - name: Deploy to k8s using helm
       id: helm-deploy
-      uses: 'deliverybot/helm@v1'
+      uses: 'glopezep/helm@v1.7.1'
       with:
         release: 'catamel-github'
         namespace: 'scicat-development'
