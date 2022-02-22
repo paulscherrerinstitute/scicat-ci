@@ -42,10 +42,17 @@ jobs:
       id: helm_configmaps
       run: |
         configMaps=$(cat <<EOF
-          {"configMaps": {"catamel-cm1": {"a": "a"}}}
+          {
+            "catamel-cm1": 
+              {
+                  "config.local.js": "$(cat helm_configs/development/catamel_cm/config.local.js)"
+                  "login-callback.js": "$(cat helm_configs/development/catamel_cm/login-callback.js)"
+                  "middleware.development.json": "$(cat helm_configs/development/catamel_cm/middleware.development.json)"
+              }
+          }
         EOF
         )
-        echo "::set-output name=configMaps::$(echo $configMaps)"
+        echo "::set-output name=configMaps::$(echo {"configMaps": $configMaps})"
 
     # - name: Log in to the Container registry
     #   uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
