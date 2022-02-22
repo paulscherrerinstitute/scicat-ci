@@ -42,7 +42,6 @@ jobs:
       id: helm_configmaps
       run: |
         configMaps=$(cat <<EOF
-        {"configMaps": 
         {
           "catamel-cm1": 
             {
@@ -50,7 +49,6 @@ jobs:
                 "login-callback.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
                 "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
             }
-        }
         }
         EOF
         )
@@ -89,7 +87,9 @@ jobs:
         chart: 'generic_service_chart'
         helm: helm3
         dry-run: true
-        values: ${{ steps.helm_configmaps.outputs.configMaps }}
+        values: |
+         configMaps: ${{ steps.helm_configmaps.outputs.configMaps }}
+         image: ${{ steps.helm_vars.outputs.image }}
         value-files: "helm_configs/development/values.yaml"
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
