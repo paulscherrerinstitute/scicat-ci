@@ -47,8 +47,8 @@ jobs:
           "catamel-cm1": 
             {
                 "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
-                "login-callback.js": "$(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js)",
-                "middleware.development.json": "$(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)"
+                "login-callback.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
+                "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
             }
         }
         }
