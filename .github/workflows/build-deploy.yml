@@ -84,9 +84,9 @@ jobs:
         helm: helm3
         dry-run: true
         value-files: >-
-        [
-          "helm_configs/development/values.yaml",
-          "configMaps.values.yaml",
-        ]
+          [
+            "helm_configs/development/values.yaml",
+            "configMaps.values.yaml",
+          ]
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
