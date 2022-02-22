@@ -1,0 +1,14 @@
+{{- with .Values.test }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "helm_chart.fullname" $ }}-test"
+  labels:
+    {{- include "helm_chart.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  restartPolicy: Never
+{{- tpl . $ | nindent 2}}
+{{- end }}
