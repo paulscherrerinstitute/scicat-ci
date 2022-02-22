@@ -85,6 +85,7 @@ jobs:
         release: 'catamel-github'
         namespace: 'scicat-development'
         chart: 'generic_service_chart'
+        helm: helm3
         values: |
           ${{ toJSON(steps.helm_vars.outputs) }}
           ${{ toJSON(steps.helm_configmaps.outputs) }}
