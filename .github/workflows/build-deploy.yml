@@ -15,18 +15,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set docker repository name and tag
-      id: docker_repository
+    # - name: Set docker repository name and tag
+    #   id: docker_repository
+    #   run: |
+    #     echo "::set-output name=image.repository::$(echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }})"
+    #     echo "::set-output name=image.tag::$(echo sha-${{ github.event.pull_request.head.sha }} | cut -c1-12)"
+
+    - name: Set helm var
+      id: helm_vars
       run: |
-        echo "::set-output name=image.repository::$(echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }})"
-        echo "::set-output name=image.tag::$(echo sha-${{ github.event.pull_request.head.sha }} | cut -c1-12)"
+        image=$(cat <<EOF
+        {
+          "repository": ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},
+          "tag":${{github.event.pull_request.head.sha}}
+        }
+        EOF
+        )
+        echo "::set-output name=image::$image"
 
     - name: Set helm configmaps
       id: helm_configmaps
       run: |
-        echo "::set-output name=configMaps.catamel-cm.config\.local\.js::$(cat helm_configs/development/catamel_cm/config.local.js)"
-        echo "::set-output name=configMaps.catamel-cm.login-callbacks\.js::$(cat helm_configs/development/catamel_cm/login-callbacks.js)"
-        echo "::set-output name=configMaps.catamel-cm.middleware\.development\.json::$(cat helm_configs/development/catamel_cm/middleware.development.json)"
+        configMaps=$(cat <<-EOF
+        {
+          "catamel-cm":
+            {
+              "config.local.js": $(cat helm_configs/development/catamel_cm/config.local.js),
+              "login-callbacks.js": $(cat helm_configs/development/catamel_cm/login-callbacks.js),
+              "middleware.development.json": $(cat helm_configs/development/catamel_cm/middleware.development.json)
+            }
+        }
+        EOF
+        )
+        echo "::set-output name=configMaps::$configMaps"
 
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -44,9 +65,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v3.6.2
       with:
-        images: ${{ steps.docker_repository.outputs.image.repository }}
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value=${{steps.docker_repository.outputs.image.tag}}
+          type=raw,value=${{github.event.pull_request.head.sha}}
     
     - name: Build and push Docker image
       id: build-and-push
@@ -65,7 +86,7 @@ jobs:
         namespace: 'scicat-development'
         chart: 'generic_service_chart'
         values: |
-          ${{ toJSON(steps.docker_repository.outputs) }}
+          ${{ toJSON(steps.helm_vars.outputs) }}
           ${{ toJSON(steps.helm_configmaps.outputs) }}
         value-files: "helm_configs/development/values.yaml"
       env:
