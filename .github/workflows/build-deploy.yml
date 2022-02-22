@@ -41,7 +41,7 @@ jobs:
     - name: Set helm configmaps
       id: helm_configmaps
       run: |
-        echo ${{steps.helm_vars.image}}
+        echo ${{steps.helm_vars.outputs.image}}
         configMaps=$(cat <<-EOF
         {
           "catamel-cm":
@@ -79,17 +79,17 @@ jobs:
     #     tags: ${{ steps.meta.outputs.tags }}
     #     labels: ${{ steps.meta.outputs.labels }}
 
-    - name: Deploy to k8s using helm
-      id: helm-deploy
-      uses: 'glopezep/helm@v1.7.1'
-      with:
-        release: 'catamel-github'
-        namespace: 'scicat-development'
-        chart: 'generic_service_chart'
-        helm: helm3
-        dry-run: true
-        values: |
-          configMaps: ${{ toJSON(steps.helm_configmaps.outputs.configMaps) }}
-        value-files: "helm_configs/development/values.yaml"
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+    # - name: Deploy to k8s using helm
+    #   id: helm-deploy
+    #   uses: 'glopezep/helm@v1.7.1'
+    #   with:
+    #     release: 'catamel-github'
+    #     namespace: 'scicat-development'
+    #     chart: 'generic_service_chart'
+    #     helm: helm3
+    #     dry-run: true
+    #     values: |
+    #       configMaps: ${{ toJSON(steps.helm_configmaps.outputs.configMaps) }}
+    #     value-files: "helm_configs/development/values.yaml"
+    #   env:
+    #     KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
