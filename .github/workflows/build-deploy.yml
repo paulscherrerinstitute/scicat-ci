@@ -42,6 +42,7 @@ jobs:
       id: helm_configmaps
       run: |
         configMaps=$(cat <<-EOF
+        "configMaps": {
         {
           "catamel-cm":
             {
@@ -49,6 +50,7 @@ jobs:
               "login-callbacks.js": "b",
               "middleware.development.json": "c"
             }
+        }
         }
         EOF
         )
@@ -88,7 +90,7 @@ jobs:
         helm: helm3
         dry-run: true
         secrets: |
-          "configMaps": ${{ toJSON(steps.helm_configmaps.outputs.configMaps) }}}
+          ${{ toJSON(steps.helm_configmaps.outputs.configMaps) }}}
         value-files: "helm_configs/development/values.yaml"
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
