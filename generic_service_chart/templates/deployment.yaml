@@ -52,5 +52,5 @@ spec:
           {{- end }}
       {{- with .Values.volumes}}
       volumes:
-        {{- toYaml . | nindent 8 }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
