@@ -1,0 +1,5 @@
+containers:
+  - name: wget
+    image: busybox
+    command: ['wget']
+    args: ['{{ include "helm_chart.fullname" . }}:{{ .Values.service.externalPort }}']

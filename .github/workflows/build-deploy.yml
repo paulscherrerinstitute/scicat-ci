@@ -7,23 +7,48 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  RELEASE_NAME: catamel-github
 
 jobs:
 
-  build:
-
+  build-deploy:
 
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set outputs
-      id: vars
-      run: echo "::set-output name=sha_short::$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)"
+
+    - name: Set helm var
+      id: helm_vars
+      run: |
+        image=$(cat <<EOF
+        {
+          "repository": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",
+          "tag": "${{ github.event.pull_request.head.sha }}"
+        }
+        EOF
+        )
+        echo "::set-output name=image::$(echo $image)"
 
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
         submodules: recursive
+
+    - name: Set helm configmaps
+      id: helm_configmaps
+      run: |
+        configMaps=$(cat <<EOF
+        {
+          "${{ env.RELEASE_NAME }}": 
+            {
+              "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
+              "login-callback.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
+              "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
+            }
+        }
+        EOF
+        )
+        echo "::set-output name=configMaps::$(echo $configMaps)"
 
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
@@ -32,14 +57,13 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-
     - name: Extract metadata (tags, labels) for Docker
       id: meta
       uses: docker/metadata-action@v3.6.2
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value=${{steps.vars.outputs.sha_short}},prefix=sha-
+          type=raw,value=${{github.event.pull_request.head.sha}}
     
     - name: Build and push Docker image
       id: build-and-push
@@ -49,3 +73,19 @@ jobs:
         push: ${{ github.event_name == 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Deploy to k8s using helm
+      id: helm-deploy
+      uses: 'glopezep/helm@v1.7.1'
+      with:
+        release: '${{ env.RELEASE_NAME }}'
+        namespace: 'scicat-development'
+        chart: 'generic_service_chart'
+        helm: helm3
+        dry-run: true
+        values: |
+         configMaps: ${{ steps.helm_configmaps.outputs.configMaps }}
+         image: ${{ steps.helm_vars.outputs.image }}
+        value-files: "helm_configs/development/values.yaml"
+      env:
+        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
