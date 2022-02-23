@@ -7,7 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  RELASE_NAME: catamel-github
+  RELEASE_NAME: catamel-github
 
 jobs:
 
