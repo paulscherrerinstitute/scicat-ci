@@ -39,7 +39,7 @@ jobs:
       run: |
         configMaps=$(cat <<EOF
         {
-          "$RELEASE_NAME": 
+          "${{ env.RELEASE_NAME }}": 
             {
               "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
               "login-callback.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
