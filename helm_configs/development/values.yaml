@@ -56,9 +56,9 @@ volumes:
   - name: config-volume
     configMap:
       name: "{{ .Release.Name }}-cm"
-  - name: catamel-secrets
+  - name: secrets-volume
     secret:
-      secretName: catamel-s
+      secretName: "{{ .Release.Name }}-s"
 
 volumeMounts:
   - name: config-volume
@@ -70,18 +70,27 @@ volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/server/boot/login-callbacks.js
     subPath: login-callbacks.js
-  - name: catamel-secrets
+  - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json
-  - name: catamel-secrets
+  - name: secrets-volume
     mountPath: /usr/src/app/server/datasources.development.json
     subPath: datasources.json
-  - name: catamel-secrets
+  - name: secrets-volume
     mountPath: /usr/src/app/server/datasources.json
     subPath: datasources.json
-  - name: catamel-secrets
+  - name: secrets-volume
     mountPath: /usr/src/app/server/functionalAccounts.json
     subPath: functionalAccounts.json
-  - name: catamel-secrets
+  - name: secrets-volume
     mountPath: /usr/src/app/server/component-config.development.json
     subPath: component-config.json
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      component-config.json: ${{ secrets.COMPONENT_CONFIG }}
+      datasources.json: ${{ secrets.DATASOURCES }}
+      functionalAccounts.json: ${{ secrets.FUNCTIONAL_ACCOUNTS }}
+      providers.json: ${{ secrets.PROVIDERS }}
