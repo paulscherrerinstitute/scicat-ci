@@ -92,4 +92,4 @@ secrets:
     data: 
       component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
       datasources.json: '${{ secrets.DATASOURCES }}'
-      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
+      providers.json: '${{ secrets.PROVIDERS }}'
