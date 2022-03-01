@@ -91,3 +91,4 @@ secrets:
     type: Opaque
     data: 
       component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
+      datasources.json: '${{ secrets.DATASOURCES }}'
