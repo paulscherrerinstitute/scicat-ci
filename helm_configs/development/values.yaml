@@ -90,7 +90,7 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      component-config.json: "${{ secrets.COMPONENT_CONFIG }}"
-      datasources.json: "${{ secrets.DATASOURCES }}"
-      functionalAccounts.json: "${{ secrets.FUNCTIONAL_ACCOUNTS }}"
-      providers.json: "${{ secrets.PROVIDERS }}"
+      component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
+      datasources.json: '${{ secrets.DATASOURCES }}'
+      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
+      providers.json: '${{ secrets.PROVIDERS }}'
