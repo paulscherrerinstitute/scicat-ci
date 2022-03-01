@@ -90,4 +90,4 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      component-config.json: 'MTIz'
+      component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
