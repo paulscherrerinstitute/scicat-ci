@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: "{{ .Values.ciVars.image }}"
+  repository: "{{ .Values.ciVars.repository }}"
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "{{ .Values.ciVars.tag }}"
