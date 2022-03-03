@@ -45,7 +45,7 @@ jobs:
           "${{ env.RELEASE_NAME }}-cm": 
             {
               "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
-              "login-callback.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
+              "login-callbacks.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
               "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
             }
         }
