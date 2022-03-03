@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: ""
+  repository: "{{ .Values.ciVars.image }}"
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: latest
+  tag: "{{ .Values.ciVars.tag }}"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -35,7 +35,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: "scicat.fraction.ch"
+    - host: "{{ .Values.ciVars.host }}"
       paths: 
         - path: "/api"
           pathType: Prefix
@@ -45,7 +45,7 @@ ingress:
           pathType: Prefix
   tls:
     - hosts:
-      - "scicat.fraction.ch"
+      - "{{ .Values.ciVars.host }}"
       secretName: "scicat-certificate"
 
 env:
