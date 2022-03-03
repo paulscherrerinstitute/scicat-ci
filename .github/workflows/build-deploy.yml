@@ -8,6 +8,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   RELEASE_NAME: catamel-github
+  TAG: ${{ github.event.pull_request.head.sha }}
   HOST: $GITHUB_REPOSITORY-$GITHUB_REF_NAME.development.psi.ch
 
 jobs:
@@ -24,7 +25,7 @@ jobs:
         ciVars=$(cat <<EOF
         {
           "repository": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}",
-          "tag": "${{ github.event.pull_request.head.sha }}"
+          "tag": "${{ env.TAG }}"
           "host": "${{ env.HOST }}"
         }
         EOF
