@@ -9,7 +9,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   RELEASE_NAME: catamel-github
   TAG: ${{ github.event.pull_request.head.sha }}
-  HOST: $GITHUB_REPOSITORY-$GITHUB_REF_NAME.development.psi.ch
+  HOST: ${{ github.event.repository.name }}-${{ github.event.number }}.development.psi.ch
 
 jobs:
 
