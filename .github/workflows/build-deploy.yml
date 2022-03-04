@@ -7,9 +7,9 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  RELEASE_NAME: ${{ github.event.repository.name }}-${{ github.event.number }}
+  RELEASE_NAME: scicat-be
   TAG: ${{ github.event.pull_request.head.sha }}
-  HOST: $RELEASE_NAME.development.psi.ch
+  HOST: scicat.development.psi.ch
 
 jobs:
 
