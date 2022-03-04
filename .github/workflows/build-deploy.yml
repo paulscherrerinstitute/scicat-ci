@@ -17,9 +17,9 @@ jobs:
     uses: ./.github/workflows/build.yml
     with: 
       context: backend/.
-      registry: '${{ env.REGISTRY }}'
-      image_name: '${{ env.IMAGE_NAME }}'
-      tag: '${{ env.TAG }}'
+      registry: ghcr.io
+      image_name: ${{ github.repository }}
+      tag: ${{ github.event.pull_request.head.sha }}
       push_condition: ${{ github.event_name == 'pull_request' }}
 
   deploy:
