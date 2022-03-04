@@ -9,7 +9,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   RELEASE_NAME: ${{ github.event.repository.name }}-${{ github.event.number }}
   TAG: ${{ github.event.pull_request.head.sha }}
-  HOST: ${{ env.RELEASE_NAME }}.development.psi.ch
+  HOST: $RELEASE_NAME.development.psi.ch
 
 jobs:
 
