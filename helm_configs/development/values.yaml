@@ -46,7 +46,7 @@ ingress:
   tls:
     - hosts:
       - "{{ .Values.ciVars.host }}"
-      secretName: "scicat-certificate"
+      secretName: "{{ .Release.Name }}-certificate"
 
 env:
   - name: NODE_ENV
