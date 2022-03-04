@@ -17,9 +17,9 @@ jobs:
     uses: ./.github/workflows/build.yml
     with: 
       context: backend/.
-      registry: $REGISTRY
-      image_name: $IMAGE_NAME
-      tag: $TAG
+      registry: '${{ env.REGISTRY }}'
+      image_name: '${{ env.IMAGE_NAME }}'
+      tag: '${{ env.TAG }}'
       push_condition: ${{ github.event_name == 'pull_request' }}
 
   deploy:
