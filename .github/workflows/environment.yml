@@ -29,5 +29,5 @@ jobs:
             environment=qa
           elif ${{ github.event == "release" }}
             environment=production
-        echo "::set-output name=tag::$(echo $tag)"
-        echo "::set-output name=environment::$(echo $environment)"
+          echo "::set-output name=tag::$(echo $tag)"
+          echo "::set-output name=environment::$(echo $environment)"
