@@ -25,6 +25,7 @@ jobs:
   #     registry: ghcr.io
   #     image_name: ${{ github.repository }}
   #     tag: ${{ needs.set_env.outputs.tag }}
+        # push_condition: ${{ github.event_name == 'pull_request' }}
 
   # deploy:
   #   runs-on: ubuntu-latest

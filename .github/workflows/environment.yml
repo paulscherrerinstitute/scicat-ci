@@ -22,12 +22,12 @@ jobs:
       - id: variables
         run: | 
           tag=${{ github.sha }}
-          if ${{ github.event == "pull_request" }}
+          if ${{ github.event_name == 'pull_request' }}
             tag=${{ github.event.pull_request.head.sha }}
             environment=development
-          elif ${{ github.event == "push" && github.branch == "main"}}
+          elif ${{ github.event_name == 'push' && github.ref == "main"}}
             environment=qa
-          elif ${{ github.event == "release" }}
+          elif ${{ github.event_name == 'release' }}
             environment=production
           echo "::set-output name=tag::$(echo $tag)"
           echo "::set-output name=environment::$(echo $environment)"
