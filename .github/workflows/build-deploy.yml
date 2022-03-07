@@ -29,6 +29,7 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
+    environment: ${{ needs.set_env.outputs.enviroment }}
     needs: 
       - set_env
       - build
