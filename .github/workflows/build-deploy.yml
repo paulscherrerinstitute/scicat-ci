@@ -28,9 +28,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: 
-      - set_env
-      - build
+    needs: [set_env, build]
 
     - name: Set helm var
       id: helm_vars
