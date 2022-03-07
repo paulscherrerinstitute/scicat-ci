@@ -29,7 +29,7 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
-    environment: ${{ needs.set_env.outputs.enviroment }}
+    environment: ${{ needs.set_env.outputs.environment }}
     needs: 
       - set_env
       - build
@@ -73,7 +73,7 @@ jobs:
       uses: 'glopezep/helm@v1.7.1'
       with:
         release: '${{ env.RELEASE_NAME }}'
-        namespace: 'scicat-${{ needs.set_env.outputs.enviroment }}'
+        namespace: 'scicat-${{ needs.set_env.outputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
         values: |
