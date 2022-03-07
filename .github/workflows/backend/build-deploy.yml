@@ -13,21 +13,25 @@ env:
 
 jobs:
 
+  set_env: 
+    uses: ./.github/workflows/environment.yml
+
   build:
+    needs: set_env
     uses: ./.github/workflows/build.yml
+    environment: ${{ needs.set_env.outputs.environment }}
     with: 
       context: backend/.
       registry: ghcr.io
       image_name: ${{ github.repository }}
-      tag: ${{ github.event.pull_request.head.sha }}
-      push_condition: ${{ github.event_name == 'pull_request' }}
+      tag: ${{ needs.set_env.outputs.tag }}
 
   deploy:
 
     runs-on: ubuntu-latest
-    needs: build
-
-    steps:
+    needs: 
+      - set_env
+      - build
 
     - name: Set helm var
       id: helm_vars
@@ -41,7 +45,6 @@ jobs:
         EOF
         )
         echo "::set-output name=ciVars::$(echo $ciVars)"
-
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -66,9 +69,10 @@ jobs:
     - name: Deploy to k8s using helm
       id: helm-deploy
       uses: 'glopezep/helm@v1.7.1'
+      environment: ${{ needs.set_env.outputs.environment }}
       with:
         release: '${{ env.RELEASE_NAME }}'
-        namespace: 'scicat-development'
+        namespace: 'scicat-${{ needs.set_env.outputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
         values: |

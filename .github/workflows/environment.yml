@@ -1,0 +1,33 @@
+name: set-environment
+
+on:
+  workflow_call:
+    outputs:
+      tag:
+        description: tag of the docker image
+        value: ${{ jobs.set_env.outputs.tag }}
+      environment:
+        description: ${{ jobs.set_env.outputs.environment }}
+        value: string
+        
+jobs:
+
+  set_env:
+    name: Output
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.variables.outputs.tag }}
+      environment: ${{ steps.variables.outputs.environment }}
+    steps:
+      - id: variables
+        run: | 
+          tag=${{ github.sha }}
+          if ${{ github.event == "pull_request" }}
+            tag=${{ github.event.pull_request.head.sha }}
+            environment=development
+          elif ${{ github.event == "push" && github.branch == "main"}}
+            environment=qa
+          elif ${{ github.event == "release" }}
+            environment=production
+        echo "::set-output name=tag::$(echo $tag)"
+        echo "::set-output name=environment::$(echo $environment)"
