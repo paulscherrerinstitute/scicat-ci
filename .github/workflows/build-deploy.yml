@@ -73,7 +73,7 @@ jobs:
       uses: 'glopezep/helm@v1.7.1'
       with:
         release: '${{ env.RELEASE_NAME }}'
-        namespace: 'scicat-development'
+        namespace: 'scicat-${{ needs.set_env.outputs.enviroment }}'
         chart: 'generic_service_chart'
         helm: helm3
         values: |
