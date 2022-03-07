@@ -7,8 +7,8 @@ on:
         description: tag of the docker image
         value: ${{ jobs.set_env.outputs.tag }}
       environment:
-        description: ${{ jobs.set_env.outputs.environment }}
-        value: string
+        description: environment based on workflow trigger
+        value: ${{ jobs.set_env.outputs.environment }}
         
 jobs:
 
