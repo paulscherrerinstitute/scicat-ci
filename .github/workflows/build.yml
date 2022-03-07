@@ -18,6 +18,9 @@ on:
       push_condition:
         required: true
         type: boolean
+      environment:
+        required: true
+        type: string
         
 jobs:
 

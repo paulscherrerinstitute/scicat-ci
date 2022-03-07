@@ -19,9 +19,8 @@ jobs:
   build:
     needs: set_env
     uses: ./.github/workflows/build.yml
-    environment:
-      name: development
     with: 
+      environment: ${{ needs.set_env.outputs.environment }}
       context: backend/.
       registry: ghcr.io
       image_name: ${{ github.repository }}
