@@ -13,19 +13,26 @@ env:
 
 jobs:
 
+  set_env: 
+    uses: ./.github/workflows/environment.yml
+
   build:
+    needs: set_env
     uses: ./.github/workflows/build.yml
     with: 
       context: backend/.
       registry: ghcr.io
       image_name: ${{ github.repository }}
-      tag: ${{ github.event.pull_request.head.sha }}
+      tag: ${{ needs.set_env.outputs.tag }}
       push_condition: ${{ github.event_name == 'pull_request' }}
 
   deploy:
 
     runs-on: ubuntu-latest
-    needs: build
+    environment: ${{ needs.set_env.outputs.environment }}
+    needs: 
+      - set_env
+      - build
 
     steps:
 
@@ -41,7 +48,6 @@ jobs:
         EOF
         )
         echo "::set-output name=ciVars::$(echo $ciVars)"
-
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -54,27 +60,26 @@ jobs:
         {
           "${{ env.RELEASE_NAME }}-cm": 
             {
-              "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
-              "login-callbacks.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
-              "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
+              "config.local.js": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/config.local.js),
+              "login-callbacks.js": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/login-callbacks.js),
+              "middleware.development.json": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/middleware.development.json)
             }
         }
         EOF
         )
         echo "::set-output name=configMaps::$(echo $configMaps)"
-
     - name: Deploy to k8s using helm
       id: helm-deploy
       uses: 'glopezep/helm@v1.7.1'
       with:
         release: '${{ env.RELEASE_NAME }}'
-        namespace: 'scicat-development'
+        namespace: 'scicat-${{ needs.set_env.outputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
         values: |
          configMaps: ${{ steps.helm_configmaps.outputs.configMaps }}
          ciVars: ${{ steps.helm_vars.outputs.ciVars }}
-        value-files: "helm_configs/development/values.yaml"
+        value-files: "helm_configs/${{ needs.set_env.outputs.environment }}/values.yaml"
         secrets: '${{ toJSON(secrets) }}'
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
