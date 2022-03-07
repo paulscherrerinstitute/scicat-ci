@@ -13,18 +13,18 @@ env:
 
 jobs:
 
-  set_env: 
-    uses: ./.github/workflows/environment.yml
+  # set_env: 
+  #   uses: ./.github/workflows/environment.yml
 
-  build:
-    needs: set_env
-    uses: ./.github/workflows/build.yml
-    with: 
-      context: backend/.
-      registry: ghcr.io
-      image_name: ${{ github.repository }}
-      tag: ${{ needs.set_env.outputs.tag }}
-      push_condition: ${{ github.event_name == 'pull_request' }}
+  # build:
+  #   needs: set_env
+  #   uses: ./.github/workflows/build.yml
+  #   with: 
+  #     context: backend/.
+  #     registry: ghcr.io
+  #     image_name: ${{ github.repository }}
+  #     tag: ${{ needs.set_env.outputs.tag }}
+  #     push_condition: ${{ github.event_name == 'pull_request' }}
 
   deploy:
     runs-on: ubuntu-latest
