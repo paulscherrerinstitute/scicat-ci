@@ -53,7 +53,3 @@ ingress:
           pathType: Prefix
         - path: "/auth"
           pathType: Prefix
-  tls:
-    - hosts:
-      - "{{ .Values.host }}"
-      secretName: "scicat-tls"
