@@ -1,0 +1,42 @@
+name: scicat-be
+
+on:  
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  set_ci_vars:
+
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.helm_vars.outputs.ciVars }}
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Set ci vars
+      id: helm_vars
+      run: |
+        ciVars=$(cat <<EOF
+          {
+            "config.local.js": $(jq -R -s < helm_configs/development/catamel_cm/config.local.js),
+            "login-callbacks.js": $(jq -R -s < helm_configs/development/catamel_cm/login-callbacks.js),
+            "middleware.development.json": $(jq -R -s < helm_configs/development/catamel_cm/middleware.development.json)
+          }
+        EOF
+        )
+        echo "::set-output name=ciVars::$(echo $ciVars)"
+
+  build_deploy_scicat_be:
+    needs: set_ci_vars
+    uses: ./.github/workflows/build-deploy-scicat-component.yml
+    with: 
+      context: backend/.
+      image_name: ${{ github.repository }}
+      helm_vars: ${{ needs.helm_vars.outputs.ciVars }}
+      release_name: scicat-be
