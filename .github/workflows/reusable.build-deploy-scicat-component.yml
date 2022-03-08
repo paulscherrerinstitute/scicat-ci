@@ -90,6 +90,7 @@ jobs:
         namespace: 'scicat-${{ inputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
+        timeout: 10m
         values: |
          ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
          ciTag: ${{ inputs.tag }}
