@@ -56,4 +56,4 @@ ingress:
   tls:
     - hosts:
       - "{{ .Values.host }}"
-      secretName: "scicat-certificate"
+      secretName: "scicat-tls"
