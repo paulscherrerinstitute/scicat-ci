@@ -94,7 +94,9 @@ jobs:
          ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
          ciTag: ${{ inputs.tag }}
          ciVars: ${{ inputs.helm_ci_vars }}
-        value-files: "helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
+        value-files: | 
+          helm_configs/${{ inputs.release_name }}/values.yaml
+          helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
