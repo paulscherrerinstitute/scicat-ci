@@ -14,9 +14,9 @@ jobs:
     uses: ./.github/workflows/reusable.changes.yml
     with: 
       files: | 
-        ".github/workflows/scicat-be.yml"
-        "helm_configs/backend/${{ needs.set_env.outputs.environment }}/**"
-        "backend/**"
+        .github/workflows/scicat-be.yml
+        helm_configs/backend/${{ needs.set_env.outputs.environment }}/**
+        backend/**
 
   set_ci_vars:
     if: needs.check_changed.outputs.changed == 'true'
