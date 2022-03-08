@@ -31,4 +31,4 @@ volumes:
     configMap:
       name: "{{ .Release.Name }}-cm"
 
-initialDelaySeconds: 600
+initialDelaySeconds: 360
