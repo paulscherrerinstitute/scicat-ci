@@ -9,10 +9,10 @@ on:
       image_name:
         required: true
         type: string
-      # helm_ci_vars:
-      #   required: false
-      #   type: JSON
-      #   default: {}
+      helm_ci_vars:
+        required: false
+        type: string
+        default: "{}"
       release_name:
         required: true
         type: string
