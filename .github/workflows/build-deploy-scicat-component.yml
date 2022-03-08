@@ -72,6 +72,11 @@ jobs:
 
     steps:
 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
     - name: Deploy to k8s using helm
       id: helm-deploy
       uses: 'glopezep/helm@v1.7.1'
