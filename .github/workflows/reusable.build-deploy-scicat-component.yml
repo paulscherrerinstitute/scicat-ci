@@ -95,9 +95,9 @@ jobs:
          ciTag: ${{ inputs.tag }}
          ciVars: ${{ inputs.helm_ci_vars }}
         value-files: >-
-          [ 
-            helm_configs/${{ inputs.release_name }}/values.yaml
-            helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml
+          [
+            "helm_configs/${{ inputs.release_name }}/values.yaml",
+            "helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
           ]
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
