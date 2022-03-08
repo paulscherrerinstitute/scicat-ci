@@ -1,0 +1,59 @@
+replicaCount: 1
+
+image:
+  repository: "{{ .Values.ciRepository }}"
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "{{ .Values.ciTag }}"
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      ls -al . ;
+      ls -al server; cat server/config.json;
+      echo "Environment: development";
+      node --max-old-space-size=4096 .
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 3000
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
+      datasources.json: '${{ secrets.DATASOURCES }}'
+      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
+      providers.json: '${{ secrets.PROVIDERS }}'
+
+ingress:
+  enabled: true
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths: 
+        - path: "/api"
+          pathType: Prefix
+        - path: "/explorer"
+          pathType: Prefix
+        - path: "/auth"
+          pathType: Prefix
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "scicat-certificate"
