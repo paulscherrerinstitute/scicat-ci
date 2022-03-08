@@ -7,7 +7,7 @@ on:
 jobs:
 
   set_env: 
-    uses: ./.github/workflows/environment.yml
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
 
   set_ci_vars:
 
@@ -40,7 +40,7 @@ jobs:
     needs: 
      - set_env
      - set_ci_vars
-    uses: ./.github/workflows/build-deploy-scicat-component.yml
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
     with: 
       context: backend/.
       image_name: ${{ github.repository }}
