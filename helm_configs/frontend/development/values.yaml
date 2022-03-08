@@ -15,4 +15,4 @@ configMaps:
     keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
     environment.development.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
 
-host: scicat.fraction.ch
+host: scicat.development.psi.ch
