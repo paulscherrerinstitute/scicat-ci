@@ -14,7 +14,7 @@ on:
         type: JSON
         default: {}
       release_name:
-        required: string
+        required: true
         type: string
 
 jobs:
