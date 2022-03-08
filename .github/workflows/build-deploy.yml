@@ -41,10 +41,10 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Set helm configmaps
-      id: helm_configmaps
+    - name: Set helm vars
+      id: helm_vars
       run: |
-        configMaps=$(cat <<EOF
+        ciVars=$(cat <<EOF
           {
             "CONFIG_LOCAL": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/config.local.js),
             "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/login-callbacks.js),
@@ -52,7 +52,8 @@ jobs:
           }
         EOF
         )
-        echo "::set-output name=configMaps::$(echo $configMaps)"
+        echo "::set-output name=configMaps::$(echo $ciVars)"
+
     - name: Deploy to k8s using helm
       id: helm-deploy
       uses: 'glopezep/helm@v1.7.1'
@@ -64,7 +65,7 @@ jobs:
         values: |
          ciRepository: ghcr.io/${{ github.repository }}
          ciTag: ${{ needs.set_env.outputs.tag }}
-         ciVars: ${{ inputs.helm_ci_vars }}
+         ciVars: ${{ steps.helm_vars.outputs.ciVars }}
         value-files: "helm_configs/${{ needs.set_env.outputs.environment }}/values.yaml"
         secrets: '${{ toJSON(secrets) }}'
       env:
