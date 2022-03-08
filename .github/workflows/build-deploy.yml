@@ -52,7 +52,7 @@ jobs:
           }
         EOF
         )
-        echo "::set-output name=configMaps::$(echo $ciVars)"
+        echo "::set-output name=ciVars::$(echo $ciVars)"
 
     - name: Deploy to k8s using helm
       id: helm-deploy
