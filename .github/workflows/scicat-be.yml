@@ -45,7 +45,7 @@ jobs:
       context: backend/.
       registry: ghcr.io
       image_name: ${{ github.repository }}
-      helm_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
+      helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       release_name: scicat-be
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
