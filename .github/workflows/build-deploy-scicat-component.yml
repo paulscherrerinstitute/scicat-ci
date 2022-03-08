@@ -26,9 +26,13 @@ on:
         required: true
         type: string
     secrets: 
-      JSONSecrets: 
-        description: all secrets in json format
+      KUBECONFIG: 
+        description: kubeconfig file
         required: true
+      JSON_SECRETS: 
+        description: other secrets in json format
+        required: false
+      
 
 jobs:
 
@@ -92,6 +96,6 @@ jobs:
          ciTag: ${{ inputs.tag }}
          ciVars: ${{ inputs.helm_ci_vars }}
         value-files: "helm_configs/${{ inputs.environment }}/values.yaml"
-        secrets: '${{ toJSON(secrets.JSONSecrets) }}'
+        secrets: '${{ secrets.JSON_SECRETS }}'
       env:
-        KUBECONFIG_FILE: '${{ secrets.JSONSecrets.KUBECONFIG }}'
+        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
