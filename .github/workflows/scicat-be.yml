@@ -6,11 +6,15 @@ on:
 
 jobs:
 
+  set_env: 
+    uses: ./.github/workflows/environment.yml
+
   set_ci_vars:
 
     runs-on: ubuntu-latest
+    needs: set_env
     outputs:
-      tag: ${{ steps.helm_vars.outputs.ciVars }}
+      ciVars: ${{ steps.helm_vars.outputs.ciVars }}
 
     steps:
 
@@ -38,5 +42,5 @@ jobs:
     with: 
       context: backend/.
       image_name: ${{ github.repository }}
-      helm_vars: ${{ needs.helm_vars.outputs.ciVars }}
+      helm_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       release_name: scicat-be
