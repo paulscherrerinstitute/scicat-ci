@@ -49,3 +49,5 @@ jobs:
       release_name: scicat-be
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      JSONSecrets: ${{ secrets }}
