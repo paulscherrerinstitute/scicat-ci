@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
 
   check_changed:
-    needs: check_changed
+    needs: set_env
     uses: ./.github/workflows/reusable.changes.yml
     with: 
       files: | 
