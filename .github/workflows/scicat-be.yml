@@ -28,9 +28,9 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "CONFIG_LOCAL": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/config.local.js),
-            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/login-callbacks.js),
-            "MIDDLEWARE": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/middleware.development.json)
+            "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/config.local.js),
+            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/login-callbacks.js),
+            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.development.json)
           }
         EOF
         )
@@ -43,9 +43,9 @@ jobs:
     uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
     with: 
       context: backend/.
-      image_name: ${{ github.repository }}
+      image_name: ${{ github.repository }}/be
       helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
-      release_name: scicat-be
+      release_name: backend
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
     secrets:
