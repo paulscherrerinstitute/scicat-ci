@@ -7,7 +7,7 @@ on:
 jobs:
 
   set_env: 
-    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    uses: ./.github/workflows/reusable.environment.yml
 
   set_ci_vars:
 
