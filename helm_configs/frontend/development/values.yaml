@@ -1,0 +1,18 @@
+env:
+  - name: env
+    value: development
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/src/app/src/environments/environment.development.ts
+    subPath: environment.development.ts
+  - name: config-volume
+    mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
+    subPath: keycloak-icon-256px.svg
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
+    environment.development.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
+
+host: scicat.fraction.ch

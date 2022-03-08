@@ -1,0 +1,64 @@
+name: scicat-fe
+
+on:  
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/scicat-fe.yml
+        helm_configs/frontend/${{ needs.set_env.outputs.environment }}/**
+        frontend/**
+
+  set_ci_vars:
+    if: needs.check_changed.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    needs: 
+      - check_changed
+      - set_env
+    outputs:
+      ciVars: ${{ steps.helm_vars.outputs.ciVars }}
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Set helm vars
+      id: helm_vars
+      run: |
+        ciVars=$(cat <<EOF
+          {
+            "KEYCLOAK_ICON": $(jq -R -s < helm_configs/frontend/${{ needs.set_env.outputs.environment }}/keycloak-icon-256px.svg),
+            "ENVIRONMENT": $(jq -R -s < helm_configs/frontend/${{ needs.set_env.outputs.environment }}/environment.development.ts),
+          }
+        EOF
+        )
+        echo "::set-output name=ciVars::$(echo $ciVars)"
+
+  build_deploy_scicat_fe:
+    if: needs.check_changed.outputs.changed == 'true'
+    needs: 
+     - check_changed
+     - set_env
+     - set_ci_vars
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    with: 
+      context: frontend/.
+      image_name: ${{ github.repository }}/fe
+      release_name: frontend
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
