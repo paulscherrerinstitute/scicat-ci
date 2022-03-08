@@ -1,0 +1,54 @@
+name: scicat-be
+
+on:  
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/environment.yml
+
+  set_ci_vars:
+
+    runs-on: ubuntu-latest
+    needs: set_env
+    outputs:
+      ciVars: ${{ steps.helm_vars.outputs.ciVars }}
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Set helm vars
+      id: helm_vars
+      run: |
+        ciVars=$(cat <<EOF
+          {
+            "CONFIG_LOCAL": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/config.local.js),
+            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/login-callbacks.js),
+            "MIDDLEWARE": $(jq -R -s < helm_configs/${{ needs.set_env.outputs.environment }}/catamel_cm/middleware.development.json)
+          }
+        EOF
+        )
+        echo "::set-output name=ciVars::$(echo $ciVars)"
+
+  build_deploy_scicat_be:
+    needs: 
+     - set_env
+     - set_ci_vars
+    uses: ./.github/workflows/build-deploy-scicat-component.yml
+    with: 
+      context: backend/.
+      registry: ghcr.io
+      image_name: ${{ github.repository }}
+      helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
+      release_name: scicat-be
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
