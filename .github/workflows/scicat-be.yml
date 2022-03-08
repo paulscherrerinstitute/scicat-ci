@@ -50,5 +50,5 @@ jobs:
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
     secrets:
-      KUBECONFIG: ${{ toJSON(secrets.KUBECONFIG) }}
-      JSONSecrets: ${{ secrets }}
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
