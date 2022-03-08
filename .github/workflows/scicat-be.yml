@@ -43,7 +43,6 @@ jobs:
     uses: ./.github/workflows/build-deploy-scicat-component.yml
     with: 
       context: backend/.
-      registry: ghcr.io
       image_name: ${{ github.repository }}
       helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       release_name: scicat-be

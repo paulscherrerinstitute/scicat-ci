@@ -7,15 +7,15 @@ on:
         required: true
         type: string
       registry:
-        required: true
+        required: false
         type: string
+        default: ghcr.io
       image_name:
         required: true
         type: string
       helm_ci_vars:
         required: false
         type: string
-        default: "{}"
       release_name:
         required: true
         type: string
