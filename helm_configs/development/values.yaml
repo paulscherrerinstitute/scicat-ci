@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: "{{ .Values.ciVars.repository }}"
+  repository: "{{ .Values.ciRepository }}"
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "{{ .Values.ciVars.tag }}"
+  tag: "{{ .Values.ciTag }}"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -35,7 +35,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: "{{ .Values.ciVars.host }}"
+    - host: scicat.development.psi.ch
       paths: 
         - path: "/api"
           pathType: Prefix
@@ -45,7 +45,7 @@ ingress:
           pathType: Prefix
   tls:
     - hosts:
-      - "{{ .Values.ciVars.host }}"
+      - scicat.development.psi.ch
       secretName: "scicat-certificate"
 
 env:
@@ -94,3 +94,9 @@ secrets:
       datasources.json: '${{ secrets.DATASOURCES }}'
       functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
       providers.json: '${{ secrets.PROVIDERS }}'
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    config.local.js: "{{ .Values.ciVars.CONFIG_LOCAL }}"
+    login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
+    middleware.development.json: "{{ .Values.ciVars.MIDDLEWARE }}"
