@@ -57,6 +57,7 @@ jobs:
       context: frontend/.
       image_name: ${{ github.repository }}/fe
       release_name: frontend
+      helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
     secrets:
