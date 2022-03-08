@@ -16,28 +16,29 @@ on:
       release_name:
         required: true
         type: string
+      environment:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
 
 jobs:
 
-  set_env: 
-    uses: ./.github/workflows/environment.yml
-
   build:
-    needs: set_env
     uses: ./.github/workflows/build.yml
     with: 
       context: backend/.
       registry: ghcr.io
       image_name: ${{ github.repository }}
-      tag: ${{ needs.set_env.outputs.tag }}
+      tag: ${{ inputs.tag }}
       push_condition: ${{ github.event_name == 'pull_request' }}
 
   deploy:
 
     runs-on: ubuntu-latest
-    environment: ${{ needs.set_env.outputs.environment }}
+    environment: ${{ inputs.environment }}
     needs: 
-      - set_env
       - build
 
     steps:
@@ -47,14 +48,14 @@ jobs:
       uses: 'glopezep/helm@v1.7.1'
       with:
         release: '${{ inputs.release_name }}'
-        namespace: 'scicat-${{ needs.set_env.outputs.environment }}'
+        namespace: 'scicat-${{ inputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
         values: |
          ciRepository: ghcr.io/${{ github.repository }}
-         ciTag: ${{ needs.set_env.outputs.tag }}
+         ciTag: ${{ inputs.tag }}
          ciVars: ${{ inputs.helm_ci_vars }}
-        value-files: "helm_configs/${{ needs.set_env.outputs.environment }}/values.yaml"
+        value-files: "helm_configs/${{ inputs.environment }}/values.yaml"
         secrets: '${{ toJSON(secrets) }}'
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
