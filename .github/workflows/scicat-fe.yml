@@ -16,6 +16,7 @@ jobs:
       files: | 
         .github/workflows/scicat-fe.yml
         helm_configs/frontend/${{ needs.set_env.outputs.environment }}/**
+        helm_configs/frontend/values.yaml
         frontend/**
 
   set_ci_vars:
