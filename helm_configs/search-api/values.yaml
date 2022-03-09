@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: "{{ .Values.ciRepository }}"
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "{{ .Values.ciTag }}"
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 3000
+
+ingress:
+  enabled: true
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths: 
+        - path: "/panosc-api"
+          pathType: Prefix
+        - path: "/panosc-explorer"
+          pathType: Prefix
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "scicat-certificate"
