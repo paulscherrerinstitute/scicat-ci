@@ -64,10 +64,4 @@ jobs:
       environment: ${{ needs.set_env.outputs.environment }}
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      JSON_SECRETS: >-
-        {
-          "COMPONENT_CONFIG": "${{ secrets.COMPONENT_CONFIG }}",
-          "DATASOURCES": "${{ secrets.DATASOURCES }}", 
-          "FUNCTIONAL_ACCOUNTS": "${{ secrets.FUNCTIONAL_ACCOUNTS }}",
-          "PROVIDERS": "${{ secrets.PROVIDERS }}"
-        }
+      JSON_SECRETS: ${{ toJSON(secrets) }}
