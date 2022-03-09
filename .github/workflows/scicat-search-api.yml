@@ -16,6 +16,7 @@ jobs:
       files: | 
         .github/workflows/scicat-search-api.yml
         helm_configs/search-api/${{ needs.set_env.outputs.environment }}/**
+        helm_configs/search-api/values.yaml
         search-api/**
 
   build_deploy_scicat_search_api:
