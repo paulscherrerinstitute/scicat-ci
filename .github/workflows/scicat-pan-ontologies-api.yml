@@ -1,0 +1,35 @@
+name: scicat-pan-ontologies-api
+
+on:  
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/scicat-pan-ontologies-api.yml
+        helm_configs/pan-ontologies-api/${{ needs.set_env.outputs.environment }}/**
+        pan-ontologies-api/**
+
+  build_deploy_scicat_pan_ontologies_api:
+    if: needs.check_changed.outputs.changed == 'true'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    with: 
+      context: pan-ontologies-api/.
+      image_name: ${{ github.repository }}/pan-ontologies-api
+      release_name: pan-ontologies-api
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
