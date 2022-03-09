@@ -1,0 +1,7 @@
+env:
+  - name: BASE_URL
+    value: https://scicat.development.psi.ch/api/v3
+  - name: FACILITY
+    value: PSI
+
+host: scicat.development.psi.ch
