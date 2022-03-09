@@ -15,6 +15,7 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-pan-ontologies-api.yml
+        helm_configs/pan-ontologies-api/values.yaml
         helm_configs/pan-ontologies-api/${{ needs.set_env.outputs.environment }}/**
         pan-ontologies-api/**
 
