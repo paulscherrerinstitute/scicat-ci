@@ -66,8 +66,8 @@ jobs:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: >-
         {
-          COMPONENT_CONFIG: ${{ secrets.COMPONENT_CONFIG }},
-          DATASOURCES: ${{ secrets.DATASOURCES }}, 
-          FUNCTIONAL_ACCOUNTS: ${{ secrets.FUNCTIONAL_ACCOUNTS }},
-          PROVIDERS: ${{ secrets.PROVIDERS }}
+          "COMPONENT_CONFIG": "${{ secrets.COMPONENT_CONFIG }}",
+          "DATASOURCES: "${{ secrets.DATASOURCES }}", 
+          "FUNCTIONAL_ACCOUNTS": ${{ secrets.FUNCTIONAL_ACCOUNTS }}",
+          "PROVIDERS": "${{ secrets.PROVIDERS }}"
         }
