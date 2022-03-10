@@ -15,6 +15,7 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-be.yml
+        helm_configs/backend/values.yaml
         helm_configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
 
