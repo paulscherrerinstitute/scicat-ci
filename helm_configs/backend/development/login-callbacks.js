@@ -1,19 +1,16 @@
-const logger = require("../../common/logger");
-
-module.exports = function (app) {
-  app.models.UserIdentity.observe("before save", function(ctx, next) {
-    if (ctx.instance){
-      ctx.instance.profile.accessGroups = ctx.instance.profile._json.pgroups
-      next()
+exports.accessGroupsToProfile =
+function (req, done) {
+  return function (err, user, identity, token) {
+      identity.updateAttribute('profile', {
+        accessGroups: identity.profile._json.pgroups,
+        ...identity.profile,
+      })
+      var authInfo = {
+        identity: identity,
+      };
+      if (token) {
+        authInfo.accessToken = token;
+      }  
+      done(err, user, authInfo)  
     }
-    if (ctx.data){
-      ctx.data.profile.accessGroups = ctx.data.profile._json.pgroups
-      next()
-    }
-    if (!ctx.data && !ctx.instance){
-      logger.logInfo("No context data or instance from UserIdentity");
-      next()
-      return
-    }
-  })
 };
