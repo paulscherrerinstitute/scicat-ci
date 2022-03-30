@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ .Values.configMaps | sha256sum }}
+        checksum/config: {{ .Values.configMaps | toJson |  sha256sum }}
       labels:
         {{- include "helm_chart.selectorLabels" . | nindent 8 }}
     spec:
