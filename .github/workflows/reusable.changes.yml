@@ -31,3 +31,4 @@ jobs:
         with: 
           files: ${{ inputs.files }}
           since_last_remote_commit: 'true'
+          fetch-depth: 0
