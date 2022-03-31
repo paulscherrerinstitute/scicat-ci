@@ -14,7 +14,7 @@ run:
     - >
       ls -al . ;
       ls -al server; cat server/config.json;
-      echo "Environment: development";
+      echo "Environment: {{ .Release.Namespace }}";
       node --max-old-space-size=4096 .
 
 service:
@@ -77,9 +77,6 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json
-  - name: secrets-volume
-    mountPath: /usr/src/app/server/datasources.json
-    subPath: datasources.json
   - name: secrets-volume
     mountPath: /usr/src/app/server/datasources.json
     subPath: datasources.json
