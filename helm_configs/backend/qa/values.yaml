@@ -2,4 +2,4 @@ env:
   - name: NODE_ENV
     value: qa
 
-host: "scicat.qa.psi.ch"
+host: scicat.qa.psi.ch
