@@ -14,7 +14,7 @@ run:
     - >
       ls -al . ;
       ls -al server; cat server/config.json;
-      echo "Environment: development";
+      echo "Environment: {{ .Release.Namespace }}";
       node --max-old-space-size=4096 .
 
 service:

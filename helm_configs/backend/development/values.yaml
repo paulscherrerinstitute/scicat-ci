@@ -1,5 +1,1 @@
-env:
-  - name: NODE_ENV
-    value: development
-
 host: scicat.development.psi.ch
