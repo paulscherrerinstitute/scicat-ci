@@ -3,6 +3,10 @@ name: scicat-be
 on:  
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [published]
 
 jobs:
 
@@ -18,7 +22,6 @@ jobs:
         helm_configs/backend/values.yaml
         helm_configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
-        generic_service_chart/**
 
   set_ci_vars:
     if: needs.check_changed.outputs.changed == 'true'
@@ -41,9 +44,9 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/config.local.js),
-            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/login-callbacks.js),
-            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.development.json)
+            "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/config.local.js),
+            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/login-callbacks.js),
+            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json)
           }
         EOF
         )

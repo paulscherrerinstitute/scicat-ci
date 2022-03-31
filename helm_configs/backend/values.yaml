@@ -57,3 +57,35 @@ ingress:
     - hosts:
       - "{{ .Values.host }}"
       secretName: "scicat-certificate"
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    config.local.js: "{{ .Values.ciVars.CONFIG_LOCAL }}"
+    login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
+    middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/src/app/server/config.local.js
+    subPath: config.local.js
+  - name: config-volume
+    mountPath: /usr/src/app/server/middleware.json
+    subPath: middleware.json
+  - name: config-volume
+    mountPath: /usr/src/app/server/boot/login-callbacks.js
+    subPath: login-callbacks.js
+  - name: secrets-volume
+    mountPath: /usr/src/app/server/providers.json
+    subPath: providers.json
+  - name: secrets-volume
+    mountPath: /usr/src/app/server/datasources.json
+    subPath: datasources.json
+  - name: secrets-volume
+    mountPath: /usr/src/app/server/datasources.json
+    subPath: datasources.json
+  - name: secrets-volume
+    mountPath: /usr/src/app/server/functionalAccounts.json
+    subPath: functionalAccounts.json
+  - name: secrets-volume
+    mountPath: /usr/src/app/server/component-config.json
+    subPath: component-config.json
