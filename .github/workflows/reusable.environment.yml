@@ -21,13 +21,13 @@ jobs:
     steps:
       - id: variables
         run: | 
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          if [[ "${{ github.event_name }}" == "123" ]]; then
             tag="sha-${{ github.event.pull_request.head.sha }}"
             environment=development
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
               tag="sha-${{ github.sha }}"
               environment=qa
-          elif [[ "${{ github.event_name }}" == "release" ]]; then
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             tag="${{ github.event.release.tag_name }}"
             environment=production
           fi
