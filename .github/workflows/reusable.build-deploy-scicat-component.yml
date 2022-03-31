@@ -58,7 +58,8 @@ jobs:
       uses: docker/metadata-action@v3.6.2
       with:
         images: ${{ inputs.registry }}/${{ inputs.image_name }}
-        tags: ${{ inputs.tag }}
+        tags: |
+          type=raw,value=${{ inputs.tag }}
     
     - name: Build and push Docker image
       id: build-and-push
