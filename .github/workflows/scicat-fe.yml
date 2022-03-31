@@ -18,6 +18,7 @@ jobs:
         helm_configs/frontend/values.yaml
         helm_configs/frontend/${{ needs.set_env.outputs.environment }}/**
         frontend/**
+        generic_service_chart/**
 
   set_ci_vars:
     if: needs.check_changed.outputs.changed == 'true'
