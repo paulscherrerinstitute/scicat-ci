@@ -7,7 +7,7 @@ import { TableColumn } from "state-management/models";
 
 export const environment = {
   production: true,
-  lbBaseURL: "https://scicat-prod.qa.psi.ch",
+  lbBaseURL: "https://scicat.qa.psi.ch",
   archiveWorkflowEnabled: true,
   retrieveDestinations: [],
   externalAuthEndpoint: "/auth/msad",
