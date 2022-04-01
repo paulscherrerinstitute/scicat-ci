@@ -36,7 +36,6 @@ jobs:
             environment=production
             component=${tag:0:2}
           fi
-          component=po
           echo "::set-output name=tag::$(echo $tag)"
           echo "::set-output name=environment::$(echo $environment)"
           echo "::set-output name=component::$(echo $component)"
