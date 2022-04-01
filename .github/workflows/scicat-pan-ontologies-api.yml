@@ -14,6 +14,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
 
   check_changed:
+    if: needs.set_env.outputs.component == 'po'
     needs: set_env
     uses: ./.github/workflows/reusable.changes.yml
     with: 
