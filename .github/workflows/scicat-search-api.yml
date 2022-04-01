@@ -24,7 +24,7 @@ jobs:
         search-api/**
 
   build_deploy_scicat_search_api:
-    if: needs.check_changed.outputs.changed == 'true' || needs.set_env.outputs.component == 'sa'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sa'
     needs: 
      - check_changed
      - set_env
