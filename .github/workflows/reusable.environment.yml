@@ -21,6 +21,7 @@ jobs:
     outputs:
       tag: ${{ steps.variables.outputs.tag }}
       environment: ${{ steps.variables.outputs.environment }}
+      component: ${{ steps.variables.outputs.component }}
     steps:
       - id: variables
         run: | 
