@@ -32,3 +32,19 @@ volumes:
       name: "{{ .Release.Name }}-cm"
 
 initialDelaySeconds: 360
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/src/app/src/environments/environment.{{ eq .Values.envValue "production" | ternary "prod" .Values.envValue }}.ts
+    subPath: environment.ts
+  - name: config-volume
+    mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
+    subPath: keycloak-icon-256px.svg
+
+env:
+  - name: env
+    value: "{{ .Values.envValue }}"
