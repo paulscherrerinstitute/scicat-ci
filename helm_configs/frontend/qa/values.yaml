@@ -1,6 +1,6 @@
 volumeMounts:
   - name: config-volume
-    mountPath: /usr/src/app/src/environments/environment.development.ts
+    mountPath: /usr/src/app/src/environments/environment.qa.ts
     subPath: environment.ts
   - name: config-volume
     mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
@@ -8,6 +8,6 @@ volumeMounts:
 
 env:
   - name: env
-    value: development
+    value: qa
 
-host: scicat.development.psi.ch
+host: scicat.qa.psi.ch

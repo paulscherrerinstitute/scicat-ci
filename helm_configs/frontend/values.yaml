@@ -32,3 +32,8 @@ volumes:
       name: "{{ .Release.Name }}-cm"
 
 initialDelaySeconds: 360
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
+    keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
