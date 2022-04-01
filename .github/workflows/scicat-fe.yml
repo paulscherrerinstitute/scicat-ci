@@ -24,7 +24,7 @@ jobs:
         frontend/**
 
   set_ci_vars:
-    if: needs.check_changed.outputs.changed == 'true'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fe'
     runs-on: ubuntu-latest
     needs: 
       - check_changed
@@ -52,7 +52,7 @@ jobs:
         echo "::set-output name=ciVars::$(echo $ciVars)"
 
   build_deploy_scicat_fe:
-    if: needs.check_changed.outputs.changed == 'true'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fe'
     needs: 
      - check_changed
      - set_env
