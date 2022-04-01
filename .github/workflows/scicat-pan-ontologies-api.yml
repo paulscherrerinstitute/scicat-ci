@@ -25,7 +25,7 @@ jobs:
         pan-ontologies-api/**
 
   build_deploy_scicat_pan_ontologies_api:
-    if: needs.check_changed.outputs.changed == 'true'
+    if: needs.check_changed.outputs.changed == 'true' || needs.set_env.outputs.component == 'po'
     needs: 
      - check_changed
      - set_env
