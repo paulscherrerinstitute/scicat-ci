@@ -1,1 +1,5 @@
+env:
+  - name: ENV
+    value: qa
+
 host: scicat.qa.psi.ch

@@ -1,1 +1,5 @@
+env:
+  - name: ENV
+    value: production
+
 host: scicat-prod.qa.psi.ch
