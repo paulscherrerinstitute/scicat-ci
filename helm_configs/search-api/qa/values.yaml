@@ -1,0 +1,9 @@
+env:
+  - name: BASE_URL
+    value: http://backend.scicat-qa/api/v3
+  - name: FACILITY
+    value: PSI
+  - name: PANET_BASE_URL
+    value: "http://pan-ontologies-api.scicat-qa"
+
+host: scicat.qa.psi.ch
