@@ -9,6 +9,9 @@ on:
       environment:
         description: environment based on workflow trigger
         value: ${{ jobs.set_env.outputs.environment }}
+      component:
+        description: Based on tag prefix, it extracts the component released
+        value: ${{ jobs.set_env.outputs.component }}
         
 jobs:
 
@@ -30,6 +33,8 @@ jobs:
           elif [[ "${{ github.event_name }}" == "release" ]]; then
             tag="${{ github.event.release.tag_name }}"
             environment=production
+            component=${tag:0:2}
           fi
           echo "::set-output name=tag::$(echo $tag)"
           echo "::set-output name=environment::$(echo $environment)"
+          echo "::set-output name=component::$(echo $component)"
