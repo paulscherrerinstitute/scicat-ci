@@ -1,6 +1,6 @@
 // catamel-psiconfig
 "use strict";
-var doiServer = process.env.env !== "production" ? "2" : "";
+var doiServer = process.env.NODE_ENV !== "production" ? "2" : "";
 var envOAIProvider = "https://doi" + (doiServer) + ".psi.ch/oaipmh/oai/Publication";
 var p = require("../package.json");
 var version = p.version.split(".").shift();
@@ -37,7 +37,7 @@ module.exports = {
   smtpMessage: {
     from: "scicatarchivemanager@psi.ch",
     to: undefined,
-    subject: "[SciCat " + process.env.env + "]",
+    subject: "[SciCat " + process.env.NODE_ENV + "]",
     text: undefined // can also set html key and this will override this
   },
   queue: "rabbitmq"
