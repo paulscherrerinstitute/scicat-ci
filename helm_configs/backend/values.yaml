@@ -69,7 +69,7 @@ volumeMounts:
     mountPath: /usr/src/app/server/config.local.js
     subPath: config.local.js
   - name: config-volume
-    mountPath: /usr/src/app/server/middleware.json
+    mountPath: /usr/src/app/server/middleware.local.json
     subPath: middleware.json
   - name: config-volume
     mountPath: /usr/src/app/server/boot/login-callbacks.js
