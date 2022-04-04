@@ -52,7 +52,7 @@ export const environment = {
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
-  tableSciDataEnabled: false,
+  tableSciDataEnabled: true,
   shareEnabled: false,
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
@@ -63,7 +63,7 @@ export const environment = {
   addDatasetEnabled: false,
   editDatasetSampleEnabled: false,
   scienceSearchUnitsEnabled: false,
-  metadataStructure: "",
+  metadataStructure: "tree",
   userNamePromptEnabled: true,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
