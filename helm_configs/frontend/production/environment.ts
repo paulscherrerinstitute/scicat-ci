@@ -11,7 +11,7 @@ export const environment = {
   archiveWorkflowEnabled: true,
   retrieveDestinations: [],
   externalAuthEndpoint: "/auth/msad",
-  editMetadataEnabled: false,
+  editMetadataEnabled: true,
   editSampleEnabled: true,
   editPublishedData: true,
   scienceSearchEnabled: false,
