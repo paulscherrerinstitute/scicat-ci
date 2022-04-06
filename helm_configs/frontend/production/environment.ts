@@ -14,22 +14,22 @@ export const environment = {
   editMetadataEnabled: true,
   editSampleEnabled: true,
   editPublishedData: true,
-  scienceSearchEnabled: false,
+  scienceSearchEnabled: true,
   disabledDatasetColumns: [],
   facility: "PSI",
   multipleDownloadEnabled: false,
   shoppingCartEnabled: true,
   shoppingCartOnHeader: true,
   columnSelectEnabled: true,
-  ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/",
+  ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/", //--> intranet only
   gettingStarted: "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
-  jupyterHubUrl: "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
+  jupyterHubUrl: "",
   fileserverBaseURL: null,
   synapseBaseUrl: null,
   riotBaseUrl: null,
   datasetReduceEnabled: false,
   fileColorEnabled: false,
-  jsonMetadataEnabled: true,
+  jsonMetadataEnabled: true,  // --> check if option to have raw view of json file
   localColumns: [
     { name: "select", order: 0, type: "standard", enabled: true },
     { name: "datasetName", order: 1, type: "standard", enabled: true },
@@ -46,25 +46,25 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: true,
+  metadataPreviewEnabled: true, // check what this is
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
   tableSciDataEnabled: true,
-  shareEnabled: false,
+  shareEnabled: false, // check status of sharing functionality
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
-  landingPage: "doi.psi.ch/detail/",
+  landingPage: "doi.psi.ch/detail/", // check what this is
   fileDownloadEnabled: false,
   jobsEnabled: true,
   policiesEnabled: true,
-  addDatasetEnabled: false,
-  editDatasetSampleEnabled: false,
-  scienceSearchUnitsEnabled: false,
+  addDatasetEnabled: false, // check what this is
+  editDatasetSampleEnabled: false, // try true
+  scienceSearchUnitsEnabled: false, // try true
   metadataStructure: "tree",
-  userNamePromptEnabled: true,
+  userNamePromptEnabled: true, // check what this is
   loginFormEnabled: true,
   oAuth2Endpoints: [{
     displayText: "Keycloak", displayImage:
