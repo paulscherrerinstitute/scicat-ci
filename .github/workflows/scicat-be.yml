@@ -21,6 +21,7 @@ jobs:
         .github/workflows/scicat-be.yml
         helm_configs/backend/values.yaml
         helm_configs/backend/login-callbacks.js
+        helm_configs/backend/config.local.js
         helm_configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
 
