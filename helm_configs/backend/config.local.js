@@ -29,13 +29,14 @@ module.exports = {
     jobCancel: "Cancelled"
   },
   smtpSettings: {
-    host: "smtpint.psi.ch",
-    port: 25,
-    secure: false
+    host: "mail.ethz.ch",
+    port: 587,
+    secure: false,
+    auth: JSON.parse(process.env.MAIL_AUTH)
   },
   expressSessionSecret: "asecret",
   smtpMessage: {
-    from: "scicatarchivemanager@psi.ch",
+    from: "dacatmail@psi.ch",
     to: undefined,
     subject: "[SciCat " + process.env.ENV + "]",
     text: undefined // can also set html key and this will override this
