@@ -36,7 +36,7 @@ module.exports = {
   },
   expressSessionSecret: "asecret",
   smtpMessage: {
-    from: "dacatmail@psi.ch",
+    from: "scicatarchivemanager@psi.ch",
     to: undefined,
     subject: "[SciCat " + process.env.ENV + "]",
     text: undefined // can also set html key and this will override this
