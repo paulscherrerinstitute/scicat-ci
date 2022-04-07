@@ -38,6 +38,7 @@ secrets:
       datasources.json: '${{ secrets.DATASOURCES }}'
       functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
       providers.json: '${{ secrets.PROVIDERS }}'
+      mail_auth: '${{ secrets.MAIL_AUTH }}'
 
 ingress:
   enabled: true
@@ -68,6 +69,11 @@ configMaps:
 env:
   - name: ENV
     value: "{{ .Values.envValue }}"
+  - name: MAIL_AUTH
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: mail_auth
 
 volumeMounts:
   - name: config-volume
