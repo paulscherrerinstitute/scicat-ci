@@ -65,6 +65,10 @@ configMaps:
     login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
 
+env:
+  - name: ENV
+    value: "{{ .Values.envValue }}"
+
 volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/server/config.local.js
