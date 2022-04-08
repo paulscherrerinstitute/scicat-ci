@@ -8,6 +8,6 @@ metadata:
 data:
   {{- range $k, $v := $values }}
   {{ $k }}: | 
-{{ tpl $v $ | indent 4}}
+{{ tpl $v $ | b64dec | indent 4}}
   {{- end }}
 {{- end }}

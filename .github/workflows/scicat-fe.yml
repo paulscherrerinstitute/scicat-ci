@@ -53,6 +53,20 @@ jobs:
         )
         echo "::set-output name=ciVars::$(echo $ciVars)"
 
+    - name: Set helm vars
+      id: helm_vars
+      run: |
+        ciVars=$(cat <<EOF
+          {
+            "KEYCLOAK_ICON": $(base64 -w 0 helm_configs/frontend/keycloak_icon_256px.svg),
+            "ENVIRONMENT": $(base64 -w 0 helm_configs/frontend/${{ needs.set_env.outputs.environment }}/environment.ts),
+            "SITE": $(base64 -w 0 helm_configs/frontend/site.png),
+            "STYLES": $(base64 -w 0 helm_configs/frontend/styles.scss),
+          }
+        EOF
+        )
+        echo "::set-output name=ciVars::$(echo $ciVars)"
+
   build_deploy_scicat_fe:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fe'
     needs: 
