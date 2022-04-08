@@ -8,7 +8,7 @@ metadata:
 data:
   {{- range $k, $v := $values }}
   {{ $k }}: | 
-    {{- if $.fileExists (tpl $v $) }}
+    {{- if $.Files.Glob (tpl $v $) }}
 {{ $.Files.Get (tpl $v $) | indent 4}}
     {{ else }}
 {{ tpl $v $ | indent 4}}
