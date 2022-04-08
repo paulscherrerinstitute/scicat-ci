@@ -83,7 +83,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Copy file
-      run: cp helm_configs/frontend/styles.scss generic_service_chart/styles.scss
+      run: cp helm_configs/frontend/site.png generic_service_chart/site.png
 
     - name: Deploy to k8s using helm
       id: helm-deploy
