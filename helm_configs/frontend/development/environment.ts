@@ -56,7 +56,7 @@ export const environment = {
   shareEnabled: true,
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
-  landingPage: "doi2.psi.ch/detail/", 
+  landingPage: "doi2.psi.ch/detail/",
   fileDownloadEnabled: false,
   jobsEnabled: true,
   policiesEnabled: true,
@@ -64,6 +64,7 @@ export const environment = {
   editDatasetSampleEnabled: true,
   scienceSearchUnitsEnabled: true,
   metadataStructure: "tree",
+  userNamePromptEnabled: true,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
     displayText: "Login with PSI user account", displayImage:
