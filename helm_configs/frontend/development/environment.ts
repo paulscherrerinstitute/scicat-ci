@@ -64,10 +64,10 @@ export const environment = {
   editDatasetSampleEnabled: true,
   scienceSearchUnitsEnabled: true,
   metadataStructure: "tree",
-  userNamePromptEnabled: true,
+  userNamePromptEnabled: false,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
-    displayText: "PSI user account", displayImage:
+    displayText: "PSI account", displayImage:
       "../../../assets/images/keycloak_icon_256px.svg", authURL:
       "auth/keycloak"
   }]

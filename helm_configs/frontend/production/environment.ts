@@ -14,14 +14,14 @@ export const environment = {
   editMetadataEnabled: true,
   editSampleEnabled: true,
   editPublishedData: true,
-  scienceSearchEnabled: true,
+  scienceSearchEnabled: true, //Add filtering on sample characteristics to sample table
   disabledDatasetColumns: [],
   facility: "PSI",
   multipleDownloadEnabled: false,
   shoppingCartEnabled: true,
   shoppingCartOnHeader: true,
   columnSelectEnabled: true,
-  ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/", //--> intranet only
+  ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/",
   gettingStarted: "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
   jupyterHubUrl: "",
   fileserverBaseURL: null,
@@ -29,7 +29,7 @@ export const environment = {
   riotBaseUrl: null,
   datasetReduceEnabled: false,
   fileColorEnabled: false,
-  jsonMetadataEnabled: true,  // --> check if option to have raw view of json file
+  jsonMetadataEnabled: true,  // --> shows json metadata
   localColumns: [
     { name: "select", order: 0, type: "standard", enabled: true },
     { name: "datasetName", order: 1, type: "standard", enabled: true },
@@ -46,28 +46,28 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: true, // check what this is
+  metadataPreviewEnabled: true, // shows first elements of metadata in dataset
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
   tableSciDataEnabled: true,
-  shareEnabled: false, // check status of sharing functionality
+  shareEnabled: true, // it's on develop
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
-  landingPage: "doi.psi.ch/detail/", // check what this is
+  landingPage: "doi.psi.ch/detail/", // creates link to landing page url
   fileDownloadEnabled: false,
   jobsEnabled: true,
   policiesEnabled: true,
-  addDatasetEnabled: false, // check what this is
-  editDatasetSampleEnabled: false, // try true
-  scienceSearchUnitsEnabled: false, // try true
+  addDatasetEnabled: false, // creates dataset using shopping cart
+  editDatasetSampleEnabled: true, // change the sample that is linked to a dataset via the GUI
+  scienceSearchUnitsEnabled: true, // Added unit field to scientific filter which suggests units based on the chosen scientific metadata field
   metadataStructure: "tree",
-  userNamePromptEnabled: true, // check what this is
+  userNamePromptEnabled: true,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
-    displayText: "Keycloak", displayImage:
+    displayText: "Login with PSI user account", displayImage:
       "../../../assets/images/keycloak_icon_256px.svg", authURL:
       "auth/keycloak"
   }]
