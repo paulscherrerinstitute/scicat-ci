@@ -67,7 +67,7 @@ export const environment = {
   userNamePromptEnabled: true,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
-    displayText: "Login with PSI user account", displayImage:
+    displayText: "PSI user account", displayImage:
       "../../../assets/images/keycloak_icon_256px.svg", authURL:
       "auth/keycloak"
   }]
