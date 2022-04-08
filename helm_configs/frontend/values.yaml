@@ -35,7 +35,11 @@ initialDelaySeconds: 360
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
-    keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
-    site.png: helm_configs/frontend/site.png
-    styles.scss: "{{ .Values.ciVars.STYLES }}"
+    environment.ts: 
+      value: "{{ .Values.ciVars.ENVIRONMENT }}"
+    keycloak-icon-256px.svg:
+      value: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
+    site.png: 
+      file: site.png
+    styles.scss: 
+      value: "{{ .Values.ciVars.STYLES }}"
