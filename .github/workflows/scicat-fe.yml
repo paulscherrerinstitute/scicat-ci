@@ -44,10 +44,9 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "KEYCLOAK_ICON": $(base64 -w 0 helm_configs/frontend/keycloak_icon_256px.svg),
-            "ENVIRONMENT": $(base64 -w 0 helm_configs/frontend/${{ needs.set_env.outputs.environment }}/environment.ts),
-            "SITE": $(base64 -w 0 helm_configs/frontend/site.png),
-            "STYLES": $(base64 -w 0 helm_configs/frontend/styles.scss),
+            "KEYCLOAK_ICON": $(jq -R -s < helm_configs/frontend/keycloak_icon_256px.svg),
+            "ENVIRONMENT": $(jq -R -s < helm_configs/frontend/${{ needs.set_env.outputs.environment }}/environment.ts),
+            "SITE": $(jq -R -s < helm_configs/frontend/site.png),
           }
         EOF
         )
