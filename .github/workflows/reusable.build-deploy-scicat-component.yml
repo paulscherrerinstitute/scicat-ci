@@ -82,9 +82,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Copy file
-      run: cp helm_configs/frontend/site.png generic_service_chart/site.png
-
     - name: Deploy to k8s using helm
       id: helm-deploy
       uses: 'glopezep/helm@v1.7.1'

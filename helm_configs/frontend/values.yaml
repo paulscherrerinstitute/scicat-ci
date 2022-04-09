@@ -30,16 +30,25 @@ volumes:
   - name: config-volume
     configMap:
       name: "{{ .Release.Name }}-cm"
+  - name: downloaddir
+    emptyDir: {}
 
 initialDelaySeconds: 360
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    environment.ts: 
-      value: "{{ .Values.ciVars.ENVIRONMENT }}"
-    keycloak-icon-256px.svg:
-      value: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
-    site.png: 
-      file: site.png
-    styles.scss: 
-      value: "{{ .Values.ciVars.STYLES }}"
+    environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
+    keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
+    styles.scss: "{{ .Values.ciVars.STYLES }}"
+
+initContainers:
+  - name: install
+    image: busybox
+    command:
+      - wget
+      - "-O"
+      - "/download-dir/site.png"
+      - https://github.com/paulscherrerinstitute/scicat-ci/blob/7727f506c8f4d7f1f5b296e0ff80501e262866d9/helm_configs/frontend/site.png
+    volumeMounts:
+      - name: downloaddir
+        mountPath: "/download-dir"

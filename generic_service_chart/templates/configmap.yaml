@@ -8,10 +8,6 @@ metadata:
 data:
   {{- range $k, $v := $values }}
   {{ $k }}: | 
-    {{- if $v.file }}
-{{ $.Files.Get (tpl $v.file $) | quote | indent 4}}
-    {{ else }}
-{{ tpl $v.value $ | quote | indent 4}}
-    {{- end }}
+{{ tpl $v $ | indent 4}}
   {{- end }}
 {{- end }}
