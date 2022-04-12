@@ -52,3 +52,21 @@ initContainers:
     volumeMounts:
       - name: downloaddir
         mountPath: "/download-dir"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/src/app/src/environments/{{ .Values.envFile }}
+    subPath: environment.ts
+  - name: config-volume
+    mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
+    subPath: keycloak-icon-256px.svg
+  - name: config-volume
+    mountPath: /usr/src/app/src/styles.scss
+    subPath: styles.scss
+  - name: downloaddir
+    mountPath: /usr/src/app/src/assets/images/site.png
+    subPath: site.png
+
+env:
+  - name: env
+    value: envValue

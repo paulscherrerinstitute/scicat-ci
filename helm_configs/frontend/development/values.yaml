@@ -1,19 +1,5 @@
-volumeMounts:
-  - name: config-volume
-    mountPath: /usr/src/app/src/environments/environment.development.ts
-    subPath: environment.ts
-  - name: config-volume
-    mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
-    subPath: keycloak-icon-256px.svg
-  - name: config-volume
-    mountPath: /usr/src/app/src/styles.scss
-    subPath: styles.scss
-  - name: downloaddir
-    mountPath: /usr/src/app/src/assets/images/site.png
-    subPath: site.png
+envFile: environment.development.ts
 
-env:
-  - name: env
-    value: development
+envValue: development
 
 host: scicat.development.psi.ch
