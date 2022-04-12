@@ -48,7 +48,8 @@ jobs:
           {
             "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/config.local.js),
             "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/login-callbacks.js),
-            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json)
+            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json),
+            "PUBLISH_FINISHED": $(jq -R -s < helm_configs/backend/publishWhenFinished.js),
           }
         EOF
         )
