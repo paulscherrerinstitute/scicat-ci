@@ -66,6 +66,7 @@ configMaps:
     login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
     publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
+    job-tempate.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
 
 env:
   - name: ENV
@@ -89,6 +90,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/server/boot/publishWhenFinished.js
     subPath: publishWhenFinished.js
+  - name: config-volume
+    mountPath: /usr/src/app/email-templates/job-tempate.html
+    subPath: job-tempate.html
   - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json
