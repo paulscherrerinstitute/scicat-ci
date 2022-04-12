@@ -65,6 +65,7 @@ configMaps:
     config.local.js: "{{ .Values.ciVars.CONFIG_LOCAL }}"
     login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
+    publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
 
 env:
   - name: ENV
@@ -85,6 +86,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/server/boot/login-callbacks.js
     subPath: login-callbacks.js
+  - name: config-volume
+    mountPath: /usr/src/app/server/boot/publishWhenFinished.js
+    subPath: publishWhenFinished.js
   - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json
