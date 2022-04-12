@@ -69,4 +69,4 @@ volumeMounts:
 
 env:
   - name: env
-    value: envValue
+    value: "{{ .Values.envValue }}"
