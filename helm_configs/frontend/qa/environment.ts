@@ -2,7 +2,7 @@ import { TableColumn } from "state-management/models";
 
 // The file contents for the current environment will overwrite these during build.
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do
-// `ng build --env=prod` then `environment.prod.ts` will be used instead.
+// `ng build --env=qa` then `environment.qa.ts` will be used instead.
 // The list of which env maps to which file can be found in `angular-cli.json`.
 
 export const environment = {
@@ -12,9 +12,9 @@ export const environment = {
   retrieveDestinations: [],
   externalAuthEndpoint: "/auth/msad",
   editMetadataEnabled: false,
-  editSampleEnabled: true,
+  editSampleEnabled: false,
   editPublishedData: true,
-  scienceSearchEnabled: false,
+  scienceSearchEnabled: true,
   disabledDatasetColumns: [],
   facility: "PSI",
   multipleDownloadEnabled: false,
@@ -23,7 +23,7 @@ export const environment = {
   columnSelectEnabled: true,
   ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/",
   gettingStarted: "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
-  jupyterHubUrl: "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
+  jupyterHubUrl: "",
   fileserverBaseURL: null,
   synapseBaseUrl: null,
   riotBaseUrl: null,
@@ -46,14 +46,14 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: true,
+  metadataPreviewEnabled: false,
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
   tableSciDataEnabled: false,
-  shareEnabled: false,
+  shareEnabled: true,
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
   landingPage: "doi2.psi.ch/detail/",
@@ -63,7 +63,7 @@ export const environment = {
   addDatasetEnabled: false,
   editDatasetSampleEnabled: false,
   scienceSearchUnitsEnabled: false,
-  metadataStructure: "",
+  metadataStructure: "tree",
   userNamePromptEnabled: false,
   loginFormEnabled: true,
   oAuth2Endpoints: [{

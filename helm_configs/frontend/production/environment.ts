@@ -11,10 +11,10 @@ export const environment = {
   archiveWorkflowEnabled: true,
   retrieveDestinations: [],
   externalAuthEndpoint: "/auth/msad",
-  editMetadataEnabled: true,
-  editSampleEnabled: true,
+  editMetadataEnabled: false,
+  editSampleEnabled: false,
   editPublishedData: true,
-  scienceSearchEnabled: true, //Add filtering on sample characteristics to sample table
+  scienceSearchEnabled: true,
   disabledDatasetColumns: [],
   facility: "PSI",
   multipleDownloadEnabled: false,
@@ -29,7 +29,7 @@ export const environment = {
   riotBaseUrl: null,
   datasetReduceEnabled: false,
   fileColorEnabled: false,
-  jsonMetadataEnabled: true,  // --> shows json metadata
+  jsonMetadataEnabled: true,
   localColumns: [
     { name: "select", order: 0, type: "standard", enabled: true },
     { name: "datasetName", order: 1, type: "standard", enabled: true },
@@ -46,28 +46,28 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: true, // shows first elements of metadata in dataset
+  metadataPreviewEnabled: false,
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
-  tableSciDataEnabled: true,
-  shareEnabled: true, // it's on develop
+  tableSciDataEnabled: false,
+  shareEnabled: true,
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
-  landingPage: "doi.psi.ch/detail/", // creates link to landing page url
+  landingPage: "doi.psi.ch/detail/",
   fileDownloadEnabled: false,
   jobsEnabled: true,
   policiesEnabled: true,
-  addDatasetEnabled: false, // creates dataset using shopping cart
-  editDatasetSampleEnabled: true, // change the sample that is linked to a dataset via the GUI
-  scienceSearchUnitsEnabled: true, // Added unit field to scientific filter which suggests units based on the chosen scientific metadata field
+  addDatasetEnabled: false,
+  editDatasetSampleEnabled: false,
+  scienceSearchUnitsEnabled: false,
   metadataStructure: "tree",
-  userNamePromptEnabled: true,
+  userNamePromptEnabled: false,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
-    displayText: "Login with PSI user account", displayImage:
+    displayText: "PSI account", displayImage:
       "../../../assets/images/keycloak_icon_256px.svg", authURL:
       "auth/keycloak"
   }]
