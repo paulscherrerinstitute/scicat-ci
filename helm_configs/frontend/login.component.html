@@ -27,13 +27,13 @@
       </div>
       <br/>
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()" *ngIf="appConfig.loginFormEnabled">
-        <mat-form-field hintLabel="Service account username">
+        <mat-form-field hintLabel="Service (functional) account username">
           <mat-label> <b> Username</b> </mat-label>
           <span matPrefix> <mat-icon>person</mat-icon> &nbsp; </span>
           <input matInput id="usernameInput" formControlName="username" />
         </mat-form-field>
 
-          <mat-form-field hintLabel="Service account password">
+          <mat-form-field hintLabel="Service (functional) account password">
             <mat-label> <b> Password</b> </mat-label>
             <span matPrefix> <mat-icon>vpn_key</mat-icon> &nbsp; </span>
             <input
