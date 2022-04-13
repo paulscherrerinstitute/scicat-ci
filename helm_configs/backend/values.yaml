@@ -49,12 +49,16 @@ ingress:
   hosts:
     - host: "{{ .Values.host }}"
       paths: 
-        - path: "/"
+        - path: "/api"
+          pathType: Prefix
+        - path: "/explorer"
+          pathType: Prefix
+        - path: "/auth"
           pathType: Prefix
   tls:
     - hosts:
       - "{{ .Values.host }}"
-      secretName: "scicat-be-certificate"
+      secretName: "scicat-certificate"
 
 configMaps: 
   "{{ .Release.Name }}-cm":
