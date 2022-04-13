@@ -11,10 +11,10 @@ export const environment = {
   archiveWorkflowEnabled: true,
   retrieveDestinations: [],
   externalAuthEndpoint: "/auth/msad",
-  editMetadataEnabled: true,
-  editSampleEnabled: true,
+  editMetadataEnabled: false,
+  editSampleEnabled: false,
   editPublishedData: true,
-  scienceSearchEnabled: false,
+  scienceSearchEnabled: true,
   disabledDatasetColumns: [],
   facility: "PSI",
   multipleDownloadEnabled: false,
@@ -23,7 +23,7 @@ export const environment = {
   columnSelectEnabled: true,
   ingestManual: "http://melanie.gitpages.psi.ch/SciCatPages/",
   gettingStarted: "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
-  jupyterHubUrl: "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
+  jupyterHubUrl: "",
   fileserverBaseURL: null,
   synapseBaseUrl: null,
   riotBaseUrl: null,
@@ -46,14 +46,14 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: true,
+  metadataPreviewEnabled: false,
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
   searchSamples: true,
   sftpHost: null,
-  tableSciDataEnabled: true,
-  shareEnabled: false,
+  tableSciDataEnabled: false,
+  shareEnabled: true,
   userProfileImageEnabled: true,
   searchPublicDataEnabled: true,
   landingPage: "doi.psi.ch/detail/",
@@ -64,10 +64,10 @@ export const environment = {
   editDatasetSampleEnabled: false,
   scienceSearchUnitsEnabled: false,
   metadataStructure: "tree",
-  userNamePromptEnabled: true,
+  userNamePromptEnabled: false,
   loginFormEnabled: true,
   oAuth2Endpoints: [{
-    displayText: "Keycloak", displayImage:
+    displayText: "PSI account", displayImage:
       "../../../assets/images/keycloak_icon_256px.svg", authURL:
       "auth/keycloak"
   }]
