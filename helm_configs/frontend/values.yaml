@@ -40,6 +40,7 @@ configMaps:
     environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
     keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
     styles.scss: "{{ .Values.ciVars.STYLES }}"
+    login.component.html: "{{ .Values.ciVars.LOGIN_COMPONENT }}"
 
 initContainers:
   - name: install
@@ -63,6 +64,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/src/styles.scss
     subPath: styles.scss
+  - name: config-volume
+    mountPath: /usr/src/app/src/app/users/login/login.component.html
+    subPath: login.component.html
   - name: downloaddir
     mountPath: /usr/src/app/src/assets/images/site.png
     subPath: site.png
