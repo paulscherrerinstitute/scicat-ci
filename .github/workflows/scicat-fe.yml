@@ -49,6 +49,7 @@ jobs:
             "ENVIRONMENT": $(jq -R -s < helm_configs/frontend/${{ needs.set_env.outputs.environment }}/environment.ts),
             "STYLES": $(jq -R -s < helm_configs/frontend/styles.scss),
             "LOGIN_COMPONENT": $(jq -R -s < helm_configs/frontend/login.component.html),
+            "HELP_COMPONENT": $(jq -R -s < helm_configs/frontend/help.component.html),
           }
         EOF
         )
