@@ -2,4 +2,4 @@ envFile: environment.qa.ts
 
 envValue: qa
 
-host: scicat.qa.psi.ch
+host: discovery-qa.psi.ch

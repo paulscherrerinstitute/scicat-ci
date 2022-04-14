@@ -2,4 +2,4 @@ envFile: environment.prod.ts
 
 envValue: production
 
-host: scicat-prod.qa.psi.ch
+host: discovery.psi.ch

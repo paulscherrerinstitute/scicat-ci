@@ -2,4 +2,4 @@ envFile: environment.development.ts
 
 envValue: development
 
-host: scicat.development.psi.ch
+host: discovery-development.psi.ch
