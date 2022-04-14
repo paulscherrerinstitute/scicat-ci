@@ -6,4 +6,4 @@ env:
   - name: PANET_BASE_URL
     value: "http://pan-ontologies-api.scicat-qa"
 
-host: scicat.qa.psi.ch
+host: dacat-qa.psi.ch
