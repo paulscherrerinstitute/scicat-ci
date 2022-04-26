@@ -1,0 +1,40 @@
+name: scicat-oaipmh
+
+on:  
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/scicat-oaipmh.yml
+        helm_configs/oaipmh/${{ needs.set_env.outputs.environment }}/**
+        helm_configs/oaipmh/values.yaml
+        oai-provider-service/**
+
+  build_deploy_scicat_oaipmh:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'oa'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    with: 
+      context: oai-provider-service/.
+      image_name: ${{ github.repository }}/oaipmh
+      release_name: oaipmh
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
