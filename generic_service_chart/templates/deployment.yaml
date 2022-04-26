@@ -37,14 +37,14 @@ spec:
             initialDelaySeconds: {{ . }}
             {{- end }}
             httpGet:
-              path: /
+              path: {{ .Values.service.probePath | default "/" }}
               port: {{ .Values.service.internalPort }}
           readinessProbe:
             {{- with .Values.initialDelaySeconds }}
             initialDelaySeconds: {{ . }}
             {{- end }}
             httpGet:
-              path: /
+              path: {{ .Values.service.probePath | default "/" }}
               port: {{ .Values.service.internalPort }}
           {{- with .Values.run }}
           {{- tpl (toYaml .) $ | nindent 10 }}

@@ -10,6 +10,7 @@ service:
   type: ClusterIP
   externalPort: 80
   internalPort: 3001
+  probePath: /openaire/oai
 
 ingress:
   enabled: true
