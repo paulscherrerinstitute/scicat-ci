@@ -25,6 +25,10 @@ on:
       tag:
         required: true
         type: string
+      namespace_prefix:
+        required: false
+        type: string
+        default: scicat-
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
@@ -87,7 +91,7 @@ jobs:
       uses: 'glopezep/helm@v1.7.1'
       with:
         release: '${{ inputs.release_name }}'
-        namespace: 'scicat-${{ inputs.environment }}'
+        namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
         chart: 'generic_service_chart'
         helm: helm3
         timeout: 10m
