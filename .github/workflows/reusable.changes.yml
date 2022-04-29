@@ -10,6 +10,12 @@ on:
       changed:
         description: boolean to check if changes on input files
         value: ${{ jobs.changed.outputs.changed }}
+    secrets: 
+      SSH_PRIVATE_KEY: 
+        description: ssh key to private submodule
+        false: true
+        default: ''
+
 
 
 jobs:
@@ -25,6 +31,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Get changed files
         id: changed-files
