@@ -38,7 +38,7 @@ on:
         required: false
       SSH_PRIVATE_KEY: 
         description: ssh key to private submodule
-        false: true
+        required: true
         default: ''
       
 jobs:
