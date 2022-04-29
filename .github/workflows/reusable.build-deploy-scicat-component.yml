@@ -40,7 +40,6 @@ on:
         description: ssh key to private submodule
         false: true
         default: ''
-        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
 jobs:
 
