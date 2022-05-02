@@ -39,6 +39,7 @@ secrets:
       functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
       providers.json: '${{ secrets.PROVIDERS }}'
       mail_auth: '${{ secrets.MAIL_AUTH }}'
+      allowed_ips: '${{ secrets.ALLOWED_IPS }}'
 
 ingress:
   enabled: true
@@ -64,6 +65,7 @@ configMaps:
     publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
     job-tmpate.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
     hideEmail.js: "{{ .Values.ciVars.HIDE_EMAIL }}"
+    filterIPS.js: "{{ .Values.ciVars.FILTER_IPS }}"
 
 env:
   - name: ENV
@@ -73,6 +75,11 @@ env:
       secretKeyRef: 
         name: "{{ .Release.Name }}-s"
         key: mail_auth
+  - name: ALLOWED_IPS
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: allowed_ips
 
 volumeMounts:
   - name: config-volume
@@ -93,6 +100,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /usr/src/app/server/boot/hideEmail.js
     subPath: hideEmail.js
+  - name: config-volume
+    mountPath: /usr/src/app/server/boot/filterIPS.js
+    subPath: filterIPS.js
   - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json

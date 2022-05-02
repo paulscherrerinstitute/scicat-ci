@@ -52,6 +52,7 @@ jobs:
             "PUBLISH_FINISHED": $(jq -R -s < helm_configs/backend/publishWhenFinished.js),
             "EMAIL_TEMPLATE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/job-tempate.html),
             "HIDE_EMAIL": $(jq -R -s < helm_configs/backend/hideEmail.js),
+            "FILTER_IPS": $(jq -R -s < helm_configs/backend/filterIPS.js),
           }
         EOF
         )
