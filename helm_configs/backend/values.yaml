@@ -65,7 +65,7 @@ configMaps:
     publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
     job-tmpate.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
     hideEmail.js: "{{ .Values.ciVars.HIDE_EMAIL }}"
-    filterIPS.js: "{{ .Values.ciVars.FILTER_IPS }}"
+    filterIPs.js: "{{ .Values.ciVars.FILTER_IPS }}"
 
 env:
   - name: ENV
@@ -101,8 +101,8 @@ volumeMounts:
     mountPath: /usr/src/app/server/boot/hideEmail.js
     subPath: hideEmail.js
   - name: config-volume
-    mountPath: /usr/src/app/server/boot/filterIPS.js
-    subPath: filterIPS.js
+    mountPath: /usr/src/app/server/boot/filterIPs.js
+    subPath: filterIPs.js
   - name: secrets-volume
     mountPath: /usr/src/app/server/providers.json
     subPath: providers.json
