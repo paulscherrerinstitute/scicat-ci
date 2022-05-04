@@ -1,7 +1,7 @@
 "use strict";
 
 const HttpErrors = require('http-errors');
-let functionalAccounts
+let functionalAccounts;
 try {
   functionalAccounts = require('../functionalAccounts.json');
 } catch {
@@ -9,7 +9,7 @@ try {
 };
 
 module.exports = function (app) {
-  const allowed_ips = JSON.parse(process.env.ALLOWED_IPS || '["*.*.*.*"]')
+  const allowed_ips = JSON.parse(process.env.ALLOWED_IPS || '["*.*.*.*"]');
   app.models.User.beforeRemote("login", function (ctx, unused, next) {
     if (ctx.args && ctx.args.credentials) {
       if (
