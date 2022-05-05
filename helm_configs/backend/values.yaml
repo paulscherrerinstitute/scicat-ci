@@ -62,7 +62,7 @@ configMaps:
     login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
     publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
-    job-tmpate.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
+    job-template.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
     hideEmail.js: "{{ .Values.ciVars.HIDE_EMAIL }}"
 
 env:
@@ -88,8 +88,8 @@ volumeMounts:
     mountPath: /usr/src/app/server/boot/publishWhenFinished.js
     subPath: publishWhenFinished.js
   - name: config-volume
-    mountPath: /usr/src/app/email-templates/job-tempate.html
-    subPath: job-tempate.html
+    mountPath: /usr/src/app/email-templates/job-template.html
+    subPath: job-template.html
   - name: config-volume
     mountPath: /usr/src/app/server/boot/hideEmail.js
     subPath: hideEmail.js
