@@ -60,3 +60,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validate the secret, checking if base64 encoded
+*/}}    
+{{- define "validateSecret" -}}
+{{ $secret := regexReplaceAllLiteral "\u0026#x3D;" (regexReplaceAllLiteral "\u0026#x2F;" . "/") "=" }}
+{{- if (b64dec $secret | hasPrefix "illegal base64") -}}
+{{ fail "Please b64 encode your secrets!" }}
+{{- else }}
+{{- $secret }}
+{{- end }}
+{{- end }}
