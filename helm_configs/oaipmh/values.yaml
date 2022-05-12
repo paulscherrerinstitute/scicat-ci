@@ -17,13 +17,15 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^/oaipmh/oai /scicat/oai last;
+      location = oaipmh/oai {
+          rewrite ^/oaipmh/oai /scicat/oai last;
+        }
   hosts:
     - host: "{{ .Values.host }}"
       paths: 
         - path: /openaire/oai
           pathType: Exact
-        - path: /scicat/oai
+        - path: /oaipmh/oai
           pathType: Exact
   tls:
     - hosts:
