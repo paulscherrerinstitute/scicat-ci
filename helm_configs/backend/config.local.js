@@ -1,7 +1,6 @@
 // catamel-psiconfig
 "use strict";
 var doiServer = process.env.ENV !== "production" ? "2" : "";
-var envOAIProvider = "https://doi" + (doiServer) + ".psi.ch/oaipmh/oai/Publication";
 var p = require("../package.json");
 var version = p.version.split(".").shift();
 module.exports = {
