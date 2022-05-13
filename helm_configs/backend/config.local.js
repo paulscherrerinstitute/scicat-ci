@@ -9,7 +9,6 @@ module.exports = {
   port: process.env.PORT || 3000,
   pidPrefix: "20.500.11935",
   doiPrefix: "10.16907",
-  oaiProviderRoute: envOAIProvider,
   policyPublicationShiftInYears: 3,
   policyRetentionShiftInYears: 10,
   metadataKeysReturnLimit: 100,
