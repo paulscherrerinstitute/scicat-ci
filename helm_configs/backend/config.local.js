@@ -1,6 +1,5 @@
 // catamel-psiconfig
 "use strict";
-var doiServer = process.env.ENV !== "production" ? "2" : "";
 var p = require("../package.json");
 var version = p.version.split(".").shift();
 module.exports = {
