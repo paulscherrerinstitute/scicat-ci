@@ -33,15 +33,10 @@ volumes:
   - name: downloaddir
     emptyDir: {}
 
-initialDelaySeconds: 360
-
 configMaps: 
   "{{ .Release.Name }}-cm":
-    environment.ts: "{{ .Values.ciVars.ENVIRONMENT }}"
+    config.json: "{{ .Values.ciVars.ENVIRONMENT }}"
     keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
-    styles.scss: "{{ .Values.ciVars.STYLES }}"
-    login.component.html: "{{ .Values.ciVars.LOGIN_COMPONENT }}"
-    help.component.html: "{{ .Values.ciVars.HELP_COMPONENT }}"
 
 initContainers:
   - name: install
@@ -57,22 +52,13 @@ initContainers:
 
 volumeMounts:
   - name: config-volume
-    mountPath: /usr/src/app/src/environments/{{ .Values.envFile }}
-    subPath: environment.ts
+    mountPath: /usr/share/nginx/html/assets/config.json
+    subPath: config.json
   - name: config-volume
-    mountPath: /usr/src/app/src/assets/images/keycloak_icon_256px.svg
+    mountPath: /usr/share/nginx/html/assets/images/keycloak_icon_256px.svg
     subPath: keycloak-icon-256px.svg
-  - name: config-volume
-    mountPath: /usr/src/app/src/styles.scss
-    subPath: styles.scss
-  - name: config-volume
-    mountPath: /usr/src/app/src/app/users/login/login.component.html
-    subPath: login.component.html
-  - name: config-volume
-    mountPath: /usr/src/app/src/app/help/help/help.component.html
-    subPath: help.component.html
   - name: downloaddir
-    mountPath: /usr/src/app/src/assets/images/site.png
+    mountPath: /usr/share/nginx/html/assets/images/site.png
     subPath: site.png
 
 env:

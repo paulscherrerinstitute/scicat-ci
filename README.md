@@ -30,6 +30,18 @@ The two common scenarios for which we want a new deployment of a component are:
  4. open a PR to `main`. At this point, the pipeline deploying on [development](#development-pipeline) starts.
  5. when ready, merge the PR into `main`. At this point, the pipeline deploying on [qa](#qa-pipeline) starts.
  6. when ready, create a new release. At this point, the pipeline deploying on [production](#production-pipeline) starts.
+ 
+#### Example session for test on development
+```
+git clone git@github.com:paulscherrerinstitute/scicat-ci.git
+git checkout -b configs/testMetadataColumns
+cd scicat-ci/helm_configs/frontend/development/
+# do your changes and commits
+git add helm_configs/frontend/development/environment.ts
+git commit -m "New frontend configuration for development to test metadata columns"
+git push origin configs/testMetadataColumns 
+# follow the PR link given and push the PR on the github webpage
+```
 
 ### Workflow when working on a submodule
 
