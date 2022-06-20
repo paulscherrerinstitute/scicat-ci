@@ -37,16 +37,19 @@ configMaps:
   "{{ .Release.Name }}-cm":
     config.json: "{{ .Values.ciVars.ENVIRONMENT }}"
     keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
-    site-logo.png: "{{ .Values.ciVars.SITE_LOGO }}"
 
 initContainers:
   - name: install
     image: busybox
     command:
-      - wget
-      - "-O"
-      - "/download-dir/site.png"
-      - https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm_configs/frontend/site.png
+      - |- 
+        wget 
+        -O "/download-dir/site.png" 
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm_configs/frontend/site.png
+      - |-
+        wget 
+        -O "/download-dir/site-logo.png" 
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/f222c6aa913f7a6449609fa8c9b4d8b69b01dfa1/helm_configs/frontend/site-logo.png
     volumeMounts:
       - name: downloaddir
         mountPath: "/download-dir"
@@ -62,7 +65,7 @@ volumeMounts:
     mountPath: /usr/share/nginx/html/assets/images/site.png
     subPath: site.png
   - name: config-volume
-    mountPath: /usr/share/nginx/html/assets/images/site-logo.png
+    mountPath: downloaddir
     subPath: site-logo.png
 
 env:
