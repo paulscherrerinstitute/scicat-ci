@@ -37,6 +37,7 @@ configMaps:
   "{{ .Release.Name }}-cm":
     config.json: "{{ .Values.ciVars.ENVIRONMENT }}"
     keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
+    site-logo.png: "{{ .Values.ciVars.SITE_LOGO }}"
 
 initContainers:
   - name: install
@@ -60,6 +61,9 @@ volumeMounts:
   - name: downloaddir
     mountPath: /usr/share/nginx/html/assets/images/site.png
     subPath: site.png
+  - name: config-volume
+    mountPath: /usr/share/nginx/html/assets/images/site-logo.png
+    subPath: site-logo.png
 
 env:
   - name: env
