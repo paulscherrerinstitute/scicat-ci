@@ -11,7 +11,7 @@ export const environment = {
   archiveWorkflowEnabled: true,
   retrieveDestinations: [{option: "PSI", location: "/home/out"}, {option:"CSCS (Testphase)"}],
   externalAuthEndpoint: "/auth/msad",
-  editMetadataEnabled: false,
+  editMetadataEnabled: true,
   editSampleEnabled: false,
   editPublishedData: true,
   scienceSearchEnabled: true,
@@ -33,7 +33,7 @@ export const environment = {
   localColumns: [
     { name: "select", order: 0, type: "standard", enabled: true },
     { name: "datasetName", order: 1, type: "standard", enabled: true },
-    { name: "runNumber", order: 2, type: "standard", enabled: false },
+    { name: "runNumber", order: 2, type: "standard", enabled: true },
     { name: "sourceFolder", order: 3, type: "standard", enabled: true },
     { name: "size", order: 4, type: "standard", enabled: true },
     { name: "creationTime", order: 5, type: "standard", enabled: true },
@@ -46,7 +46,7 @@ export const environment = {
     // { name: "derivedDatasetsNum", order: 12, type: "standard", enabled: false }
   ] as TableColumn[],
   logbookEnabled: false,
-  metadataPreviewEnabled: false,
+  metadataPreviewEnabled: true,
   maxDirectDownloadSize: 5000000000,
   multipleDownloadAction: null,
   searchProposals: true,
