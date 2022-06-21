@@ -51,7 +51,7 @@ initContainers:
         https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm_configs/frontend/site.png; 
         wget 
         -O /download-dir/site-logo.png 
-        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/f222c6aa913f7a6449609fa8c9b4d8b69b01dfa1/helm_configs/frontend/site-logo.png;
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm_configs/frontend/site-logo.png;
     volumeMounts:
       - name: downloaddir
         mountPath: "/download-dir"
