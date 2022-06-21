@@ -43,7 +43,7 @@ initContainers:
     image: busybox
     command:
       - "/bin/sh"
-      - c
+      - -c
     args:
       - >-
         wget 
