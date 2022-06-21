@@ -33,7 +33,7 @@ export const environment = {
   localColumns: [
     { name: "select", order: 0, type: "standard", enabled: true },
     { name: "datasetName", order: 1, type: "standard", enabled: true },
-    { name: "runNumber", order: 2, type: "custom", enabled: false },
+    { name: "runNumber", order: 2, type: "custom", enabled: true },
     { name: "sourceFolder", order: 3, type: "standard", enabled: true },
     { name: "size", order: 4, type: "standard", enabled: true },
     { name: "creationTime", order: 5, type: "standard", enabled: true },
