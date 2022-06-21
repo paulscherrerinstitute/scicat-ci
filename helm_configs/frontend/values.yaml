@@ -42,11 +42,11 @@ initContainers:
   - name: install
     image: busybox
     command:
-      - |- 
+      - >-
         wget 
         -O "/download-dir/site.png" 
         https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm_configs/frontend/site.png
-      - |-
+      - >-
         wget 
         -O "/download-dir/site-logo.png" 
         https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/f222c6aa913f7a6449609fa8c9b4d8b69b01dfa1/helm_configs/frontend/site-logo.png
@@ -64,8 +64,8 @@ volumeMounts:
   - name: downloaddir
     mountPath: /usr/share/nginx/html/assets/images/site.png
     subPath: site.png
-  - name: config-volume
-    mountPath: downloaddir
+  - name: downloaddir
+    mountPath: /usr/share/nginx/html/assets/images/site-logo.png
     subPath: site-logo.png
 
 env:
