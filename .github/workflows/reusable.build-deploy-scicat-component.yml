@@ -102,7 +102,6 @@ jobs:
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
         chart: '${{ inputs.helm_chart }}'
         helm: helm3
-        timeout: 10m
         values: |
          ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
          ciTag: ${{ inputs.tag }}
