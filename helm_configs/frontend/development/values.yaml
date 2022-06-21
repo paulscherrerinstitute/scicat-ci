@@ -1,5 +1,1 @@
-envFile: environment.development.ts
-
-envValue: development
-
 host: discovery-development.psi.ch

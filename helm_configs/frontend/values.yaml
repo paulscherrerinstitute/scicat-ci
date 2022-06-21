@@ -69,7 +69,3 @@ volumeMounts:
   - name: downloaddir
     mountPath: /usr/share/nginx/html/assets/images/site-logo.png
     subPath: site-logo.png
-
-env:
-  - name: env
-    value: "{{ .Values.envValue }}"
