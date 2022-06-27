@@ -1,7 +1,8 @@
 {
     "lbBaseURL": "https://dacat-development.psi.ch",
     "archiveWorkflowEnabled": true,
-    "retrieveDestinations": [{
+    "retrieveDestinations": [
+        {
             "option": "PSI",
             "location": "/home/out"
         },
@@ -29,7 +30,8 @@
     "datasetReduceEnabled": true,
     "fileColorEnabled": true,
     "jsonMetadataEnabled": true,
-    "localColumns": [{
+    "localColumns": [
+        {
             "name": "select",
             "order": 0,
             "type": "standard",
@@ -120,9 +122,11 @@
     "scienceSearchUnitsEnabled": true,
     "metadataStructure": "",
     "loginFormEnabled": true,
-    "oAuth2Endpoints": [{
-        "displayText": "PSI account",
-        "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
-        "authURL": "auth/keycloak"
-    }]
+    "oAuth2Endpoints": [
+        {
+            "displayText": "PSI account",
+            "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
+            "authURL": "auth/keycloak"
+        }
+    ]
 }
