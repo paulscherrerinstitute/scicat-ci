@@ -1,5 +1,10 @@
 {
   "final:after": {
-    "strong-error-handler": {}
+    "strong-error-handler": {
+      "params": {
+        "debug": true,
+        "log": true
+      }
+    }
   }
 }
