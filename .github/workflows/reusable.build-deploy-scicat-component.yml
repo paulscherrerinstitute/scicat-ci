@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: scicat-
+      helm_chart:
+        required: false
+        type: string
+        default: generic_service_chart
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
@@ -96,7 +100,7 @@ jobs:
       with:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
-        chart: 'generic_service_chart'
+        chart: '${{ inputs.helm_chart }}'
         helm: helm3
         timeout: 10m
         values: |
