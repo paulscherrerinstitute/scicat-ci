@@ -21,6 +21,7 @@ secrets:
     type: Opaque
     data: 
       .env: '${{ secrets.BENEXT_ENV }}'
+      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
 
 ingress:
   enabled: true
@@ -50,3 +51,6 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/.env
     subPath: .env
+  - name: secrets-volume
+    mountPath: /home/node/app/functionalAccounts.json
+    subPath: functionalAccounts.json
