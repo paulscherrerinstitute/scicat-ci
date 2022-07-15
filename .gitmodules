@@ -13,3 +13,6 @@
 [submodule "oaipmh"]
 	path = oaipmh
 	url = https://github.com/SciCatProject/oai-provider-service.git
+[submodule "scicat-backend-next"]
+	path = scicat-backend-next
+	url = https://github.com/SciCatProject/scicat-backend-next
