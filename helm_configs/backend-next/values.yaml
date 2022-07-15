@@ -10,6 +10,7 @@ service:
   type: ClusterIP
   externalPort: 80
   internalPort: 3000
+  probePath: /api/v3
 
 volumes:
   - name: secrets-volume
