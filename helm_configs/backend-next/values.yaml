@@ -21,7 +21,7 @@ secrets:
     type: Opaque
     data: 
       .env: '${{ secrets.BENEXT_ENV }}'
-      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
+      functionalAccounts.json: '${{ secrets.BENEXT_FUNCTIONAL_ACCOUNTS }}'
 
 ingress:
   enabled: true
