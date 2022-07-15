@@ -3,7 +3,6 @@ replicaCount: 1
 image:
   repository: "{{ .Values.ciRepository }}"
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "{{ .Values.ciTag }}"
 
 service:
