@@ -1,0 +1,40 @@
+name: scicat-be-next
+
+on:  
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/scicat-be-next.yml
+        helm_configs/backend-next/${{ needs.set_env.outputs.environment }}/**
+        helm_configs/backend-next/values.yaml
+        backend-next/**
+
+  build_deploy_scicat_backend_next:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'bn'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    with: 
+      context: scicat-backend-next/.
+      image_name: ${{ github.repository }}/backend-next
+      release_name: backend-next
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
