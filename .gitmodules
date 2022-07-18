@@ -16,3 +16,6 @@
 [submodule "scicat-backend-next"]
 	path = scicat-backend-next
 	url = https://github.com/SciCatProject/scicat-backend-next
+[submodule "landing-page-server"]
+	path = landing-page-server
+	url = https://github.com/SciCatProject/LandingPageServer.git
