@@ -35,4 +35,3 @@ jobs:
         uses: tj-actions/changed-files@v17.3
         with: 
           files: ${{ inputs.files }}
-          since_last_remote_commit: 'true'
