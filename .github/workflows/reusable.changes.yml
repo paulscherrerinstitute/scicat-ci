@@ -6,6 +6,10 @@ on:
       files:
         required: true
         type: string
+      main:
+        required: false
+        type: string
+        default: main
     outputs:
       changed:
         description: boolean to check if changes on input files
@@ -29,7 +33,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
+      - run: |
+          current_commit=`git rev-parse HEAD`;
+          git checkout ${{ inputs.main }} && git submodule update --recursive;
+          git checkout $current_commit && git submodule update --recursive;
+        
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v17.3
