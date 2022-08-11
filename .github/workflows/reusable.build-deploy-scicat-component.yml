@@ -37,15 +37,15 @@ on:
         required: false
         type: string
         default: ""
+      component:
+        required: true
+        type: string
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
         required: true
       JSON_SECRETS: 
         description: other secrets in json format
-        required: false
-      SSH_PRIVATE_KEY: 
-        description: ssh key to private submodule
         required: false
       
 jobs:
@@ -55,74 +55,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set environment 
+        id: set_env
+        uses: ./.github/actions/set_environment.yml
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Check for changes 
+        id: check_changed
+        uses: ./.github/actions/check_changes.yml
+        with: 
+          files: ${{ inputs.files }}        
 
-    - name: Copy docker build specific files
-      run: |
-        for f in ${{ inputs.docker_build_files }}; 
-        do
-          cp -r ${f%%:*} ${f#*:};
-        done
+      - name: Copy docker build specific files
+        run: |
+          for f in ${{ inputs.docker_build_files }}; 
+          do
+            cp -r ${f%%:*} ${f#*:};
+          done
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-      with:
-        registry: ${{ inputs.registry }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v3.6.2
-      with:
-        images: ${{ inputs.registry }}/${{ inputs.image_name }}
-        tags: |
-          type=raw,value=${{ inputs.tag }}
-    
-    - name: Build and push Docker image
-      id: build-and-push
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-      with:
-        context: ${{ inputs.context }}
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3.6.2
+        with:
+          images: ${{ inputs.registry }}/${{ inputs.image_name }}
+          tags: |
+            type=raw,value=${{ inputs.tag }}
+      
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ${{ inputs.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    needs: 
-      - build
-
-    steps:
-
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Deploy to k8s using helm
-      id: helm-deploy
-      uses: 'glopezep/helm@v1.7.1'
-      with:
-        release: '${{ inputs.release_name }}'
-        namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
-        chart: '${{ inputs.helm_chart }}'
-        helm: helm3
-        timeout: 10m
-        values: |
-         ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
-         ciTag: ${{ inputs.tag }}
-         ciVars: ${{ inputs.helm_ci_vars }}
-        value-files: >-
-          [
-            "helm_configs/${{ inputs.release_name }}/values.yaml",
-            "helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
-          ]
-        secrets: '${{ secrets.JSON_SECRETS }}'
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+      - name: Deploy to k8s using helm
+        if: (steps.check_changed.outputs.changed == 'true' && !steps.set_env.outputs.component) || steps.set_env.outputs.component == '${{ inputs.component }}'
+        id: helm-deploy
+        uses: 'glopezep/helm@v1.7.1'
+        with:
+          release: '${{ inputs.release_name }}'
+          namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
+          chart: '${{ inputs.helm_chart }}'
+          helm: helm3
+          timeout: 10m
+          values: |
+          ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
+          ciTag: ${{ inputs.tag }}
+          ciVars: ${{ inputs.helm_ci_vars }}
+          value-files: >-
+            [
+              "helm_configs/${{ inputs.release_name }}/values.yaml",
+              "helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
+            ]
+          secrets: '${{ secrets.JSON_SECRETS }}'
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'

@@ -1,0 +1,34 @@
+name: set-environment
+description: "Set environment based on trigger event"
+
+outputs:
+  tag: 
+    description: Name of the image tag to be later applied based on the CI trigger 
+    value: ${{ steps.variables.outputs.tag }}
+  environment: 
+    description: Name of the environment based on the CI trigger
+    value: ${{ steps.variables.outputs.environment }}
+  component:
+    description: Name of the component depending on the release tag 
+    value: ${{ steps.variables.outputs.component }}
+
+runs: 
+  using: "composite"
+  steps:
+    - id: variables
+      run: | 
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          tag="sha-${{ github.event.pull_request.head.sha }}"
+          environment=development
+        elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            tag="sha-${{ github.sha }}"
+            environment=qa
+        elif [[ "${{ github.event_name }}" == "release" ]]; then
+          tag="${{ github.event.release.tag_name }}"
+          environment=production
+          component=${tag:0:2}
+        fi
+        echo "::set-output name=tag::$(echo $tag)"
+        echo "::set-output name=environment::$(echo $environment)"
+        echo "::set-output name=component::$(echo $component)"
+      shell: bash

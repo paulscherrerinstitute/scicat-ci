@@ -1,0 +1,34 @@
+name: changes
+description: "Check changed files"
+
+inputs:
+  files:
+    required: true
+    type: string
+  main:
+    required: false
+    type: string
+    default: main
+
+outputs:
+  changed:
+    description: boolean to check if changes on input files
+    value: ${{ steps.changed-files.outputs.changed }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+    - run: |
+        current_commit=`git rev-parse HEAD`;
+        git checkout ${{ inputs.main }} && git submodule update --recursive;
+        git checkout $current_commit && git submodule update --recursive;
+      
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v17.3
+      with: 
+        files: ${{ inputs.files }}
