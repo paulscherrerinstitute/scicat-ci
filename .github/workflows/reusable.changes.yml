@@ -35,7 +35,8 @@ jobs:
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - run: |
           current_commit=`git rev-parse HEAD`;
-          git checkout ${{ inputs.main }} && git submodule update --recursive;
+          checkout_branch=`[[ $(git rev-parse --abbrev-ref HEAD) == "${{ inputs.main }}" ]] && echo "HEAD^" || echo "${{ inputs.main }}"`;
+          git checkout $checkout_branch && git submodule update --recursive;
           git checkout $current_commit && git submodule update --recursive;
         
       - name: Get changed files
