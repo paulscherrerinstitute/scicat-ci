@@ -1,6 +1,14 @@
 name: scicat-search-api
 
 on:  
+  workflow_dispatch: 
+    inputs:
+      submodule_commit:
+        description: 'Commit of the submodule to deploy'     
+        required: false
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
+        required: false
   pull_request:
     branches: [ main ]
   push:
@@ -12,6 +20,9 @@ jobs:
 
   set_env: 
     uses: ./.github/workflows/reusable.environment.yml
+    with: 
+      commit: ${{ github.event.inputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
 
   check_changed:
     needs: set_env
@@ -22,19 +33,25 @@ jobs:
         helm_configs/search-api/${{ needs.set_env.outputs.environment }}/**
         helm_configs/search-api/values.yaml
         search-api/**
+      commit: ${{ needs.set_env.outputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule: scilog
 
   build_deploy_scicat_search_api:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sa'
     needs: 
      - check_changed
      - set_env
-    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       context: search-api/.
       image_name: ${{ github.repository }}/search-api
       release_name: search-api
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
+      commit: ${{ needs.set_env.outputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule: scilog
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
