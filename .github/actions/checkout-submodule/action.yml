@@ -1,0 +1,25 @@
+name: checkout-submodule
+description: "Checkout submodule"
+
+inputs:
+  submodule_commit: 
+    description: commit of the submodule to deploy on workflow dispatch
+    required: false
+    type: string
+  commit: 
+    description: commit of the CI repo to deploy on workflow dispatch
+    required: false
+    type: string
+  submodule: 
+    description: name of the submodule folder
+    required: false
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        cd ${{ inputs.submodule }}
+        git fetch origin ${{ inputs.submodule_commit }}
+        git checkout ${{ inputs.submodule_commit }}
+      shell: bash
