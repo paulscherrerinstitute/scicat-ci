@@ -1,4 +1,4 @@
-name: build-deploy-scicat-component
+name: build-deploy
 
 on:
   workflow_call:
@@ -37,6 +37,18 @@ on:
         required: false
         type: string
         default: ""
+      submodule_commit: 
+        description: commit of the submodule to deploy on workflow dispatch
+        required: false
+        type: string
+      commit: 
+        description: commit of the CI repo to deploy on workflow dispatch
+        required: false
+        type: string
+      submodule: 
+        description: name of the submodule folder
+        required: false
+        type: string
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
@@ -61,6 +73,14 @@ jobs:
       with:
         submodules: recursive
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        ref: ${{ inputs.commit }}
+
+    - if: ${{ inputs.submodule_commit }}
+      uses: ./.github/actions/checkout-submodule
+      with: 
+        submodule_commit: ${{ inputs.submodule_commit }}
+        commit: ${{ inputs.commit }}
+        submodule: ${{ inputs.submodule }}
 
     - name: Copy docker build specific files
       run: |
@@ -104,6 +124,8 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.commit }}
 
     - name: Deploy to k8s using helm
       id: helm-deploy
