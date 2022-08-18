@@ -1,6 +1,14 @@
 name: scicat-fe
 
 on:  
+  workflow_dispatch: 
+    inputs:
+      submodule_commit:
+        description: 'Commit of the submodule to deploy'     
+        required: false
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
+        required: false
   pull_request:
     branches: [ main ]
   push:
@@ -12,6 +20,9 @@ jobs:
 
   set_env: 
     uses: ./.github/workflows/reusable.environment.yml
+    with: 
+      commit: ${{ github.event.inputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
 
   check_changed:
     needs: set_env
@@ -23,6 +34,9 @@ jobs:
         helm_configs/frontend/login.component.html
         helm_configs/frontend/${{ needs.set_env.outputs.environment }}/**
         frontend/**
+      commit: ${{ needs.set_env.outputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule: frontend
 
   set_ci_vars:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fe'
@@ -39,6 +53,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         submodules: recursive
+        ref: ${{ needs.set_env.outputs.commit }}
 
     - name: Set helm vars
       id: helm_vars
@@ -61,7 +76,7 @@ jobs:
      - check_changed
      - set_env
      - set_ci_vars
-    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       context: frontend/.
       image_name: ${{ github.repository }}/fe
@@ -69,6 +84,9 @@ jobs:
       helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
+      commit: ${{ needs.set_env.outputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule: frontend
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
