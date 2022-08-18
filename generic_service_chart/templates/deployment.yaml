@@ -33,15 +33,15 @@ spec:
             - containerPort: {{ .Values.service.internalPort }}
               protocol: TCP
           livenessProbe:
-            {{- with .Values.initialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
+            {{- with .Values.probeChecks }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
             httpGet:
               path: {{ .Values.service.probePath | default "/" }}
               port: {{ .Values.service.internalPort }}
           readinessProbe:
-            {{- with .Values.initialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
+            {{- with .Values.probeChecks }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
             httpGet:
               path: {{ .Values.service.probePath | default "/" }}

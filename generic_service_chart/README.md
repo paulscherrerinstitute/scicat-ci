@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the chart and their def
 | `volumeMounts`        | Define what volumes to mount in the deployment. It follows the same syntax as volumesMounts in k8s                                   | `nil`                           |
 | `configMaps`          | Dictionary of `configmapName-> {key:value,}` used to define configmaps. An example `{cm1: {k1:v1,k2:v2}, cm2: {k3:v3}}`              | `{}`                            |
 | `test`                | Test to run when using `helm test`. It follows the same syntax as containers in k8s                                                  | `nil` (evaluated as a template) |
-| `initialDelaySeconds` | Number of seconds after the container has started before liveness or readiness probes are initiated                                  | `nil`                           |
+| `probeChecks` | Readiness and liveness probes configuration                                  | `nil`                           |
 
 ### Statefulset parameters
 
