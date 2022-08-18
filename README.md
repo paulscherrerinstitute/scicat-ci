@@ -74,3 +74,87 @@ Below are the existing components with their prefix, in the format `component: p
  - search-api: `sa`
  - pan-ontologies-api: `po`
  - oaipmh: `oa`
+
+
+## Deploy.sh
+
+The [deploy.sh](deploy.sh) script should ease the deployment in the development and qa environment, by making use of CI triggers.
+
+The deployment to development is triggered when a pull request to main is opened or when there is a workflow dispatch event. The script makes use of the github APIs to trigger a workflow dispatch event and start a deployment on development. On qa the trigger is a push to main and, so, the script does a push on main when needing to deploy on qa.
+
+### How to use
+
+1. clone the repo and its submodules: 
+```
+git clone git@github.com:paulscherrerinstitute/scicat-ci.git
+git submodule update --recursive --init
+```
+
+2. Print out the script options: 
+```
+./deploy.sh -h
+>Input options:
+>   -e           deployment environment name. Default to development
+>   -w           CI workflow file name. To be specified when environment=development
+>   -s           submodule name. Default to scicat
+>   -c           CI repo local path. Default to .
+>   -b           CI Branch name. Default to the current branch name of the submodule
+>   -o           CI origin alias. Default to origin
+>   -m           CI Main branch name. Default to main
+>   -t           Github token
+```
+
+#### Deploy on dev
+
+To deploy on development the workflow to run and the github token must be set, respectively with the -w and -t flags or exporting the env variables. The other options are optional.
+
+```
+./deploy.sh -t <YOUR_GITHUB_TOKEN> -w scicat-be.yml
+```
+
+This will trigger the deployment of the scicat be using the commit from your submodule (NOTE that this commit must be in the [scicat be](https://github.com/SciCatProject/backend)).
+
+To obtain a suitable token, please follow the [github wiki](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event).
+
+#### Deploy on qa
+
+To deploy on qa the environment option must be set, with the -e flag, or exporting the env variable.
+
+```
+./deploy.sh -e qa
+```
+
+As before, the version which is deployed on qa is the one of the commit from your submodule (NOTE that this commit must be in the [scicat be](https://github.com/SciCatProject/backend)).
+
+### :warning: IMPORTANT
+
+The deploy.sh script belongs to the scicat-ci repo, so it needs to be run from this folder. This means that, when developing on scicat, one still needs to run the following steps: 
+
+1. from scicat-ci `cd` e.g. into backend:
+```
+cd backend
+```
+2. commit and push the change to the scicat be repo
+3. cd back to scicat-ci:
+```
+cd ..
+```
+4. run deploy.sh
+```
+./deploy.sh
+```
+
+This can be eased by creating an alias that sets the -c flag, e.g.: 
+
+```
+alias deploy_scicat_be=". <YOUR_PATH_TO_SCICATCI>/deploy.sh -c <YOUR_PATH_TO_SCICATCI>"
+```
+
+or exporting the cipath env variable and expanding the PATH:
+
+```
+export cipath=<YOUR_PATH_TO_SCICATCI>
+PATH=$PATH:<YOUR_PATH_TO_SCICATCI>
+```
+
+In this way, it is possible to run the deploy.sh script directly from the e.g. scicat be folder, thus not needing (3).
