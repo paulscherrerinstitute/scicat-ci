@@ -33,7 +33,8 @@ volumes:
   - name: downloaddir
     emptyDir: {}
 
-initialDelaySeconds: 360
+probeChecks:
+  initialDelaySeconds: 360
 
 configMaps: 
   "{{ .Release.Name }}-cm":

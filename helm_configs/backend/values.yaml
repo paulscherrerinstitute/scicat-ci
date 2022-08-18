@@ -105,3 +105,8 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/server/component-config.json
     subPath: component-config.json
+
+probeChecks:
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 5 
