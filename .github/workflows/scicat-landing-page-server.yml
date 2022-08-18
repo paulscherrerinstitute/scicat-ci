@@ -42,7 +42,7 @@ jobs:
     needs: 
      - check_changed
      - set_env
-    uses: ./.github/workflows/reusable.build-deploy-scicat-component.yml
+    uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       docker_build_files: helm_configs/landing-page-server/${{ needs.set_env.outputs.environment }}/environment.ts:landing-page-server/src/environments/environment.essprod.ts
       context: landing-page-server/.
