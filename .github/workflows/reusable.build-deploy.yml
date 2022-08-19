@@ -76,7 +76,7 @@ jobs:
         ref: ${{ inputs.commit }}
 
     - if: ${{ inputs.submodule_commit }}
-      uses: ./.github/actions/checkout-submodule
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
       with: 
         submodule_commit: ${{ inputs.submodule_commit }}
         commit: ${{ inputs.commit }}
