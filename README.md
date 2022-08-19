@@ -74,6 +74,7 @@ Below are the existing components with their prefix, in the format `component: p
  - search-api: `sa`
  - pan-ontologies-api: `po`
  - oaipmh: `oa`
+ - landing-page-server: `lp`
 
 
 ## Deploy.sh
