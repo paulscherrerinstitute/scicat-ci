@@ -11,7 +11,8 @@ export const environment = {
   archiveWorkflowEnabled: true,
   retrieveDestinations: [
     {option: "PSI"}, 
-    {option:"PSI-RA", location: "/gpfs/workfs/p18/p18525/retrieve"}
+    {option:"PSI-RA", location: "/gpfs/workfs/p18/p18525/retrieve"},
+    {option:"CSCS"}
   ],
   externalAuthEndpoint: "/auth/msad",
   editMetadataEnabled: false,
