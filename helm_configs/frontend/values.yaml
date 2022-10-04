@@ -34,7 +34,7 @@ volumes:
     emptyDir: {}
 
 probeChecks:
-  initialDelaySeconds: 360
+  initialDelaySeconds: 480
 
 configMaps: 
   "{{ .Release.Name }}-cm":
