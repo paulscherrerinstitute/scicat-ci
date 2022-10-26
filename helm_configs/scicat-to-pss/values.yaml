@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: "{{ .Values.ciRepository }}"
+  pullPolicy: Always
+  tag: "{{ .Values.ciTag }}"
+
+env:
+  - name: SCICAT_BASE_URL
+    value: "{{ .Values.scicatBaseUrl }}"
+  - name: PSS_BASE_URL
+    value: "{{ .Values.pssBaseUrl }}"

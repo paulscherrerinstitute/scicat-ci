@@ -1,0 +1,6 @@
+1. Get the application resources by running:
+    $ kubectl get all -n {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "helm_chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+2. Get the application configmaps by running:
+    $ kubectl get configmaps -n {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "helm_chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+3. Get the application secrets by running:
+    $ kubectl get secrets -n {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "helm_chart.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
