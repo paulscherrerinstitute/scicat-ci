@@ -1,9 +1,5 @@
-env:
-  - name: BASE_URL
-    value: http://backend.scicat-production/api/v3
-  - name: FACILITY
-    value: PSI
-  - name: PANET_BASE_URL
-    value: "http://pan-ontologies-api.scicat-production"
+baseUrl: http://backend.scicat-production/api/v3
+panetBaseUrl: http://pan-ontologies-api.scicat-production
+pssBaseUrl: http://pss.scicat-production
 
 host: dacat.psi.ch
