@@ -61,6 +61,6 @@ def main(scicat_base_url, pss_base_url):
     compute_weights(f"{pss_base_url}/compute")
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     main(os['SCICAT_BASE_URL'], os['PSS_BASE_URL'])
