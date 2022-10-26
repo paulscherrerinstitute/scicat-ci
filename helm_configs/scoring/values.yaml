@@ -16,7 +16,7 @@ ingress:
 
 env:
   - name: PSS_PORT
-    value: 3000
+    value: '3000'
   - name: PSS_MONGODB_URL
     valueFrom:
       secretKeyRef: 
