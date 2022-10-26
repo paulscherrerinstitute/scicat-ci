@@ -33,7 +33,7 @@ def delete_all_scored(pss_items_url):
         pss_items_url,
     )
     delete_codes = map(
-        lambda x: delete(f"{pss_items_url}/{x[id]}").status_code, res.json() or []
+        lambda x: delete(f"{pss_items_url}/{x['id']}").status_code, res.json() or []
     )
     return list(delete_codes)
 
