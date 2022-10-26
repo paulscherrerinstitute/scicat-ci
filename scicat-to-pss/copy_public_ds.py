@@ -1,3 +1,4 @@
+import logging
 import os
 
 from requests import get, post
@@ -51,6 +52,7 @@ def get_public_datasets(sc_datasets_url):
 
 def main(scicat_base_url, pss_base_url):
     public_datasets = get_public_datasets(f"{scicat_base_url}/datasets")
+    logging.log(len(public_datasets))
     scoring_datasets = format_dataset_for_scoring(public_datasets)
     post_datasets_to_scoring(scoring_datasets, f"{pss_base_url}/items")
     compute_weights(f"{pss_base_url}/compute")

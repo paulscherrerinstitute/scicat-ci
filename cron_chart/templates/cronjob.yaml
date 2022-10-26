@@ -20,6 +20,10 @@ spec:
           - name: {{ include "helm_chart.fullname" . }}
             image: {{ tpl .Values.image.repository $ }}:{{ tpl .Values.image.tag $ }}
             imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- with .Values.env }}
+            env:
+              {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
             {{- with .Values.volumeMounts }}
             volumeMounts:
               {{- tpl (toYaml .) $ | nindent 12 }}
