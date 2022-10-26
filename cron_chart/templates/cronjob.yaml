@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "helm_chart.fullname" . }}
+  labels:
+    {{- include "helm_chart.labels" $ | nindent 4 }}
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "helm_chart.selectorLabels" . | nindent 12 }}
+        spec:
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          containers:
+          - name: {{ include "helm_chart.fullname" . }}
+            image: {{ tpl .Values.image.repository $ }}:{{ tpl .Values.image.tag $ }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- with .Values.volumeMounts }}
+            volumeMounts:
+              {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          {{- with .Values.volumes}}
+          volumes:
+            {{- tpl (toYaml .) $ | nindent 10 }}
+          {{- end }}
