@@ -27,3 +27,17 @@ ingress:
     - hosts:
       - "{{ .Values.host }}"
       secretName: "scicat-be-certificate"
+
+env:
+  - name: BASE_URL
+    value: "{{ .Values.baseUrl }}"
+  - name: FACILITY
+    value: PSI
+  - name: PANET_BASE_URL
+    value: "{{ .Values.panetBaseUrl }}"
+  - name: PSS_ENABLE
+    value: "true"
+  - name: PASS_DOCUMENTS_TO_SCORING
+    value: "false"
+  - name: PSS_BASE_URL
+    value: "{{ .Values.pssBaseUrl }}"
