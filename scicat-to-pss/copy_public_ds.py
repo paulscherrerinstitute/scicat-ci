@@ -59,9 +59,9 @@ def main(scicat_base_url, pss_base_url):
     scoring_datasets = format_dataset_for_scoring(public_datasets)
     logging.info(len(scoring_datasets))
     to_scoring = post_datasets_to_scoring(scoring_datasets, f"{pss_base_url}/items")
-    logging.info(to_scoring)
+    logging.info(to_scoring.json())
     scores = compute_weights(f"{pss_base_url}/compute")
-    logging.info(scores)
+    logging.info(scores.json())
 
 
 if __name__ == "__main__":
