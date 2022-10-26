@@ -37,10 +37,7 @@ jobs:
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
         chart: generic_service_chart
         helm: helm3
-        value-files: >-
-          [
-            "helm_configs/${{ env.RELEASE_NAME }}/values.yaml"
-          ]
+        value-files: helm_configs/${{ env.RELEASE_NAME }}/values.yaml
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
         RELEASE_NAME: scoring
