@@ -43,6 +43,7 @@ jobs:
         helm: helm3
         value-files: helm_configs/${{ env.RELEASE_NAME }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
+        values: "db: ${{ env.RELEASE_NAME }}-${{ env.ENVIRONMENT }}"
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
         RELEASE_NAME: pss
