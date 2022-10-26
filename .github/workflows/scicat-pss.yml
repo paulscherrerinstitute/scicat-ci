@@ -1,20 +1,20 @@
-name: scicat-scoring
+name: scicat-pss
 
 on:  
   workflow_dispatch: 
     paths: 
-      - .github/workflows/scicat-scoring.yml
-      - helm_configs/scoring/**
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
   pull_request:
     branches: [ main ]
     paths: 
-      - .github/workflows/scicat-scoring.yml
-      - helm_configs/scoring/**
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
   push:
     branches: [ main ]
     paths: 
-      - .github/workflows/scicat-scoring.yml
-      - helm_configs/scoring/**
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
   release:
     types: [published]
 
@@ -24,7 +24,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
 
   deploy:
-    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sc'
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'ps'
     runs-on: ubuntu-latest
     environment: ${{ needs.set_env.outputs.environment }}
     needs: 
@@ -45,6 +45,6 @@ jobs:
         secrets:  ${{ toJSON(secrets) }}
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
-        RELEASE_NAME: scoring
+        RELEASE_NAME: pss
         ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
         NAMESPACE_PREFIX: scicat-
