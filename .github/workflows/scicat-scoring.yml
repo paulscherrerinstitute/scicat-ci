@@ -24,7 +24,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
 
   deploy:
-    if: needs.set_env.outputs.component == 'sc'
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sc'
     runs-on: ubuntu-latest
     environment: ${{ needs.set_env.outputs.environment }}
     needs: 
