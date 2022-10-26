@@ -29,6 +29,7 @@ jobs:
     environment: ${{ needs.set_env.outputs.environment }}
     needs: 
      - set_env
+    steps: 
     - name: deploy 
       uses: 'glopezep/helm@v1.7.1'
       with:
