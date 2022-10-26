@@ -1,0 +1,7 @@
+{
+    "loopback-component-explorer": {
+      "mountPath": "/panosc-explorer",
+      "generateOperationScopedModels": true
+    }
+  }
+  
