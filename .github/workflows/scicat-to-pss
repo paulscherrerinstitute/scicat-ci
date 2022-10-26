@@ -1,0 +1,41 @@
+name: scicat-to-pss
+
+on:  
+  workflow_dispatch: 
+    paths: 
+      - .github/workflows/scicat-to-pss.yml
+      - helm_configs/scicat-to-pss/**
+    inputs:
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
+        required: false
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml@main
+    with: 
+      commit: ${{ github.event.inputs.commit }}
+
+  build_deploy:
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sp'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy.yml@main
+    with: 
+      context: scicat-to-pss/.
+      image_name: ${{ github.repository }}/scicat-to-pss
+      release_name: scicat-to-pss
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+      helm_chart: cron_chart
+      commit: ${{ needs.set_env.outputs.commit }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
