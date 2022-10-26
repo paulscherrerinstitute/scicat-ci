@@ -8,6 +8,7 @@ meaningful_fields = {
         "title": "datasetName",
         "keywords": "keywords",
         "metadata": "scientificMetadata",
+        "description": "description",
     },
 }
 
@@ -21,7 +22,6 @@ def format_dataset_for_scoring(raw_datasets):
         {
             "id": item["pid"],
             "group": "datasets",
-            "description": "description",
             "fields": prepFields(item, "datasets"),
         }
         for item in raw_datasets
