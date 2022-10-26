@@ -21,7 +21,7 @@ env:
     valueFrom:
       secretKeyRef: 
         name: "{{ .Release.Name }}-s"
-        PSS_MONGODB_URL: pss_mongodb_url
+        key: pss_mongodb_url
 
 secrets: 
   "{{ .Release.Name }}-s":
