@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/panosc-eu/panosc-search-scoring
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v1.0-beta-15
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 3000
+
+ingress:
+  enabled: false
+
+env:
+  - name: PSS_PORT
+    value: "3000"
+  - name: PSS_MONGODB_URL
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: pss_mongodb_url
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      pss_mongodb_url: '${{ secrets.PSS_MONGODB_URL }}'

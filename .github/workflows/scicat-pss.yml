@@ -1,0 +1,50 @@
+name: scicat-pss
+
+on:  
+  workflow_dispatch: 
+    paths: 
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
+  pull_request:
+    branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
+  push:
+    branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-pss.yml
+      - helm_configs/pss/**
+  release:
+    types: [published]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  deploy:
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'ps'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set_env.outputs.environment }}
+    needs: 
+     - set_env
+    steps: 
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: deploy 
+      uses: 'glopezep/helm@v1.7.1'
+      with:
+        release: '${{ env.RELEASE_NAME }}'
+        namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
+        chart: generic_service_chart
+        helm: helm3
+        value-files: helm_configs/${{ env.RELEASE_NAME }}/values.yaml
+        secrets:  ${{ toJSON(secrets) }}
+      env:
+        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+        RELEASE_NAME: pss
+        ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
+        NAMESPACE_PREFIX: scicat-
