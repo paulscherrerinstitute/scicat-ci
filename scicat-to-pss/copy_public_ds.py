@@ -24,10 +24,10 @@ def prepFields(item, group):
     return {k: item.get(v, "") for k, v in meaningful_fields[group].items()}
 
 
-def format_dataset_for_scoring(raw_datasets, group="datasets"):
+def format_dataset_for_scoring(raw_datasets, group="datasets", pid="pid"):
     return [
         {
-            "id": item["pid"],
+            "id": item[pid],
             "group": group,
             "fields": prepFields(item, group),
         }
@@ -78,7 +78,7 @@ def main(scicat_base_url, pss_base_url):
     # documents
     public_documents = get_public_datasets(f"{scicat_base_url}/PublishedData")
     logging.info(len(public_documents))
-    scoring_documents = format_dataset_for_scoring(public_documents, "documents")
+    scoring_documents = format_dataset_for_scoring(public_documents, "documents", "doi")
     logging.info(len(scoring_documents))
     to_scoring_documents = post_datasets_to_scoring(scoring_documents, pss_items_url)
     logging.info(to_scoring_documents.json())
