@@ -37,15 +37,46 @@ jobs:
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       submodule: search-api
 
+  set_ci_vars:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sa'
+    runs-on: ubuntu-latest
+    needs: 
+      - check_changed
+      - set_env
+    outputs:
+      ciVars: ${{ steps.helm_vars.outputs.ciVars }}
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        ref: ${{ needs.set_env.outputs.commit }}
+
+    - name: Set helm vars
+      id: helm_vars
+      run: |
+        ciVars=$(cat <<EOF
+          {
+            "CONFIG": $(jq -R -s < helm_configs/search-api/config.json),
+            "COMPONENT_CONFIG": $(jq -R -s < helm_configs/search-api/component-config.json),
+          }
+        EOF
+        )
+        echo "::set-output name=ciVars::$(echo $ciVars)"
+
   build_deploy_scicat_search_api:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sa'
     needs: 
      - check_changed
      - set_env
+     - set_ci_vars
     uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       context: search-api/.
       image_name: ${{ github.repository }}/search-api
+      helm_ci_vars: ${{ needs.set_ci_vars.outputs.ciVars }}
       release_name: search-api
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
