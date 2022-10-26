@@ -3,3 +3,9 @@ panetBaseUrl: http://pan-ontologies-api.scicat-production
 pssBaseUrl: http://pss.scicat-production
 
 host: dacat.psi.ch
+
+ingress:
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
