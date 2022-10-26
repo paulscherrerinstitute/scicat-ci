@@ -2,42 +2,41 @@ name: scicat-to-pss
 
 on:  
   workflow_dispatch: 
-    paths: 
-      - .github/workflows/scicat-to-pss.yml
-      - helm_configs/scicat-to-pss/**
-      - scicat-to-pss/**
     inputs:
       commit: 
         description: 'Commit of the CI repo to deploy'     
         required: false
   pull_request:
     branches: [ main ]
-    paths: 
-      - .github/workflows/scicat-to-pss.yml
-      - helm_configs/scicat-to-pss/**
-      - scicat-to-pss/**
   push:
     branches: [ main ]
-    paths: 
-      - .github/workflows/scicat-to-pss.yml
-      - helm_configs/scicat-to-pss/**
-      - scicat-to-pss/**
   release:
     types: [ published ]
 
 jobs:
 
   set_env: 
-    uses: ./.github/workflows/reusable.environment.yml@main
+    uses: ./.github/workflows/reusable.environment.yml
     with: 
       commit: ${{ github.event.inputs.commit }}
 
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/scicat-to-pss.yml
+        helm_configs/scicat-to-pss/${{ needs.set_env.outputs.environment }}/**
+        helm_configs/scicat-to-pss/values.yaml
+        scicat-to-pss/**
+      commit: ${{ needs.set_env.outputs.commit }}
+
   build_deploy:
-    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sp'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'sp'
     needs: 
      - check_changed
      - set_env
-    uses: ./.github/workflows/reusable.build-deploy.yml@main
+    uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       context: scicat-to-pss/.
       image_name: ${{ github.repository }}/scicat-to-pss
