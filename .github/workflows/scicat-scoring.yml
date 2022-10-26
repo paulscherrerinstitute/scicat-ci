@@ -1,0 +1,44 @@
+name: scicat-scoring
+
+on:  
+  workflow_dispatch: 
+    paths: 
+      - .github/workflows/scicat-scoring.yml
+      - helm_configs/scoring/**
+  pull_request:
+    branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-scoring.yml
+      - helm_configs/scoring/**
+  push:
+    branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-scoring.yml
+      - helm_configs/scoring/**
+  release:
+    types: [published]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  deploy:
+    if: needs.set_env.outputs.component == 'sc'
+    needs: 
+     - set_env
+    uses: 'glopezep/helm@v1.7.1'
+    with:
+      release: '${{ env.RELEASE_NAME }}'
+      namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
+      chart: generic_service_chart
+      helm: helm3
+      value-files: >-
+        [
+          "helm_configs/${{ env.RELEASE_NAME }}/values.yaml",
+        ]
+    env:
+      KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+      RELEASE_NAME: scoring
+      ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
+      NAMESPACE_PREFIX: scicat-
