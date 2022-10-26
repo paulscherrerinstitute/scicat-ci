@@ -1,0 +1,6 @@
+scicatBaseUrl: http://backend.scicat-development/api/v3
+pssBaseUrl: http://pss.scicat-development
+
+cronjob:
+  restartPolicy: OnFailure
+  schedule: 0 5 * * 6
