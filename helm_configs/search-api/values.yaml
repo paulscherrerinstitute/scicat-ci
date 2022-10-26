@@ -38,7 +38,7 @@ env:
   - name: PSS_ENABLE
     value: "true"
   - name: PASS_DOCUMENTS_TO_SCORING
-    value: "false"
+    value: "true"
   - name: PSS_BASE_URL
     value: "{{ .Values.pssBaseUrl }}"
 
