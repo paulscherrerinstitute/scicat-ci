@@ -1,11 +1,12 @@
 import logging
-import os
+from os import environ
 
 from requests import get, post
 
 meaningful_fields = {
     'datasets': {
         'title': 'datasetName',
+        'description': 'description',
         'keywords': 'keywords',
         'metadata': 'scientificMetadata'
     },
@@ -14,7 +15,7 @@ meaningful_fields = {
 
 def prepFields(item, group):
     return {
-        k: item[v]
+        k: item.get(v, '')
         for k, v
         in meaningful_fields[group].items()
     }
@@ -63,4 +64,4 @@ def main(scicat_base_url, pss_base_url):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    main(os.environ['SCICAT_BASE_URL'], os.environ['PSS_BASE_URL'])
+    main(environ['SCICAT_BASE_URL'], environ['PSS_BASE_URL'])
