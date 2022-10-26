@@ -1,3 +1,4 @@
+from asyncio import constants
 import logging
 from os import environ
 
@@ -6,7 +7,6 @@ from requests import get, post
 meaningful_fields = {
     'datasets': {
         'title': 'datasetName',
-        'description': 'description',
         'keywords': 'keywords',
         'metadata': 'scientificMetadata'
     },
@@ -34,14 +34,14 @@ def format_dataset_for_scoring(raw_datasets):
 
 
 def post_datasets_to_scoring(scoring_datasets, pss_items_url):
-    post(
+    return post(
         pss_items_url,
         json=scoring_datasets
     )
 
 
 def compute_weights(pss_compute_url):
-    get(pss_compute_url)
+    return get(pss_compute_url)
 
 
 def get_public_datasets(sc_datasets_url):
@@ -58,8 +58,10 @@ def main(scicat_base_url, pss_base_url):
     logging.info(len(public_datasets))
     scoring_datasets = format_dataset_for_scoring(public_datasets)
     logging.info(len(scoring_datasets))
-    post_datasets_to_scoring(scoring_datasets, f"{pss_base_url}/items")
-    compute_weights(f"{pss_base_url}/compute")
+    to_scoring = post_datasets_to_scoring(scoring_datasets, f"{pss_base_url}/items")
+    logging.info(to_scoring)
+    scores = compute_weights(f"{pss_base_url}/compute")
+    logging.info(scores)
 
 
 if __name__ == "__main__":
