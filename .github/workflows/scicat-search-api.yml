@@ -71,6 +71,7 @@ jobs:
     needs: 
      - check_changed
      - set_env
+     - set_ci_vars
     uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
       context: search-api/.
