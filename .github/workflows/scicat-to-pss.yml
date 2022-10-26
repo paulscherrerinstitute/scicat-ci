@@ -5,14 +5,23 @@ on:
     paths: 
       - .github/workflows/scicat-to-pss.yml
       - helm_configs/scicat-to-pss/**
+      - scicat-to-pss/**
     inputs:
       commit: 
         description: 'Commit of the CI repo to deploy'     
         required: false
   pull_request:
     branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-to-pss.yml
+      - helm_configs/scicat-to-pss/**
+      - scicat-to-pss/**
   push:
     branches: [ main ]
+    paths: 
+      - .github/workflows/scicat-to-pss.yml
+      - helm_configs/scicat-to-pss/**
+      - scicat-to-pss/**
   release:
     types: [ published ]
 
