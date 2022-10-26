@@ -41,3 +41,21 @@ env:
     value: "false"
   - name: PSS_BASE_URL
     value: "{{ .Values.pssBaseUrl }}"
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    config.json: "{{ .Values.ciVars.CONFIG }}"
+    component-config.json: "{{ .Values.ciVars.COMPONENT_CONFIG }}"
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /home/node/app/server/config.json
+    subPath: config.json
+  - name: config-volume
+    mountPath: /home/node/app/server/component-config.json
+    subPath: component-config.json
