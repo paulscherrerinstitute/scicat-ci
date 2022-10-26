@@ -63,4 +63,4 @@ def main(scicat_base_url, pss_base_url):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    main(os['SCICAT_BASE_URL'], os['PSS_BASE_URL'])
+    main(os.environ['SCICAT_BASE_URL'], os.environ['PSS_BASE_URL'])
