@@ -13,3 +13,18 @@ service:
 
 ingress:
   enabled: false
+
+env:
+  - name: PSS_PORT
+    value: 3000
+  - name: PSS_MONGODB_URL
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        PSS_MONGODB_URL: pss_mongodb_url
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      pss_mongodb_url: '${{ secrets.PSS_MONGODB_URL }}'
