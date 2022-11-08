@@ -163,10 +163,10 @@ app.start = function() {
     }
 
   });
-  console.log("keepAliveTimeout,headersTimeout default:", server.keepAliveTimeout, server.headersTimeout)
-  server.keepAliveTimeout = (75 * 1000) + 1000;
-  server.headersTimeout = (75 * 1000) + 2000;
-  console.log("keepAliveTimeout,headersTimeout changed to:", server.keepAliveTimeout, server.headersTimeout)
+  console.log("keepAliveTimeout,headersTimeout default:", server.keepAliveTimeout, server.headersTimeout);
+  server.keepAliveTimeout = 76000;
+  server.headersTimeout = 77000;
+  console.log("keepAliveTimeout,headersTimeout changed to:", server.keepAliveTimeout, server.headersTimeout);
 
   return server;
 };
