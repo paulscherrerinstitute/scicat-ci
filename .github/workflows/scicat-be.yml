@@ -61,6 +61,7 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
+            "SERVER": $(jq -R -s < helm_configs/backend/server.js),
             "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/config.local.js),
             "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/login-callbacks.js),
             "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json),

@@ -59,6 +59,7 @@ ingress:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
+    server.js: "{{ .Values.ciVars.SERVER }}"
     config.local.js: "{{ .Values.ciVars.CONFIG_LOCAL }}"
     login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
@@ -76,6 +77,9 @@ env:
         key: mail_auth
 
 volumeMounts:
+  - name: config-volume
+    mountPath: /home/node/app/server/server.js
+    subPath: server.js
   - name: config-volume
     mountPath: /home/node/app/server/config.local.js
     subPath: config.local.js
