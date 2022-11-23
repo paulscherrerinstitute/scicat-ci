@@ -1,5 +1,1 @@
-envFile: environment.prod.ts
-
-envValue: production
-
 host: discovery.psi.ch
