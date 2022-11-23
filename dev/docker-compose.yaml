@@ -1,0 +1,79 @@
+version: "3.9"
+services:
+
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb_data:/bitnami
+    profiles:
+      - legacy
+      - be
+      - be_next
+      - next
+
+  backend:
+    build: ../backend/.
+    depends_on:
+      - mongodb
+    volumes:
+      - ../backend:/home/node/app
+      - /home/node/app/node_modules
+      - ./config/backend/config.local.js:/home/node/app/server/config.local.js
+      - ./config/backend/datasources.json:/home/node/app/server/datasources.json
+      - ./config/backend/providers.json:/home/node/app/server/providers.json
+    command: /bin/sh -c "while true; do sleep 600; done"
+    profiles:
+      - be
+      - legacy
+
+  frontend:
+    build: 
+      context: ../frontend/.
+      target: builder
+    environment:
+      - CHROME_BIN=/usr/bin/chromium
+      - CHROME_PATH=/usr/lib/chromium/
+    volumes:
+      - ../frontend:/frontend
+      - ./config/frontend/config.json:/frontend/src/assets/config.json
+      - /frontend/node_modules
+      - /frontend/dist
+    command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    profiles:
+      - legacy
+      - fe
+      - next
+
+  backend_next:
+    build: 
+      context: ../scicat-backend-next/.
+      target: dev
+    depends_on:
+      - mongodb
+    ports:
+      - 3000:3000
+    volumes:
+      - ../scicat-backend-next:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/scicat_next
+      EXPRESS_SESSION_SECRET: a_scicat_secret
+      JWT_SECRET: a_scicat_secret
+      PORT: 3000
+      HTTP_MAX_REDIRECTS: 5
+      HTTP_TIMEOUT: 5000
+      JWT_EXPIRES_IN: 3600
+      SITE: SAMPLE-SITE
+      PID_PREFIX: PID.SAMPLE.PREFIX
+      DOI_PREFIX: DOI.SAMPLE.PREFIX
+      METADATA_KEYS_RETURN_LIMIT: 100
+      METADATA_PARENT_INSTANCES_RETURN_LIMIT: 100
+    command: /bin/sh -c "while true; do sleep 600; done"
+    profiles:
+      - be_next
+      - next
+
+volumes:
+  mongodb_data:
+    driver: local
