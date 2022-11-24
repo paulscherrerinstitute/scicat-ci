@@ -5,5 +5,5 @@ If running on MACOS, because of platform differences, please change the image in
 After that, if needed, build the docker containers with the suitable profiles: 
 
 ```bash
-docker-compose -f docker-compose.dev.yaml --profile legacy up -d --force-recreate --build --no-deps
+docker-compose -f docker-compose.yaml --profile legacy up -d --force-recreate --build --no-deps
 ```
