@@ -77,6 +77,18 @@ services:
       - be_next
       - next
 
+  jupyter:
+    image: python:3.10
+    ports:
+     - 8888:8888
+    volumes:
+      - ../curation/requirements.txt:/requirements.txt
+      - ../curation/notebooks:/notebooks
+      - ./config/jupyter/.env:/.env
+    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt && pip install jupyterlab && jupyter-lab --LabApp.token='' --allow-root --port=8888 --ip=0.0.0.0 --notebook-dir=/notebooks"
+    profiles: 
+      - jupyter
+
 volumes:
   mongodb_data:
     driver: local
