@@ -10,6 +10,8 @@ services:
       - be
       - be_next
       - next
+      - search_legacy
+      - search_next
 
   backend:
     build: ../backend/.
@@ -28,14 +30,15 @@ services:
     profiles:
       - be
       - legacy
+      - search_legacy
 
   frontend:
     build: 
       context: ../frontend/.
       target: builder
     environment:
-      - CHROME_BIN=/usr/bin/chromium
-      - CHROME_PATH=/usr/lib/chromium/
+      CHROME_BIN: /usr/bin/chromium
+      CHROME_PATH: /usr/lib/chromium/
     volumes:
       - ../frontend:/frontend
       - ./config/frontend/config.json:/frontend/src/assets/config.json
@@ -76,6 +79,7 @@ services:
     profiles:
       - be_next
       - next
+      - search_next
 
   jupyter:
     image: python:3.10
@@ -88,6 +92,20 @@ services:
     command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt && pip install jupyterlab && jupyter-lab --LabApp.token='' --allow-root --port=8888 --ip=0.0.0.0 --notebook-dir=/notebooks"
     profiles: 
       - jupyter
+
+  search_api:
+    build: 
+      context: ../search-api/.
+    volumes:
+      - ../search-api:/home/node/app
+      - /home/node/app/node_modules
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    environment:
+      NODE_ENV: development
+    profiles:
+      - search
+      - search_next
+      - search_legacy
 
 volumes:
   mongodb_data:
