@@ -17,14 +17,20 @@ def get_token():
     return response.json()["id"]
 
 
+def get_ds(filter_string=None):
+    ds_url = f"{os.environ['LB_BASE_URL']}/Datasets"
+    url_parsed = f"{ds_url}?filter={parse.quote(dumps(filter_string))}" if filter_string else ds_url
+    response = requests.get(ds_url)
+    return response.json()
+
+
+
 def get_ds_creation_location(locations_dict):
     fields = {
         "creationLocation": {"inq": list(locations_dict.keys())},
         "fields": ["pid", "creationLocation", "techniques"],
     }
-    response = requests.get(
-        f"{os.environ['LB_BASE_URL']}/Datasets?filter={parse.quote(dumps(fields))}"
-    )
+    response = get_ds(fields)
     return list(
         filter(
             lambda x: locations_dict.get(x.get("creationLocation"))
