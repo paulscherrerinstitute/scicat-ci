@@ -56,5 +56,3 @@ scientific_metadata_dict = {
     "experimentalSettings": {"beamEnergy": "string(v u)"},
     "sampleTemperature": "dict(u:v)"
 }
-
-
