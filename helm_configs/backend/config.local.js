@@ -35,7 +35,7 @@ module.exports = {
   },
   expressSessionSecret: "asecret",
   smtpMessage: {
-    from: "stephan.egli@psi.ch",
+    from: "dacatmail@psi.ch",
     replyTo: "scicatarchivemanager@psi.ch",
     subject: "[SciCat " + process.env.ENV + "]",
   },
