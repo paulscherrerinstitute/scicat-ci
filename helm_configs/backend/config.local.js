@@ -29,18 +29,15 @@ module.exports = {
     jobCancel: "Cancelled"
   },
   smtpSettings: {
-    host: "mail.ethz.ch",
-    port: 587,
-    secure: false,
-    auth: JSON.parse(process.env.MAIL_AUTH)
+    auth: JSON.parse(process.env.MAIL_AUTH),
+    aadEndpoint: "https://login.microsoftonline.com",
+    graphEndpoint: "https://graph.microsoft.com"
   },
   expressSessionSecret: "asecret",
   smtpMessage: {
     from: "dacatmail@psi.ch",
     replyTo: "scicatarchivemanager@psi.ch",
-    to: undefined,
     subject: "[SciCat " + process.env.ENV + "]",
-    text: undefined // can also set html key and this will override this
   },
   queue: "rabbitmq",
   logbook: {
