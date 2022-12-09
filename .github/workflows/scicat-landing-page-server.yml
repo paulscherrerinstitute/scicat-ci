@@ -44,7 +44,9 @@ jobs:
      - set_env
     uses: ./.github/workflows/reusable.build-deploy.yml
     with: 
-      docker_build_files: helm_configs/landing-page-server/${{ needs.set_env.outputs.environment }}/environment.ts:landing-page-server/src/environments/environment.essprod.ts
+      docker_build_files: |
+        helm_configs/landing-page-server/${{ needs.set_env.outputs.environment }}/environment.ts:landing-page-server/src/environments/environment.essprod.ts
+        helm_configs/landing-page-server/favicon.ico:landing-page-server/src/favicon.ico
       context: landing-page-server/.
       image_name: ${{ github.repository }}/landing-page-server
       release_name: landing-page-server
