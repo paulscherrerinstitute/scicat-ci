@@ -117,8 +117,8 @@ jobs:
 
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    needs: 
-      - build
+    # needs: 
+    #   - build
 
     steps:
 
