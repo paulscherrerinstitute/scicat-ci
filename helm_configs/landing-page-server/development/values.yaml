@@ -9,9 +9,9 @@ secrets:
 env: 
   - name: GOOGLE_VERIFY
     valueFrom:
-    secretKeyRef: 
-      name: "{{ .Release.Name }}-s"
-      key: google_verify
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: google_verify
 
 run:
   command: 
