@@ -4,9 +4,21 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      google-verification.html: '${{ secrets.LP_GOOGLE_VERIFY }}'
+      google_verify: '${{ secrets.LP_GOOGLE_VERIFY }}'
 
-volumeMounts: 
-  - name: secrets-volume
-    mountPath: '{{ b64dec "${{ secrets.LP_GOOGLE_VERIFY }}" | trimPrefix "google-site-verification: " }}'
-    subPath: google-verification.html
+env: 
+  - name: GOOGLE_VERIFY
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: google_verify
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      rm -f /usr/share/nginx/html/google43e14584df796f63.html;
+      echo "google-site-verification: $GOOGLE_VERIFY" > /usr/share/nginx/html/$GOOGLE_VERIFY;
+      nginx -g "daemon off;"
