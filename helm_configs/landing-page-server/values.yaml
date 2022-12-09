@@ -25,3 +25,12 @@ ingress:
     - hosts:
       - "{{ .Values.host }}"
       secretName: "scicat-oaipmh-certificate"
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      rm -f /usr/share/nginx/html/google43e14584df796f63.html;
+      nginx -g "daemon off;"
