@@ -57,3 +57,4 @@ jobs:
       submodule: landing-page-server
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
