@@ -8,5 +8,5 @@ secrets:
 
 volumeMounts: 
   - name: secrets-volume
-    mountPath: '{{ tpl (include "validateSecret" "${{ secrets.LP_GOOGLE_VERIFY }}" | b64dec | trimPrefix "google-site-verification: ") .}}'
+    mountPath: '{{ tpl (printf "%s" ${{ secrets.LP_GOOGLE_VERIFY }} | include "validateSecret" | b64dec | trimPrefix "google-site-verification: ") .}}'
     subPath: google-verification.html
