@@ -1,0 +1,12 @@
+host: oaipmh-prod.qa.psi.ch
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      google-verification.html: '${{ secrets.LP_GOOGLE_VERIFY }}'
+
+volumeMounts: 
+  - name: secrets-volume
+    mountPath: '{{ b64dec "${{ secrets.LP_GOOGLE_VERIFY }}" | trimPrefix "google-site-verification: " }}'
+    subPath: google-verification.html
