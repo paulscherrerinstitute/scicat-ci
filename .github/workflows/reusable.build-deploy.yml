@@ -86,7 +86,7 @@ jobs:
       run: |
         for f in ${{ inputs.docker_build_files }}; 
         do
-          cp -r ${f%%:*} ${f#*:};
+          cp ${f%%:*} ${f#*:};
         done
 
     - name: Log in to the Container registry
