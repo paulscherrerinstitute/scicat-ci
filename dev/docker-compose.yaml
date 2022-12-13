@@ -4,7 +4,7 @@ services:
   mongodb:
     image: mongo
     volumes:
-      - mongodb_data:/bitnami
+      - mongodb_data:/data/db
     profiles:
       - legacy
       - be
@@ -12,6 +12,11 @@ services:
       - next
       - search_legacy
       - search_next
+      - lp_legacy
+      - lp_next
+      - oi_next
+      - oi_legacy
+      - oi_lp
 
   backend:
     build: ../backend/.
@@ -31,11 +36,14 @@ services:
       - be
       - legacy
       - search_legacy
+      - lp_legacy
+      - oi_legacy
 
   frontend:
     build: 
       context: ../frontend/.
-      target: builder
+      target: installer
+      dockerfile: ../dev/config/frontend/Dockerfile
     environment:
       CHROME_BIN: /usr/bin/chromium
       CHROME_PATH: /usr/lib/chromium/
@@ -80,6 +88,8 @@ services:
       - be_next
       - next
       - search_next
+      - lp_next
+      - oi_next
 
   jupyter:
     image: python:3.10
@@ -106,6 +116,36 @@ services:
       - search
       - search_next
       - search_legacy
+
+  landing_page:
+    build: 
+      context: ../landing-page-server/.
+      target: installer
+      dockerfile: ../dev/config/landing-page-server/Dockerfile
+    volumes:
+      - ../landing-page-server:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    profiles:
+      - lp
+      - lp_next
+      - lp_legacy
+      - oi_lp
+
+  oaipmh:
+    build: ../oaipmh/.
+    volumes:
+      - ../oaipmh:/home/node/app
+      - ./config/oaipmh/.env:/home/node/app/production/.env
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    profiles:
+      - oi
+      - oi_next
+      - oi_legacy
+      - oi_lp
 
 volumes:
   mongodb_data:
