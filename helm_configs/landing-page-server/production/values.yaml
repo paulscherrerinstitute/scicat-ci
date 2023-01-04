@@ -1,4 +1,4 @@
-host: oaipmh-prod.qa.psi.ch
+host: doi.psi.ch
 
 secrets: 
   "{{ .Release.Name }}-s":
