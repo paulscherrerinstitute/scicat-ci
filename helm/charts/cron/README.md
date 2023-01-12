@@ -7,7 +7,7 @@ A simple chart to deploy a cronJob runner mounting secrets
 To install the chart with the release name `my-release`:
 
 ```bash
-$ helm install my-release cron_chart
+$ helm install my-release cron
 ```
 
 The command deploys a cron chart on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.

@@ -30,10 +30,10 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-be.yml
-        helm_configs/backend/values.yaml
-        helm_configs/backend/login-callbacks.js
-        helm_configs/backend/config.local.js
-        helm_configs/backend/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/backend/values.yaml
+        helm/configs/backend/login-callbacks.js
+        helm/configs/backend/config.local.js
+        helm/configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
@@ -61,13 +61,13 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "SERVER": $(jq -R -s < helm_configs/backend/server.js),
-            "CONFIG_LOCAL": $(jq -R -s < helm_configs/backend/config.local.js),
-            "LOGIN_CALLBACKS": $(jq -R -s < helm_configs/backend/login-callbacks.js),
-            "MIDDLEWARE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json),
-            "PUBLISH_FINISHED": $(jq -R -s < helm_configs/backend/publishWhenFinished.js),
-            "EMAIL_TEMPLATE": $(jq -R -s < helm_configs/backend/${{ needs.set_env.outputs.environment }}/job-template.html),
-            "HIDE_EMAIL": $(jq -R -s < helm_configs/backend/hideEmail.js),
+            "SERVER": $(jq -R -s < helm/configs/backend/server.js),
+            "CONFIG_LOCAL": $(jq -R -s < helm/configs/backend/config.local.js),
+            "LOGIN_CALLBACKS": $(jq -R -s < helm/configs/backend/login-callbacks.js),
+            "MIDDLEWARE": $(jq -R -s < helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json),
+            "PUBLISH_FINISHED": $(jq -R -s < helm/configs/backend/publishWhenFinished.js),
+            "EMAIL_TEMPLATE": $(jq -R -s < helm/configs/backend/${{ needs.set_env.outputs.environment }}/job-template.html),
+            "HIDE_EMAIL": $(jq -R -s < helm/configs/backend/hideEmail.js),
           }
         EOF
         )

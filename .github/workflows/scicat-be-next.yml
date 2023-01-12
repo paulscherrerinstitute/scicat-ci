@@ -30,8 +30,8 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-be-next.yml
-        helm_configs/backend-next/${{ needs.set_env.outputs.environment }}/**
-        helm_configs/backend-next/values.yaml
+        helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/backend-next/values.yaml
         scicat-backend-next/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}

@@ -26,8 +26,8 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-to-pss.yml
-        helm_configs/scicat-to-pss/${{ needs.set_env.outputs.environment }}/**
-        helm_configs/scicat-to-pss/values.yaml
+        helm/configs/scicat-to-pss/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/scicat-to-pss/values.yaml
         scicat-to-pss/**
       commit: ${{ needs.set_env.outputs.commit }}
 
@@ -43,7 +43,7 @@ jobs:
       release_name: scicat-to-pss
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
-      helm_chart: cron_chart
+      helm_chart: helm/charts/cron
       commit: ${{ needs.set_env.outputs.commit }}
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}

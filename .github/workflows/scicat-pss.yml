@@ -4,17 +4,17 @@ on:
   workflow_dispatch: 
     paths: 
       - .github/workflows/scicat-pss.yml
-      - helm_configs/pss/**
+      - helm/configs/pss/**
   pull_request:
     branches: [ main ]
     paths: 
       - .github/workflows/scicat-pss.yml
-      - helm_configs/pss/**
+      - helm/configs/pss/**
   push:
     branches: [ main ]
     paths: 
       - .github/workflows/scicat-pss.yml
-      - helm_configs/pss/**
+      - helm/configs/pss/**
   release:
     types: [published]
 
@@ -39,9 +39,8 @@ jobs:
       with:
         release: '${{ env.RELEASE_NAME }}'
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
-        chart: generic_service_chart
         helm: helm3
-        value-files: helm_configs/${{ env.RELEASE_NAME }}/values.yaml
+        value-files: helm/configs/${{ env.RELEASE_NAME }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
         values: "db: ${{ env.RELEASE_NAME }}-${{ env.ENVIRONMENT }}"
       env:

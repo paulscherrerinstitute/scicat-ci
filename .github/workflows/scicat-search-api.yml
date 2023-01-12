@@ -30,8 +30,8 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-search-api.yml
-        helm_configs/search-api/${{ needs.set_env.outputs.environment }}/**
-        helm_configs/search-api/values.yaml
+        helm/configs/search-api/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/search-api/values.yaml
         search-api/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
@@ -59,8 +59,8 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "CONFIG": $(jq -R -s < helm_configs/search-api/config.json),
-            "COMPONENT_CONFIG": $(jq -R -s < helm_configs/search-api/component-config.json),
+            "CONFIG": $(jq -R -s < helm/configs/search-api/config.json),
+            "COMPONENT_CONFIG": $(jq -R -s < helm/configs/search-api/component-config.json),
           }
         EOF
         )
