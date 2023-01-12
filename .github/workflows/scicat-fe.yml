@@ -30,9 +30,9 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-fe.yml
-        helm_configs/frontend/values.yaml
-        helm_configs/frontend/login.component.html
-        helm_configs/frontend/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/frontend/values.yaml
+        helm/configs/frontend/login.component.html
+        helm/configs/frontend/${{ needs.set_env.outputs.environment }}/**
         frontend/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
@@ -60,8 +60,8 @@ jobs:
       run: |
         ciVars=$(cat <<EOF
           {
-            "KEYCLOAK_ICON": $(jq -R -s < helm_configs/frontend/keycloak_icon_256px.svg),
-            "ENVIRONMENT": $(jq -R -s < helm_configs/frontend/${{ needs.set_env.outputs.environment }}/config.json),
+            "KEYCLOAK_ICON": $(jq -R -s < helm/configs/frontend/keycloak_icon_256px.svg),
+            "ENVIRONMENT": $(jq -R -s < helm/configs/frontend/${{ needs.set_env.outputs.environment }}/config.json),
           }
         EOF
         )

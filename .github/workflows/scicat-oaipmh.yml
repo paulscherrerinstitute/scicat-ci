@@ -30,8 +30,8 @@ jobs:
     with: 
       files: | 
         .github/workflows/scicat-oaipmh.yml
-        helm_configs/oaipmh/${{ needs.set_env.outputs.environment }}/**
-        helm_configs/oaipmh/values.yaml
+        helm/configs/oaipmh/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/oaipmh/values.yaml
         oaipmh/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}

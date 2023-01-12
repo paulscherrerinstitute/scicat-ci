@@ -32,7 +32,7 @@ on:
       helm_chart:
         required: false
         type: string
-        default: generic_service_chart
+        default: helm/charts/generic_service
       docker_build_files:
         required: false
         type: string
@@ -141,8 +141,8 @@ jobs:
          ciVars: ${{ inputs.helm_ci_vars }}
         value-files: >-
           [
-            "helm_configs/${{ inputs.release_name }}/values.yaml",
-            "helm_configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
+            "helm/configs/${{ inputs.release_name }}/values.yaml",
+            "helm/configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
           ]
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
