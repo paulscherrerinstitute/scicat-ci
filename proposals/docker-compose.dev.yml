@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+    app:
+        build:
+            context: .
+            target: dev
+        environment:
+            DUO_ENDPOINT: https://duo.psi.ch/duo/api.php/v1
+            DUO_FACILITY: sinq  # for a list of possible values see the README.md
+            SCICAT_ENDPOINT: https://dacat-development.psi.ch/api/v3
+            SCICAT_USERNAME: proposalIngestor
+        volumes:
+            - .:/usr/src/proposals
+        # infinite loop to keep the container running
+        command: /bin/sh -c "while sleep 1000; do :; done"

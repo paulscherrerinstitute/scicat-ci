@@ -1,2 +1,3 @@
 config/jupyter/.env
 config/frontend/config.json
+config/proposals/.env
