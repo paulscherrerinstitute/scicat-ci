@@ -1,0 +1,42 @@
+{{- $list := include "duo_facility_proposals.facilities_schedule" . | fromYaml}}
+{{- range $_ := $list.duo_facilities }}
+{{- $facility := dict "fullname" (include "duo_facility_proposals.fullname" $) "name" .name "year" .year }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "duo_facility_proposals.resource_name" $facility }}
+  labels: {{ include "duo_facility_proposals.labels" $ | nindent 4 }}
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  schedule: {{ .schedule | default $.Values.cronjob.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels: {{ include "duo_facility_proposals.labels" $ | nindent 12 }}
+        spec:
+          restartPolicy: {{ $.Values.cronjob.restartPolicy }}
+          containers:
+          - name: {{ include "duo_facility_proposals.resource_name" $facility }}
+            image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
+            imagePullPolicy: {{ $.Values.image.pullPolicy }}
+            command: [python]
+            args:
+            - main.py
+            env:
+            - name: DUO_FACILITY
+              value: {{ .name }}
+            - name: DUO_YEAR
+              value: {{ .year | quote }}
+            {{- tpl (toYaml $.Values.env) $ | nindent 12 }}
+            {{- with $.Values.volumeMounts }}
+            volumeMounts:
+              {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          {{- with $.Values.volumes}}
+          volumes:
+            {{- tpl (toYaml .) $ | nindent 8 }}
+          {{- end }}
+---
+{{- end}}
