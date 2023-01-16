@@ -47,16 +47,16 @@ jobs:
           docker-compose up -d --build
 
       - name: test
-        run: docker-compose exec app pytest
+        run: docker-compose exec -T app pytest
 
       - name: black
-        run: docker-compose exec app black --check --diff --no-color ./src
+        run: docker-compose exec -T app black --check --diff --no-color ./src
 
       - name: isort
-        run: docker-compose exec app isort --check --diff ./src
+        run: docker-compose exec -T app isort --check --diff ./src
 
       - name: pylint
-        run: docker-compose exec app pylint ./src
+        run: docker-compose exec -T app pylint ./src
 
       - name: clenup
         if: ${{ always() }}
