@@ -42,7 +42,9 @@ jobs:
           ref: ${{ github.event.inputs.commit }}
 
       - name: build
-        run: docker-compose up -d --build
+        run: |
+          cp docker-compose.dev.yml docker-compose.yml
+          docker-compose up -d --build
 
       - name: test
         run: docker-compose exec app pytest
