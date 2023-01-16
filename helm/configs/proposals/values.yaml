@@ -1,0 +1,21 @@
+env:
+  - name: SCICAT_ENDPOINT
+    value: {{ .Values.scicatEndpoint }}
+  - name: DUO_ENDPOINT
+    value: https://duo.psi.ch/duo/api.php/v1/
+
+volumes:
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      .env: '${{ secrets.PROPOSAL_ENV }}'
+
+volumeMounts:
+  - name: secrets-volume
+    mountPath: /usr/src/proposals/.env
+    subPath: .env
