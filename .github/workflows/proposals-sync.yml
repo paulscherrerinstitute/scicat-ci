@@ -1,0 +1,66 @@
+name: proposals-sync
+
+on:  
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+    with: 
+      commit: ${{ github.event.inputs.commit }}
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/proposals-sync.yml
+        helm/configs/proposals/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/proposals/values.yaml
+        proposals/**
+      commit: ${{ needs.set_env.outputs.commit }}
+
+  test_lint: 
+    if: (needs.set_env.outputs.environment == 'development')
+    needs: check_changed
+    - name: build
+      run: docker build --target dev -t test .
+
+    - name: test
+      run: docker run test pytest
+
+    - name: black
+      run: docker run test black --check --diff --no-color ./src
+
+    - name: isort
+      run: docker run test isort --check --diff ./src
+
+    - name: pylint
+      run: docker run test pylint ./src
+
+    - name: clenup
+      if: ${{ always() }}
+      run: docker rmi test 
+
+  build_deploy:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'pr'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy.yml
+    with: 
+      context: proposals/.
+      image_name: ${{ github.repository }}/proposals
+      release_name: proposals
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+      helm_chart: helm/charts/cron
+      commit: ${{ needs.set_env.outputs.commit }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
