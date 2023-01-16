@@ -32,7 +32,7 @@ jobs:
     needs: check_changed
     steps:
       - name: build
-        run: docker build --target dev -t test .
+        run: docker build --target dev -t test proposals/.
 
       - name: test
         run: docker run test pytest
