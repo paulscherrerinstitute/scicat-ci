@@ -33,13 +33,13 @@ jobs:
     defaults:
       run:
         working-directory: proposals
+    env:
+      COMPOSE_FILE: docker-compose.dev.yml
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.commit }}
-        env:
-          COMPOSE_FILE: docker-compose.dev.yml
 
       - name: build
         run: docker-compose up -d --build
