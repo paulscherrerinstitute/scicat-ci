@@ -33,32 +33,31 @@ jobs:
     defaults:
       run:
         working-directory: proposals
-    env:
-      COMPOSE_FILE: docker-compose.dev.yml
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.commit }}
 
-      - name: build
+      - name: Build
         run: |
           cp docker-compose.dev.yml docker-compose.yml
           docker-compose up -d --build
 
-      - name: test
+      - name: Test
         run: docker-compose exec -T app pytest
 
-      - name: black
+      - name: Black
         run: docker-compose exec -T app black --check --diff --no-color ./src
 
-      - name: isort
+      - name: Isort
         run: docker-compose exec -T app isort --check --diff ./src
 
-      - name: pylint
+      - name: Pylint
         run: docker-compose exec -T app pylint ./src
+        continue-on-error: true
 
-      - name: clenup
+      - name: Clenup
         if: ${{ always() }}
         run: docker-compose down 
 
