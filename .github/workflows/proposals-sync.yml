@@ -21,7 +21,7 @@ jobs:
     with: 
       files: | 
         .github/workflows/proposals-sync.yml
-        helm/configs/proposals/qa/**
+        helm/configs/proposals/${{ needs.set_env.outputs.environment }}/**
         helm/configs/proposals/values.yaml
         proposals/**
       commit: ${{ needs.set_env.outputs.commit }}
@@ -40,7 +40,9 @@ jobs:
           ref: ${{ github.event.inputs.commit }}
 
       - name: Helm template
-        run: helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml --set-json "secrets={}" &> /dev/null
+        run: | 
+          cat ../helm/configs/proposals/development/values.yaml >> ../helm/configs/proposals/values.yaml
+          helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml > /dev/null
 
       - name: Build
         run: |
