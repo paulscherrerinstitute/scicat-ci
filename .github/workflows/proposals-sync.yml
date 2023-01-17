@@ -40,7 +40,7 @@ jobs:
           ref: ${{ github.event.inputs.commit }}
 
       - name: Helm template
-        run: helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml
+        run: helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml --set "secrets={}"
 
       - name: Build
         run: |
