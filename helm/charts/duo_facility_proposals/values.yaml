@@ -5,7 +5,8 @@ nameOverride: ""
 fullnameOverride: ""
 image:
   pullPolicy: IfNotPresent
-
+  repository: "busybox"
+  tag: latest
 cronjob:
   restartPolicy: OnFailure
   schedule: 0 7 * * 1

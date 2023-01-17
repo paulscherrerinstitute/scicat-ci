@@ -1,7 +1,7 @@
 {{- $list := include "duo_facility_proposals.facilities_schedule" . | fromYaml}}
 {{- range $_ := $list.duo_facilities }}
 {{- $facility := dict "fullname" (include "duo_facility_proposals.fullname" $) "name" .name "year" .year }}
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "duo_facility_proposals.resource_name" $facility }}
@@ -36,7 +36,7 @@ spec:
             {{- end }}
           {{- with $.Values.volumes}}
           volumes:
-            {{- tpl (toYaml .) $ | nindent 8 }}
+            {{- tpl (toYaml .) $ | nindent 10 }}
           {{- end }}
 ---
 {{- end}}

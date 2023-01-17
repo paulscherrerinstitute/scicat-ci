@@ -1,6 +1,6 @@
 env:
   - name: SCICAT_ENDPOINT
-    value: {{ .Values.scicatEndpoint }}
+    value: "{{ .Values.scicatEndpoint }}"
   - name: DUO_ENDPOINT
     value: https://duo.psi.ch/duo/api.php/v1/
 

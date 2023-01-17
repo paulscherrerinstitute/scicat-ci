@@ -1,3 +1,22 @@
 scicatEndpoint: http://backend.scicat-development/api/v3
 
-duo_facilities: []
+duo_facilities:
+ - name: pgroups
+   schedule: 0 2 * * 4
+ - name: sls
+   schedule: 30 3 * * 1,3,5
+ - name: swissfel
+   schedule: 30 4 * * 1,3,5
+ - name: smus
+   schedule: 0 5 * * 4
+ - name: sinq
+   schedule: 0 3 * * 6
+   year: 2020
+ - name: sinq
+   schedule: 30 3 * * 6
+   year: 2021
+ - name: sinq
+   schedule: 0 4 * * 6
+
+
+secrets: 

@@ -74,7 +74,8 @@ jobs:
       release_name: proposals
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
-      helm_chart: helm/charts/cron
+      helm_chart: helm/charts/duo_facility_proposal
       commit: ${{ needs.set_env.outputs.commit }}
+      dry_run: true
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
