@@ -57,6 +57,12 @@ jobs:
         run: docker-compose exec -T app pylint ./src
         continue-on-error: true
 
+      - name: Build prod
+        run: docker build -t prod .
+
+      - name: Helm template
+        run: helm template proposals --debug ../charts/duo_facility_proposals  -f ../configs/proposals/values.yaml &> /dev/null 
+
       - name: Cleanup
         if: ${{ always() }}
         run: docker-compose down 
@@ -76,6 +82,5 @@ jobs:
       environment: ${{ needs.set_env.outputs.environment }}
       helm_chart: helm/charts/duo_facility_proposals
       commit: ${{ needs.set_env.outputs.commit }}
-      dry_run: true
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}

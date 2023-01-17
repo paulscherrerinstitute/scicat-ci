@@ -49,11 +49,6 @@ on:
         description: name of the submodule folder
         required: false
         type: string
-      dry_run: 
-        description: helm dry-run option
-        required: false
-        type: string
-        default: false
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
@@ -150,6 +145,5 @@ jobs:
             "helm/configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
           ]
         secrets: '${{ secrets.JSON_SECRETS }}'
-        dry-run: ${{ inputs.dry_run }}
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
