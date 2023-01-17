@@ -61,14 +61,14 @@ jobs:
         run: docker build -t prod .
 
       - name: Helm template
-        run: helm template proposals --debug ../charts/duo_facility_proposals  -f ../configs/proposals/values.yaml &> /dev/null 
+        run: helm template proposals --debug ../charts/duo_facility_proposals  -f ../configs/proposals/values.yaml
 
       - name: Cleanup
         if: ${{ always() }}
         run: docker-compose down 
 
   build_deploy:
-    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'pr'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component && needs.set_env.outputs.environment != 'development') || needs.set_env.outputs.component == 'pr'
     needs: 
      - check_changed
      - set_env
