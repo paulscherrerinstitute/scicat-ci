@@ -39,6 +39,9 @@ jobs:
         with:
           ref: ${{ github.event.inputs.commit }}
 
+      - name: Helm template
+        run: helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml
+
       - name: Build
         run: |
           cp docker-compose.dev.yml docker-compose.yml
@@ -59,9 +62,6 @@ jobs:
 
       - name: Build prod
         run: docker build -t prod .
-
-      - name: Helm template
-        run: helm template proposals --debug ../charts/duo_facility_proposals  -f ../configs/proposals/values.yaml
 
       - name: Cleanup
         if: ${{ always() }}
