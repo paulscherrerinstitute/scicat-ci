@@ -24,7 +24,7 @@ IMAGE_NAME=<IMAGE_NAME>
 docker build -t $IMAGE_NAME .
 docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
 -e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" -e "DUO_ENDPOINT=https://duo.psi.ch/duo/api.php/v1" \
--e "DUO_SECRET=<YOUR_DUO_SECRET>" -e "DUO_FACILITY=<DUO_FACILITY>" \
+-e "DUO_SECRET=<DUO_SECRET>" -e "DUO_FACILITY=<DUO_FACILITY>" \
 $IMAGE_NAME python main.py
 # see below for more on duo facilities
 ```
@@ -34,7 +34,7 @@ The below endpoint returns the full list of available DUO Facilities. The `name`
 
 ```bash
 curl --location --request GET 'https://duo.psi.ch/duo/api.php/v1/CalendarInfos/facilities' \
---header 'Cookie: SECRET=<YOUR_DUO_SECRET>'
+--header 'Cookie: SECRET=<DUO_SECRET>'
 ```
 
 Example showing one element of the returned list:
@@ -70,7 +70,7 @@ helm install proposals-sync helm/duo_facility_proposals/ \
 -n <NAMESPACE> --create-namespace \
 --set "scicat_endpoint=https://dacat-development.psi.ch/api/v3" \
 --set "scicat_username=proposalIngestor" \
---set "scicat_password=YW1hbg==" \
+--set "scicat_password=<SCICAT_PASSWORD>" \
 --set "duo_endpoint=https://duo.psi.ch/duo/api.php/v1" \
---set "duo_secret=<YOUR_DUO_SECRET>" \
+--set "duo_secret=<DUO_SECRET>" \
 ```
