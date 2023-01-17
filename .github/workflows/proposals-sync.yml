@@ -85,3 +85,4 @@ jobs:
       commit: ${{ needs.set_env.outputs.commit }}
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}
