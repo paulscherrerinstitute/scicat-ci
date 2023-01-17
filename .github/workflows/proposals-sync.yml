@@ -1,0 +1,87 @@
+name: proposals-sync
+
+on:  
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+    with: 
+      commit: ${{ github.event.inputs.commit }}
+
+  check_changed:
+    needs: set_env
+    uses: ./.github/workflows/reusable.changes.yml
+    with: 
+      files: | 
+        .github/workflows/proposals-sync.yml
+        helm/configs/proposals/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/proposals/values.yaml
+        proposals/**
+      commit: ${{ needs.set_env.outputs.commit }}
+
+  test_lint: 
+    if: (needs.set_env.outputs.environment == 'development')
+    runs-on: ubuntu-latest
+    needs: check_changed
+    defaults:
+      run:
+        working-directory: proposals
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.commit }}
+
+      - name: Helm template
+        run: | 
+          cat ../helm/configs/proposals/development/values.yaml >> ../helm/configs/proposals/values.yaml
+          helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml > /dev/null
+
+      - name: Build
+        run: |
+          cp docker-compose.dev.yml docker-compose.yml
+          docker-compose up -d --build
+
+      - name: Test
+        run: docker-compose exec -T app pytest
+
+      - name: Black
+        run: docker-compose exec -T app black --check --diff --no-color ./src
+
+      - name: Isort
+        run: docker-compose exec -T app isort --check --diff ./src
+
+      - name: Pylint
+        run: docker-compose exec -T app pylint ./src
+        continue-on-error: true
+
+      - name: Build prod
+        run: docker build -t prod .
+
+      - name: Cleanup
+        if: ${{ always() }}
+        run: docker-compose down 
+
+  build_deploy:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component && needs.set_env.outputs.environment != 'development') || needs.set_env.outputs.component == 'pr'
+    needs: 
+     - check_changed
+     - set_env
+    uses: ./.github/workflows/reusable.build-deploy.yml
+    with: 
+      context: proposals/.
+      image_name: ${{ github.repository }}/proposals
+      release_name: proposals
+      tag: ${{ needs.set_env.outputs.tag }}
+      environment: ${{ needs.set_env.outputs.environment }}
+      helm_chart: helm/charts/duo_facility_proposals
+      commit: ${{ needs.set_env.outputs.commit }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}

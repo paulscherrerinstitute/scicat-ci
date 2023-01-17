@@ -38,6 +38,7 @@ services:
       - search_legacy
       - lp_legacy
       - oi_legacy
+      - be_pr
 
   frontend:
     build: 
@@ -146,6 +147,19 @@ services:
       - oi_next
       - oi_legacy
       - oi_lp
+
+  proposals:
+    build:
+      context: ../proposals/.
+      target: dev
+    volumes:
+      - ../proposals:/usr/src/proposals
+      - ./config/proposals/.env:/usr/src/proposals/.env
+    # infinite loop to keep the container running
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    profiles:
+      - pr
+      - be_pr
 
 volumes:
   mongodb_data:

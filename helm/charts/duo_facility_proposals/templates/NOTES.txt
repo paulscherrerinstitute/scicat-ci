@@ -1,0 +1,6 @@
+1. Get the application resources by running:
+    $ kubectl get all -n {{ .Release.Namespace }} -l {{ include "duo_facility_proposals.selectorLabelsFilter" . }}
+2. Get the application configmaps by running:
+    $ kubectl get configmaps -n {{ .Release.Namespace }} -l {{ include "duo_facility_proposals.selectorLabelsFilter" . }}
+3. Get the application secrets by running:
+    $ kubectl get secrets -n {{ .Release.Namespace }} -l {{ include "duo_facility_proposals.selectorLabelsFilter" . }}
