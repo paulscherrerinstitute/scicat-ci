@@ -124,7 +124,7 @@
     "retrieveDestinations": [
         {
             "option": "PSI",
-            "tooltip": "Copy the data to the PSI storage buffer. After that, the user needs to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
+            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
         },
         {
             "option": "PSI-RA",
