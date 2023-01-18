@@ -2,15 +2,18 @@
     "lbBaseURL": "https://dacat-development.psi.ch",
     "accessTokenPrefix": "",
     "archiveWorkflowEnabled": true,
-    "retrieveDestinations": [{
-            "option": "PSI"
+    "retrieveDestinations": [
+        {
+            "option": "PSI",
+            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
         },
         {
             "option": "CSCS"
         },
         {
             "option": "PSI-RA",
-            "location": "/gpfs/workfs/p18/p18525/retrieve"
+            "location": "/gpfs/workfs/p18/p18525/retrieve",
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
         }
     ],
     "externalAuthEndpoint": null,
@@ -29,7 +32,8 @@
     "datasetReduceEnabled": false,
     "fileColorEnabled": false,
     "jsonMetadataEnabled": true,
-    "localColumns": [{
+    "localColumns": [
+        {
             "name": "select",
             "order": 0,
             "type": "standard",
@@ -120,11 +124,13 @@
     "scienceSearchUnitsEnabled": false,
     "metadataStructure": "tree",
     "loginFormEnabled": true,
-    "oAuth2Endpoints": [{
-        "displayText": "PSI account",
-        "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
-        "authURL": "auth/keycloak"
-    }],
+    "oAuth2Endpoints": [
+        {
+            "displayText": "PSI account",
+            "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
+            "authURL": "auth/keycloak"
+        }
+    ],
     "helpMessages": {
         "gettingStarted": "(PSI intranet only) gives a brief description on how to get started using the data catalog.",
         "ingestManual": "(PSI intranet only) provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
