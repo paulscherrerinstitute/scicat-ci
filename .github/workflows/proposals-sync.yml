@@ -27,7 +27,7 @@ jobs:
       commit: ${{ needs.set_env.outputs.commit }}
 
   test_lint: 
-    if: (needs.set_env.outputs.environment == 'development')
+    if: (needs.set_env.outputs.environment == 'development' && needs.check_changed.outputs.changed == 'true')
     runs-on: ubuntu-latest
     needs: check_changed
     defaults:
