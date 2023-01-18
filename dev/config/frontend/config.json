@@ -1,17 +1,7 @@
 {
-    "lbBaseURL": "https://dacat-qa.psi.ch",
+    "lbBaseURL": "http://127.0.0.1:3000",
     "accessTokenPrefix": "",
     "archiveWorkflowEnabled": true,
-    "retrieveDestinations": [
-        {
-            "option": "PSI",
-            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
-        },
-        {
-            "option": "PSI-RA",
-            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
-        }
-    ],
     "externalAuthEndpoint": null,
     "editMetadataEnabled": false,
     "editSampleEnabled": false,
@@ -130,5 +120,15 @@
     "helpMessages": {
         "gettingStarted": "(PSI intranet only) gives a brief description on how to get started using the data catalog.",
         "ingestManual": "(PSI intranet only) provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
-    }
+    },
+    "retrieveDestinations": [
+        {
+            "option": "PSI",
+            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
+        },
+        {
+            "option": "PSI-RA",
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
+        }
+    ]
 }
