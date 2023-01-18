@@ -41,8 +41,7 @@ jobs:
 
       - name: Helm template
         run: | 
-          cat ../helm/configs/proposals/development/values.yaml >> ../helm/configs/proposals/values.yaml
-          helm template proposals --debug ../helm/charts/duo_facility_proposals  -f ../helm/configs/proposals/values.yaml > /dev/null
+          helm template proposals --debug ../helm/charts/duo_facility_proposals --values=../helm/configs/proposals/values.yaml --values=../helm/configs/proposals/development/values.yaml > /dev/null
 
       - name: Build
         run: |
