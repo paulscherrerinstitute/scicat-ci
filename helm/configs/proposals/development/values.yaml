@@ -1,1 +1,4 @@
 secrets: 
+image:
+  repository: busybox
+  tag: latest
