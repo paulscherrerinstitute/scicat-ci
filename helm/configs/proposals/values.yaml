@@ -1,3 +1,7 @@
+image:
+  repository: "{{ .Values.ciRepository }}"
+  tag: "{{ .Values.ciTag }}"
+
 env:
   - name: SCICAT_ENDPOINT
     value: "{{ .Values.scicatEndpoint }}"
