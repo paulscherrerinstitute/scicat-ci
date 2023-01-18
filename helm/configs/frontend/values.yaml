@@ -40,12 +40,13 @@ configMaps:
 
 initContainers:
   - name: install
-    image: busybox
+    image: alpine
     command:
       - "/bin/sh"
       - -c
     args:
       - >-
+        apk update && apk add ca-certificates && update-ca-certificates;
         wget 
         -O /download-dir/site.png 
         https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm/configs/frontend/site.png; 
