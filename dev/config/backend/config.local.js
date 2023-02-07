@@ -9,7 +9,7 @@ module.exports = {
   policyPublicationShiftInYears: 3,
   policyRetentionShiftInYears: 10,
   metadataKeysReturnLimit:100,
-  site: "SAMPLE-SITE",
+  site: "PSI",
   facilities: ["Facility1", "Facility2"],
   jobMessages: {
     jobSubmitted: "Submitted for immediate execution",
@@ -32,4 +32,7 @@ module.exports = {
     subject: "[SciCat " + process.env.NODE_ENV + "]",
     text: undefined, // can also set html key and this will override this
   },
+  logbook: {
+    enabled: false
+  }
 };
