@@ -147,5 +147,4 @@ jobs:
         files: >-
           ${{ inputs.helm_set_files }}
         secrets: '${{ secrets.JSON_SECRETS }}'
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+        kubeconfig: '${{ secrets.KUBECONFIG }}'
