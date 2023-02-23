@@ -40,7 +40,7 @@ runs:
         set=`echo ${{ inputs.values }} | tr -s ' ' ','`
         set_file=`echo ${{ inputs.files }} | tr -s ' ' ','`
         helm upgrade ${{ inputs.release }} ${{ inputs.chart }} \
-        --namespace ${{ inputs.namespace }} --create-namespace \ 
+        --namespace ${{ inputs.namespace }} --create-namespace \
         --install  --wait --atomic --values=$values --set=$set \
         --set-file=$set_file --set-json "secretsJson=${{ inputs.secrets }}"
       shell: bash
