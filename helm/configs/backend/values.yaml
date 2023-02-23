@@ -34,11 +34,11 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      component-config.json: '${{ secrets.COMPONENT_CONFIG }}'
-      datasources.json: '${{ secrets.DATASOURCES }}'
-      functionalAccounts.json: '${{ secrets.FUNCTIONAL_ACCOUNTS }}'
-      providers.json: '${{ secrets.PROVIDERS }}'
-      mail_auth: '${{ secrets.MAIL_AUTH }}'
+      component-config.json: "{{ secretsJson.COMPONENT_CONFIG }}"
+      datasources.json: "{{ secretsJson.DATASOURCES }}"
+      functionalAccounts.json: "{{ secretsJson.FUNCTIONAL_ACCOUNTS }}"
+      providers.json: "{{ secretsJson.PROVIDERS }}"
+      mail_auth: "{{ secretsJson.MAIL_AUTH }}"
 
 ingress:
   enabled: true
@@ -59,13 +59,13 @@ ingress:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    server.js: "{{ .Values.ciVars.SERVER }}"
-    config.local.js: "{{ .Values.ciVars.CONFIG_LOCAL }}"
-    login-callbacks.js: "{{ .Values.ciVars.LOGIN_CALLBACKS }}"
-    middleware.json: "{{ .Values.ciVars.MIDDLEWARE }}"
-    publishWhenFinished.js: "{{ .Values.ciVars.PUBLISH_FINISHED }}"
-    job-template.html: "{{ .Values.ciVars.EMAIL_TEMPLATE }}"
-    hideEmail.js: "{{ .Values.ciVars.HIDE_EMAIL }}"
+    server.js: "{{ .Values.SERVER }}"
+    config.local.js: "{{ .Values.CONFIG_LOCAL }}"
+    login-callbacks.js: "{{ .Values.LOGIN_CALLBACKS }}"
+    middleware.json: "{{ .Values.MIDDLEWARE }}"
+    publishWhenFinished.js: "{{ .Values.PUBLISH_FINISHED }}"
+    job-template.html: "{{ .Values.EMAIL_TEMPLATE }}"
+    hideEmail.js: "{{ .Values.HIDE_EMAIL }}"
 
 env:
   - name: ENV
