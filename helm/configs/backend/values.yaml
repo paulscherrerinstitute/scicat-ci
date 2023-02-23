@@ -34,11 +34,11 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      component-config.json: "{{ secretsJson.COMPONENT_CONFIG }}"
-      datasources.json: "{{ secretsJson.DATASOURCES }}"
-      functionalAccounts.json: "{{ secretsJson.FUNCTIONAL_ACCOUNTS }}"
-      providers.json: "{{ secretsJson.PROVIDERS }}"
-      mail_auth: "{{ secretsJson.MAIL_AUTH }}"
+      component-config.json: "{{ .Values.secretsJson.COMPONENT_CONFIG }}"
+      datasources.json: "{{ .Values.secretsJson.DATASOURCES }}"
+      functionalAccounts.json: "{{ .Values.secretsJson.FUNCTIONAL_ACCOUNTS }}"
+      providers.json: "{{ .Values.secretsJson.PROVIDERS }}"
+      mail_auth: "{{ .Values.secretsJson.MAIL_AUTH }}"
 
 ingress:
   enabled: true
