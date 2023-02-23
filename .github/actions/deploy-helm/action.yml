@@ -39,8 +39,8 @@ runs:
         values=`echo ${{ inputs.value-files }} | paste -d, -s -`
         set=`echo ${{ inputs.values }} | paste -d, -s -`
         set_file=`echo ${{ inputs.files }} | paste -d, -s -`
-        helm --namespace ${{ inputs.namespace }} \
-        upgrade --create-namespace --install ${{ inputs.release }} \
-        --wait --atomic ${{ inputs.chart }} --values=$values \
-        --set=$set --set-file=$set_file --set-json "secretsJson=${{ inputs.secrets }}"
+        helm upgrade ${{ inputs.release }} ${{ inputs.chart }} \
+        --namespace ${{ inputs.namespace }} --create-namespace \ 
+        --install  --wait --atomic --values=$values --set=$set \
+        --set-file=$set_file --set-json "secretsJson=${{ inputs.secrets }}"
       shell: bash
