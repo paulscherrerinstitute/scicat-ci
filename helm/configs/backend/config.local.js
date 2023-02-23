@@ -35,6 +35,7 @@ module.exports = {
     from: "dacatmail@psi.ch",
     replyTo: "scicatarchivemanager@psi.ch",
     subject: "[SciCat " + process.env.ENV + "]",
+    scicatHref: process.env.NODE_ENV === "production"? "https://discovery.psi.ch": `https://discovery-${process.env.NODE_ENV}.psi.ch`
   },
   queue: "rabbitmq",
   logbook: {
