@@ -37,7 +37,7 @@ runs:
   steps:
     - run: |
         values=`echo ${{ inputs.value-files }} | | paste -d, -s -`
-        set=--set=`echo ${{ inputs.values }} | | paste -d, -s -`
+        set=`echo ${{ inputs.values }} | | paste -d, -s -`
         set_file=`echo ${{ inputs.files }} | | paste -d, -s -`
         helm --namespace ${{ inputs.namespace }} \
         upgrade --create-namespace --install ${{ inputs.release }} \
