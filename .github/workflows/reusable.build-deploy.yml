@@ -138,13 +138,13 @@ jobs:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
         chart: '${{ inputs.helm_chart }}'
-        values: |-
+        values: >-
          ciRepository=${{ inputs.registry }}/${{ inputs.image_name }}
          ciTag=${{ inputs.tag }}
-        value-files: |-
+        value-files: >-
           helm/configs/${{ inputs.release_name }}/values.yaml
           helm/configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml
-        files: |-
+        files: >-
           ${{ inputs.helm_set_files }}
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
