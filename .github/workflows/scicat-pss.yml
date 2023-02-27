@@ -35,14 +35,14 @@ jobs:
       uses: actions/checkout@v2
 
     - name: deploy 
-      uses: 'glopezep/helm@v1.7.1'
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
       with:
         release: '${{ env.RELEASE_NAME }}'
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
-        helm: helm3
+        chart: '${{ env.RELEASE_NAME }}'
+        values: "db=${{ env.RELEASE_NAME }}-${{ env.ENVIRONMENT }}"
         value-files: helm/configs/${{ env.RELEASE_NAME }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
-        values: "db: ${{ env.RELEASE_NAME }}-${{ env.ENVIRONMENT }}"
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
         RELEASE_NAME: pss
