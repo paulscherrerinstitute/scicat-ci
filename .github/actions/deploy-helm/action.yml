@@ -39,7 +39,6 @@ runs:
         echo $KUBECONFIG_FILE | base64 -d > conf;
         values=`echo ${{ inputs.value-files }} | tr -s ' ' ','`;
         set=`echo ${{ inputs.values }} | tr -s ' ' ','`;
-        set_file=`echo ${{ inputs.files }} | tr -s ' ' ','`;
         helm upgrade ${{ inputs.release }} ${{ inputs.chart }} \
           --namespace ${{ inputs.namespace }} --create-namespace \
           --install  --wait --atomic --values=$values --set=$set \
