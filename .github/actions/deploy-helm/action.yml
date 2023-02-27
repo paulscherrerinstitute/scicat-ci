@@ -46,7 +46,7 @@ runs:
         helm upgrade ${{ inputs.release }} ${{ inputs.chart }} \
           --namespace ${{ inputs.namespace }} --create-namespace \
           --install --wait --atomic --values=$values --set=$set \
-          --set-file=$set_file --set-json secretsJson=${{ inputs.secrets }}
+          --set-file=$set_file
       shell: bash
       env: 
         KUBECONFIG: conf
