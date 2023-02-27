@@ -149,9 +149,10 @@
                     <td>Name</td>
                     <td>Ownergroup</td>
                     <td>Sourcefolder</td>
-                    <td>Size</td>
                     {{#if (eq ../jobParams.option "CSCS")}}
-                    <td>Tar Size</td>
+                    <td>Download (size)</td>
+                    {{else}}
+                    <td>Size</td>
                     {{/if}}
                 </tr>
                 {{#each good}}
@@ -160,25 +161,27 @@
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
                     <td>{{sourcefolder}}</td>
-                    <td>{{size}}</td>
                     {{#if (eq ../../jobParams.option "CSCS")}}
-                    <td>{{tarSize}}
-                        <ul>
-                            {{#each files}}
-                            <li><a href="{{url}}" download="{{name}}">{{size}}</a></li>
-                            {{/each}}
+                    <td>
+                        <ol>
+                            {{#each ../../jobResultObject}}
+                            {{#if (eq datasetId ../pid)}}
+                            <li><a href="{{url}}" download="{{name}}">⬇</a> ({{size}})</li>
                             {{/if}}
-                        </ul>
+                            {{/each}}
+                        </ol>
                     </td>
+                    {{else}}
+                    <td>{{size}}</td>
+                    {{/if}}
                 </tr>
                 {{/each}}
             </table>
             {{/if}}
             {{/with}}
             {{#if (eq jobParams.option "CSCS")}}
-            <p>You can now download the data by clicking on the download links in the <b>Tar Size</b> column of the
-                table. The data is
-                potentially spread over several tar files which you then must untar on your destination system
+            <p>You can now download the data by clicking on the download icon in the <b>Download</b> column of the
+                table. The data is potentially spread over several tar files which you then must untar on your destination system
             </p>
             {{else if (eq jobParams.option "PSI")}}
             <p>You can now use the command 'datasetRetriever' to move the retrieved datasets to their final destination.
