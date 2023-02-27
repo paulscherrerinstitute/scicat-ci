@@ -4,7 +4,7 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      google_verify: '${{ secrets.LP_GOOGLE_VERIFY }}'
+      google_verify: "{{ .Values.secretsJson.LP_GOOGLE_VERIFY }}"
 
 env: 
   - name: GOOGLE_VERIFY
