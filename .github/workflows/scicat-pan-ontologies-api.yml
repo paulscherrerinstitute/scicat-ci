@@ -54,5 +54,4 @@ jobs:
       submodule: pan-ontologies-api
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      JSON_SECRETS: ${{ toJSON(secrets) }}
 
