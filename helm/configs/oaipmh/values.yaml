@@ -39,7 +39,7 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      .env: '${{ secrets.OAIPMH_ENV }}'
+      .env: "{{ .Values.secretsJson.OAIPMH_ENV }}"
 
 volumeMounts:
   - name: secrets-volume
