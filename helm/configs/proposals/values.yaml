@@ -17,7 +17,7 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      .env: '${{ secrets.PROPOSAL_ENV }}'
+      .env: "{{ .Values.secretsJson.PROPOSAL_ENV }}"
 
 volumeMounts:
   - name: secrets-volume
