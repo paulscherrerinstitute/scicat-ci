@@ -133,7 +133,7 @@ jobs:
 
     - name: Deploy to k8s using helm
       id: helm-deploy
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@drop_helm_deploy
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
       with:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
