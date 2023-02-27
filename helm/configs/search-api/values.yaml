@@ -44,8 +44,8 @@ env:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    config.json: "{{ .Values.ciVars.CONFIG }}"
-    component-config.json: "{{ .Values.ciVars.COMPONENT_CONFIG }}"
+    config.json: "{{ .Values.CONFIG }}"
+    component-config.json: "{{ .Values.COMPONENT_CONFIG }}"
 
 volumes:
   - name: config-volume
