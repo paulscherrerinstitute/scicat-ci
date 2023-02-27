@@ -35,8 +35,8 @@ volumes:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    config.json: "{{ .Values.ciVars.ENVIRONMENT }}"
-    keycloak-icon-256px.svg: "{{ .Values.ciVars.KEYCLOAK_ICON }}"
+    config.json: "{{ .Values.ENVIRONMENT }}"
+    keycloak-icon-256px.svg: "{{ .Values.KEYCLOAK_ICON }}"
 
 initContainers:
   - name: install
