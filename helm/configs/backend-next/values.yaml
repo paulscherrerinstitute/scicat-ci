@@ -20,8 +20,8 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      .env: '${{ secrets.BENEXT_ENV }}'
-      functionalAccounts.json: '${{ secrets.BENEXT_FUNCTIONAL_ACCOUNTS }}'
+      .env: "{{ .Values.secretsJson.BENEXT_ENV }}"
+      functionalAccounts.json: "{{ .Values.secretsJson.BENEXT_FUNCTIONAL_ACCOUNTS }}"
 
 ingress:
   enabled: true
