@@ -49,6 +49,10 @@ on:
         description: name of the submodule folder
         required: false
         type: string
+      helm_set_files:
+        required: false
+        type: string
+        default: ""
     secrets: 
       KUBECONFIG: 
         description: kubeconfig file
@@ -129,21 +133,19 @@ jobs:
 
     - name: Deploy to k8s using helm
       id: helm-deploy
-      uses: 'glopezep/helm@v1.7.1'
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@drop_helm_deploy
       with:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
         chart: '${{ inputs.helm_chart }}'
-        helm: helm3
-        values: |
-         ciRepository: ${{ inputs.registry }}/${{ inputs.image_name }}
-         ciTag: ${{ inputs.tag }}
-         ciVars: ${{ inputs.helm_ci_vars }}
+        values: >-
+         ciRepository=${{ inputs.registry }}/${{ inputs.image_name }}
+         ciTag=${{ inputs.tag }}
         value-files: >-
-          [
-            "helm/configs/${{ inputs.release_name }}/values.yaml",
-            "helm/configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml"
-          ]
+          helm/configs/${{ inputs.release_name }}/values.yaml
+          helm/configs/${{ inputs.release_name }}/${{ inputs.environment }}/values.yaml
+        files: >-
+          ${{ inputs.helm_set_files }}
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
