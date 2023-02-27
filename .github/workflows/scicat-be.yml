@@ -64,4 +64,4 @@ jobs:
         HIDE_EMAIL=helm/configs/backend/hideEmail.js
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      JSON_SECRETS: ${{ toJSON(secrets) }}
+      JSON_SECRETS: ${{ secrets }}
