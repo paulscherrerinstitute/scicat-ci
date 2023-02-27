@@ -29,4 +29,4 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      pss_mongodb_url: '${{ secrets.PSS_MONGODB_URL }}'
+      pss_mongodb_url: "{{ .Values.secretsJson.PSS_MONGODB_URL }}"
