@@ -164,7 +164,7 @@
                     {{#if (eq ../../jobParams.option "CSCS")}}
                     <td>
                         <ol>
-                            {{#each ../../jobResultObject}}
+                            {{#each ../../jobResultObject.result}}
                             {{#if (eq datasetId ../pid)}}
                             <li><a href="{{url}}" download="{{name}}">⬇</a> ({{size}})</li>
                             {{/if}}
