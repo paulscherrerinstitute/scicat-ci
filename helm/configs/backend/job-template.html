@@ -77,9 +77,8 @@
         <!-- Template for job submission comfirmation -->
         {{#with jobSubmissionNotification}}
         <div>
-            Your {{jobType}} job has been submitted and will be processed as soon as possible.<br>
+            Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job has been submitted and will be processed as soon as possible.<br>
             You will be notified by email as soon as the job is completed.<br>
-            Job id: <a href="{{@root.config.scicatHref}}/{{urlEncode jobId}}">{{jobId}}</a>
         </div>
         {{#if jobData}}
         <p><b>Job will be perfomed on the following dataset(s):</b></p>
@@ -95,10 +94,10 @@
             </tr>
             {{#each jobData}}
             <tr>
-                <td><a href="{{@root.config.scicatHref}}/{{urlEncode pid}}">{{pid}}</a></td>
+                <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                 <td>{{name}}</td>
                 <td>{{ownerGroup}}</td>
-                <td>{{sourcefolder}}</td>
+                <td>{{sourceFolder}}</td>
                 <td>{{size}}</td>
                 <td>{{archivable}}</td>
                 <td>{{retrievable}}</td>
@@ -112,7 +111,7 @@
         <!-- Template for finished job  Notification -->
         {{#with jobFinishedNotification}}
         <div>
-            Your <a href="{{@root.config.scicatHref}}/{{urlEncode jobId}}">{{jobType}}</a> job is now finished.<br>
+            Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job is now finished.<br>
             {{#if jobStatusMessage}}
             The returned job status is: <b>{{jobStatusMessage}}</b>
             {{/if}}
@@ -132,10 +131,10 @@
                 </tr>
                 {{#each bad}}
                 <tr>
-                    <td><a href="{{@root.config.scicatHref}}/{{urlEncode pid}}">{{pid}}</a></td>
+                    <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
-                    <td>{{sourcefolder}}</td>
+                    <td>{{sourceFolder}}</td>
                     <td>{{size}}</td>
                 </tr>
                 {{/each}}
@@ -157,10 +156,10 @@
                 </tr>
                 {{#each good}}
                 <tr>
-                    <td><a href="{{@root.config.scicatHref}}/{{urlEncode pid}}">{{pid}}</a></td>
+                    <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
-                    <td>{{sourcefolder}}</td>
+                    <td>{{sourceFolder}}</td>
                     {{#if (eq ../../jobParams.option "CSCS")}}
                     <td>
                         <ol>
