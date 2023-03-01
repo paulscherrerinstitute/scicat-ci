@@ -98,7 +98,7 @@
                 <td>{{name}}</td>
                 <td>{{ownerGroup}}</td>
                 <td>{{sourceFolder}}</td>
-                <td>{{size}}</td>
+                <td>{{formatBytes size}}</td>
                 <td>{{archivable}}</td>
                 <td>{{retrievable}}</td>
             </tr>
@@ -135,7 +135,7 @@
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
                     <td>{{sourceFolder}}</td>
-                    <td>{{size}}</td>
+                    <td>{{formatBytes size}}</td>
                 </tr>
                 {{/each}}
             </table>
@@ -165,13 +165,13 @@
                         <ol>
                             {{#each ../../jobResultObject.result}}
                             {{#if (eq datasetId ../pid)}}
-                            <li><a href="{{url}}" download="{{name}}">⬇</a> ({{size}})</li>
+                            <li><a href="{{url}}" download="{{name}}">⬇</a> ({{formatBytes size}})</li>
                             {{/if}}
                             {{/each}}
                         </ol>
                     </td>
                     {{else}}
-                    <td>{{size}}</td>
+                    <td>{{formatBytes size}}</td>
                     {{/if}}
                 </tr>
                 {{/each}}
