@@ -148,6 +148,9 @@
                     <td>Sourcefolder</td>
                     {{#if (eq ../jobParams.option "CSCS")}}
                     <td>Download (size)</td>
+                    {{else if (eq ../jobParams.option "PSI-RA")}}
+                    <td>PSI-RA folder</td>
+                    <td>Size</td>
                     {{else}}
                     <td>Size</td>
                     {{/if}}
@@ -168,6 +171,9 @@
                             {{/each}}
                         </ol>
                     </td>
+                    {{else if (eq ../jobParams.option "PSI-RA")}}
+                    <td>PSI-RA folder</td>
+                    <td>/das/work/{{subString ownerGroup 0 3}}/{{ownerGroup}}/retrieve/{{sourceFolder}}/</td>
                     {{else}}
                     <td>{{formatBytes size}}</td>
                     {{/if}}
@@ -187,7 +193,7 @@
                 see <a href="https://scicatproject.github.io/documentation/Ingestor/ingestManual.html#sec-6">manual</a>
             </p>
             {{else}}
-            <p>You can now find the retrieve datasets in the <code>{{jobParams.location}}</code> on the Ra cluster:</p>
+            <p>You can now find the retrieve datasets on the Ra cluster in the folder shown in the <b>PSI-RA</b> column of the table.</p>
             {{/if}}
         </div>
         {{/with}}
