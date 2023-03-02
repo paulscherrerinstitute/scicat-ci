@@ -60,7 +60,6 @@ jobs:
         CONFIG_LOCAL=helm/configs/backend/config.local.js
         LOGIN_CALLBACKS=helm/configs/backend/login-callbacks.js
         MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
-        PUBLISH_FINISHED=helm/configs/backend/publishWhenFinished.js
         EMAIL_TEMPLATE=helm/configs/backend/job-template.html
         HIDE_EMAIL=helm/configs/backend/hideEmail.js
     secrets:
