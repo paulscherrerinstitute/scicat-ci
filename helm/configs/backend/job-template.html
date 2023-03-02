@@ -172,8 +172,8 @@
                         </ol>
                     </td>
                     {{else if (eq ../jobParams.option "PSI-RA")}}
-                    <td>PSI-RA folder</td>
                     <td>/das/work/{{subString ownerGroup 0 3}}/{{ownerGroup}}/retrieve/{{sourceFolder}}/</td>
+                    <td>{{formatBytes size}}</td>
                     {{else}}
                     <td>{{formatBytes size}}</td>
                     {{/if}}
