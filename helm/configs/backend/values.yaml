@@ -63,7 +63,6 @@ configMaps:
     config.local.js: "{{ .Values.CONFIG_LOCAL }}"
     login-callbacks.js: "{{ .Values.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.MIDDLEWARE }}"
-    publishWhenFinished.js: "{{ .Values.PUBLISH_FINISHED }}"
     job-template.html: "{{ .Values.EMAIL_TEMPLATE }}"
     hideEmail.js: "{{ .Values.HIDE_EMAIL }}"
 
@@ -89,9 +88,6 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/server/boot/login-callbacks.js
     subPath: login-callbacks.js
-  - name: config-volume
-    mountPath: /home/node/app/server/boot/publishWhenFinished.js
-    subPath: publishWhenFinished.js
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template.html
     subPath: job-template.html
