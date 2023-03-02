@@ -1,0 +1,47 @@
+name: changes
+description: "Get changed files"
+
+inputs:
+  main:
+    required: false
+    type: string
+    default: main
+  submodule_commit: 
+    description: commit of the submodule to deploy on workflow dispatch
+    required: false
+    type: string
+  commit: 
+    description: commit of the CI repo to deploy on workflow dispatch
+    required: false
+    type: string
+  submodule: 
+    description: name of the submodule folder
+    required: false
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ inputs.commit }}
+    - run: |
+        current_commit=`git rev-parse HEAD`;
+        checkout_branch=`[[ $(git rev-parse --abbrev-ref HEAD) == "${{ inputs.main }}" ]] && echo "HEAD^" || echo "${{ inputs.main }}"`;
+        git checkout $checkout_branch && git submodule update --recursive ${{ inputs.submodule }};
+        git checkout $current_commit && git submodule update --recursive ${{ inputs.submodule }};
+      shell: bash
+
+    - if: ${{ inputs.submodule_commit }}
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
+      with: 
+        submodule_commit: ${{ inputs.submodule_commit }}
+        commit: ${{ inputs.commit }}
+        submodule: ${{ inputs.submodule }}
+
+    - if: ${{ inputs.submodule_commit }}
+      uses: EndBug/add-and-commit@v9
+      with:
+        default_author: github_actions
+        push: false

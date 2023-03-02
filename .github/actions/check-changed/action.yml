@@ -1,0 +1,33 @@
+name: changes
+description: "Check changed files"
+
+inputs:
+  files:
+    required: true
+    type: string
+  main:
+    required: false
+    type: string
+    default: main
+outputs:
+  changed:
+    description: boolean to check if changes on input files
+    value: ${{ steps.changed-files.outputs.any_changed }}
+
+runs:
+  using: "composite"
+  steps:
+    - if: github.event_name == 'workflow_dispatch'
+      id: shas
+      run: | 
+        echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        echo "base_sha=$(git rev-parse ${{ inputs.main }})" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v17.3
+      with: 
+        files: ${{ inputs.files }}
+        base_sha: ${{ steps.shas.outputs.base_sha }}
+        sha: ${{ steps.shas.outputs.sha }}

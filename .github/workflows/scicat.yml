@@ -1,0 +1,94 @@
+name: scicat-be
+
+on:
+  workflow_call:
+    inputs:
+      context:
+        required: true
+        type: false
+      submodule_commit:
+        description: 'Commit of the submodule to deploy'     
+        required: false
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
+        required: false
+      submodule: 
+        description: name of the submodule folder
+        required: true
+        type: string
+      package_name: 
+        description: name of the package
+        required: true
+        type: string
+      registry:
+        required: false
+        type: string
+        default: ghcr.io
+      namespace_prefix:
+        required: false
+        type: string
+        default: scicat-
+      helm_chart:
+        required: false
+        type: string
+        default: helm/charts/generic_service
+      helm_set_files:
+        required: false
+        type: string
+        default: ""
+    secrets: 
+      KUBECONFIG: 
+        description: kubeconfig file
+        required: true
+      JSON_SECRETS: 
+        description: other secrets in json format
+        required: false
+
+jobs:
+    
+    - name: checkout-recursive
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-recursive@main
+      with: 
+        commit: ${{ steps.set_env.outputs.commit }}
+        submodule_commit: ${{ inputs.submodule_commit }}
+        submodule: ${{ inputs.submodule }}
+
+    - name: check_changed
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/check-changed@main
+      with: 
+        files: | 
+          .github/workflows/scicat-be.yml
+          helm/configs/${{ inputs.submodule }}/*
+          helm/configs/${{ inputs.submodule }}/${{ steps.set_env.outputs.environment }}/**
+          backend/**
+
+    - name: build_push
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/build-push@main
+      with: 
+        context: ${{ inputs.submodule }}/.
+        image_name: ${{ github.repository }}/${{ inputs.package_name }}
+        tag: ${{ steps.set_env.outputs.tag }}
+
+  deploy:
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == '${{ inputs.package_name }}'
+    needs: 
+     - build_deploy
+    steps:
+    - name: deploy
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+      with: 
+        image_name: ${{ github.repository }}/${{ inputs.package_name }}
+        release: ${{ inputs.submodule }}
+        chart: '${{ inputs.helm_chart }}'
+        namespace: '${{ inputs.namespace_prefix }}${{ steps.set_env.outputs.environment }}'
+        values: >-
+          ciRepository=${{ inputs.registry }}/${{ inputs.image_name }}
+          ciTag=${{ steps.set_env.outputs.tag }}
+        value-files: >-
+          helm/configs/${{ inputs.submodule }}/values.yaml
+          helm/configs/${{ inputs.submodule }}/${{ steps.set_env.outputs.environment }}/values.yaml
+        files: >-
+          ${{ inputs.helm_set_files }}
+      secrets:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        JSON_SECRETS: ${{ toJSON(secrets) }}

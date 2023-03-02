@@ -1,0 +1,45 @@
+on:  
+  workflow_dispatch: 
+    inputs:
+      submodule_commit:
+        description: 'Commit of the submodule to deploy'     
+        required: false
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
+        required: false
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    steps:
+    - name: set_env
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/set-environment@main
+      with: 
+        commit: ${{ inputs.commit }}
+        submodule_commit: ${{ inputs.submodule_commit }}
+
+  scicat-be: 
+    needs: set_env
+    uses: ./.github/workflows/reusable.scicat.yml
+    with: 
+      commit: ${{ needs.set_env.outputs.commit }}
+      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule: backend
+      package_name: be
+      helm_set_files: >-
+        SERVER=helm/configs/backend/server.js
+        CONFIG_LOCAL=helm/configs/backend/config.local.js
+        LOGIN_CALLBACKS=helm/configs/backend/login-callbacks.js
+        MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
+        PUBLISH_FINISHED=helm/configs/backend/publishWhenFinished.js
+        EMAIL_TEMPLATE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/job-template.html
+        HIDE_EMAIL=helm/configs/backend/hideEmail.js
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      JSON_SECRETS: ${{ toJSON(secrets) }}

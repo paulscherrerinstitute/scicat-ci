@@ -1,0 +1,53 @@
+name: set-environment
+description: "Set environment variables depending on workflow trigger"
+
+inputs: 
+  submodule_commit: 
+    description: commit of the submodule to deploy on workflow dispatch
+    required: false
+    type: string
+  commit: 
+    description: commit of the CI repo to deploy on workflow dispatch
+    required: false
+    type: string
+outputs:
+  tag:
+    description: tag of the docker image
+    value: ${{ steps.variables.outputs.tag }}
+  environment:
+    description: environment based on workflow trigger
+    value: ${{ steps.variables.outputs.environment }}
+  component:
+    description: Based on tag prefix, it extracts the component released
+    value: ${{ steps.variables.outputs.component }}
+  commit:
+    description: Commit when using workflow dispatch
+    value: ${{ steps.variables.outputs.commit }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: variables
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          tag="sha-${{ github.event.pull_request.head.sha }}"
+          environment=development 
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          input_commit=${{ inputs.commit }}
+          commit=${input_commit:-${{ github.sha }}}
+          submodule_append=`[ -z ${{ inputs.submodule_commit }} ] || echo "_sha-${{ inputs.submodule_commit }}" && echo ""`
+          tag="sha-$commit$submodule_append"
+          environment=development
+        elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            tag="sha-${{ github.sha }}"
+            environment=qa
+        elif [[ "${{ github.event_name }}" == "release" ]]; then
+          tag="${{ github.event.release.tag_name }}"
+          environment=production
+          component=${tag:0:2}
+        fi
+        echo "tag=$(echo $tag)" >> $GITHUB_OUTPUT
+        echo "environment=$(echo $environment)" >> $GITHUB_OUTPUT
+        echo "component=$(echo $component)" >> $GITHUB_OUTPUT
+        echo "commit=$(echo $commit)" >> $GITHUB_OUTPUT
+      shell: bash

@@ -1,0 +1,44 @@
+name: build-push
+description: "Build and push to ghcr"
+
+inputs:
+  context:
+    required: true
+    type: string
+  registry:
+    required: false
+    type: string
+    default: ghcr.io
+  image_name:
+    required: true
+    type: string
+  tag:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Log in to the Container registry
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v3.6.2
+      with:
+        images: ${{ inputs.registry }}/${{ inputs.image_name }}
+        tags: |
+          type=raw,value=${{ inputs.tag }}
+    
+    - name: Build and push Docker image
+      id: build-and-push
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: ${{ inputs.context }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
