@@ -43,6 +43,7 @@
         ol {
             margin-left: 0em; 
             padding-left: 1.5em;
+            list-style-type: none;
         }
 
         .container {
@@ -157,7 +158,7 @@
                     <td>Ownergroup</td>
                     {{#if (eq ../jobParams.option "CSCS")}}
                     <td>Sourcefolder</td>
-                    <td>Download (size)</td>
+                    <td>Download parts (size)</td>
                     {{else if (eq ../jobParams.option "PSI-RA")}}
                     <td>PSI-RA folder</td>
                     <td>Size</td>
@@ -195,7 +196,7 @@
             {{/if}}
             {{/with}}
             {{#if (eq jobParams.option "CSCS")}}
-            <p>You can now download the data by clicking on the download icon in the <b>Download</b> column of the
+            <p>You can now download the data by clicking on the download icon in the <b>Download parts</b> column of the
                 table. The data is potentially spread over several tar files which you then must untar on your destination system
             </p>
             {{else if (eq jobParams.option "PSI")}}
