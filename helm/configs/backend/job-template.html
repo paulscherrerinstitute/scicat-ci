@@ -8,7 +8,12 @@
             max-width: 100%;
             table-layout: auto;
             width: fit-content;
-            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+            /* make scrollbar transparent */
         }
 
         .key {
@@ -20,7 +25,6 @@
 
         tr {
             border-top: 1px solid #eee;
-            overflow: hidden;
         }
 
         td {
