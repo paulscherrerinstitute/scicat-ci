@@ -41,9 +41,9 @@
 
         .container {
             margin: auto;
-            max-width: 90%;
+            max-width: 100%;
             background: white;
-            padding: 2em;
+            padding: 1em;
             box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
                 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
                 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
@@ -149,13 +149,14 @@
                     <td>PID</td>
                     <td>Name</td>
                     <td>Ownergroup</td>
-                    <td>Sourcefolder</td>
                     {{#if (eq ../jobParams.option "CSCS")}}
+                    <td>Sourcefolder</td>
                     <td>Download (size)</td>
                     {{else if (eq ../jobParams.option "PSI-RA")}}
                     <td>PSI-RA folder</td>
                     <td>Size</td>
                     {{else}}
+                    <td>Sourcefolder</td>
                     <td>Size</td>
                     {{/if}}
                 </tr>
@@ -164,8 +165,8 @@
                     <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
-                    <td>{{sourceFolder}}</td>
                     {{#if (eq ../../jobParams.option "CSCS")}}
+                    <td>{{sourceFolder}}</td>
                     <td>
                         <ol>
                             {{#each ../../jobResultObject.result}}
@@ -179,6 +180,7 @@
                     <td>/das/work/{{subString ownerGroup 0 3}}/{{ownerGroup}}/retrieve/{{strip sourceFolder "/"}}/</td>
                     <td>{{formatBytes size}}</td>
                     {{else}}
+                    <td>{{sourceFolder}}</td>
                     <td>{{formatBytes size}}</td>
                     {{/if}}
                 </tr>
