@@ -20,7 +20,7 @@
         }
 
         td {
-            max-width: 300px;
+            max-width: 280px;
             padding: 0.5em;
             overflow-wrap: break-word;
             word-wrap: break-word;
@@ -39,11 +39,15 @@
             margin-top: 0;
         }
 
+        ol {
+            margin-left: 0em; 
+        }
+
         .container {
             margin: auto;
             max-width: 100%;
             background: white;
-            padding: 1em;
+            padding: 0.2em;
             box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
                 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
                 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
@@ -171,7 +175,7 @@
                         <ol>
                             {{#each ../../jobResultObject.result}}
                             {{#if (eq datasetId ../pid)}}
-                            <li><a href="{{url}}" download="{{name}}">⬇</a> ({{formatBytes size}})</li>
+                            <li><a href="{{url}}" download="{{name}}">⬇️</a> ({{formatBytes size}})</li>
                             {{/if}}
                             {{/each}}
                         </ol>
