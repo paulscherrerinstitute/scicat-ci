@@ -6,7 +6,8 @@
             border-collapse: collapse;
             border-spacing: 10px;
             max-width: 100%;
-            table-layout: fixed;
+            table-layout: auto;
+            width: fit-content;
         }
 
         .key {
@@ -21,6 +22,7 @@
         }
 
         td {
+            max-width: 400px;
             overflow: scroll;
             text-overflow: clip;
             white-space: nowrap!important;
