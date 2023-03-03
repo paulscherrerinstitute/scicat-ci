@@ -10,6 +10,10 @@
         {
             "option": "PSI-RA",
             "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
+        },
+        {
+            "option": "download URLs",
+            "tooltip": "Get an email with links to data URLs. Clicking on the links starts the data download"
         }
     ],
     "externalAuthEndpoint": null,
