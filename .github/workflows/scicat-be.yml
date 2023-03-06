@@ -33,6 +33,7 @@ jobs:
         helm/configs/backend/values.yaml
         helm/configs/backend/login-callbacks.js
         helm/configs/backend/config.local.js
+        helm/configs/backend/job-template.html
         helm/configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
       commit: ${{ needs.set_env.outputs.commit }}

@@ -158,7 +158,7 @@
                     <td>PID</td>
                     <td>Name</td>
                     <td>Ownergroup</td>
-                    {{#if (eq ../jobParams.option "CSCS")}}
+                    {{#if (eq ../jobParams.option "URLs")}}
                     <td>Sourcefolder</td>
                     <td>Download parts (size)</td>
                     {{else if (eq ../jobParams.option "PSI-RA")}}
@@ -174,7 +174,7 @@
                     <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
                     <td>{{ownerGroup}}</td>
-                    {{#if (eq ../../jobParams.option "CSCS")}}
+                    {{#if (eq ../../jobParams.option "URLs")}}
                     <td>{{sourceFolder}}</td>
                     <td>
                         <ol>
@@ -197,7 +197,7 @@
             </table>
             {{/if}}
             {{/with}}
-            {{#if (eq jobParams.option "CSCS")}}
+            {{#if (eq jobParams.option "URLs")}}
             <p>You can now download the data by clicking on the download icon in the <b>Download parts</b> column of the
                 table. The data is potentially spread over several tar files which you then must untar on your destination system
             </p>
