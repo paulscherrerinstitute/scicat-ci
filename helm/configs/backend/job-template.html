@@ -19,6 +19,7 @@
 
         tr {
             border-top: 1px solid #eee;
+            overflow:hidden;
         }
 
         td {
@@ -130,7 +131,7 @@
             {{#if failure}}
             <p class="error">The job resulted in an error message.</p>
             {{/if}}
-            {{#if (or (eq jobType "ARCHIVE") (eq jobStatusMessage "finishedUnsuccessful"))}}
+            {{#if (or (eq jobType "ARCHIVE") (eq jobStatusMessage "finishedSuccessful"))}}
             {{#with datasets}}
             {{#if bad}}
             <p><b>Our system was unable to perform the requested action on the following dataset(s):</b></p>
