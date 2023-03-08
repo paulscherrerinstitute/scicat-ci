@@ -130,27 +130,29 @@
             <p class="error">The job resulted in an error message.</p>
             {{/if}}
             {{#with datasets}}
-            {{#if (and bad (eq ../jobType "ARCHIVE"))}}
-            <p><b>Our system was unable to perform the requested action on the following dataset(s):</b></p>
-            <table>
-                <tr style="background-color:lightblue">
-                    <td>PID</td>
-                    <td>Name</td>
-                    <td>Ownergroup</td>
-                    <td>Sourcefolder</td>
-                    <td>Size</td>
-                </tr>
-                {{#each bad}}
-                <tr>
-                    <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
-                    <td>{{name}}</td>
-                    <td>{{ownerGroup}}</td>
-                    <td>{{sourceFolder}}</td>
-                    <td>{{formatBytes size}}</td>
-                </tr>
-                {{/each}}
-            </table>
-            {{/if}}
+                {{#if bad}}
+                    {{#if (eq ../jobType "ARCHIVE")}}
+                    <p><b>Our system was unable to perform the requested action on the following dataset(s):</b></p>
+                    <table>
+                        <tr style="background-color:lightblue">
+                            <td>PID</td>
+                            <td>Name</td>
+                            <td>Ownergroup</td>
+                            <td>Sourcefolder</td>
+                            <td>Size</td>
+                        </tr>
+                        {{#each bad}}
+                        <tr>
+                            <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
+                            <td>{{name}}</td>
+                            <td>{{ownerGroup}}</td>
+                            <td>{{sourceFolder}}</td>
+                            <td>{{formatBytes size}}</td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                    {{/if}}
+                {{/if}}
             {{#if good}}
             <p><b>The following datasets were successfully processed:</b></p>
             <table>
