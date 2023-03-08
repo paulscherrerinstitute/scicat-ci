@@ -130,7 +130,7 @@
             {{#if failure}}
             <p class="error">The job resulted in an error message.</p>
             {{/if}}
-            {{#if (or (eq jobType "ARCHIVE") (eq jobStatusMessage "finishedSuccessful"))}}
+            {{#if (or (eq jobType "ARCHIVE") (eq jobStatusMessage "finishedUnsuccessful"))}}
             {{#with datasets}}
             {{#if bad}}
             <p><b>Our system was unable to perform the requested action on the following dataset(s):</b></p>
