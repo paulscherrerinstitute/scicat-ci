@@ -23,9 +23,9 @@
 
         td {
             max-width: 400px;
-            overflow: scroll;
+            overflow-wrap: break-word;
             text-overflow: clip;
-            white-space: nowrap!important;
+            word-wrap: break-word;
             padding: 0.5em;
         }
 
@@ -127,10 +127,10 @@
             The returned job status is: <b>{{jobStatusMessage}}</b>
             {{/if}}
             {{#if failure}}
-            <p class="error">The job resulted in an error message. Please look at the details below.</p>
+            <p class="error">The job resulted in an error message.</p>
             {{/if}}
             {{#with datasets}}
-            {{#if bad}}
+            {{#if (and bad (eq ../jobType "ARCHIVE"))}}
             <p><b>Our system was unable to perform the requested action on the following dataset(s):</b></p>
             <table>
                 <tr style="background-color:lightblue">
