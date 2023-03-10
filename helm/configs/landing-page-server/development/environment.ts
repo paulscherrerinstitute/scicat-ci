@@ -15,6 +15,6 @@ export const environment = {
       option: "URLs", 
       username: "lp_service", 
       title: "Please enter your email address where you will receive the download procedure",
-      confirmMessage: "You are about to submit a data request to the following email:"
+      confirmMessage: "Are you sure you want to continue?"
   },
   };
