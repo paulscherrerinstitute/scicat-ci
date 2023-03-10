@@ -14,6 +14,7 @@ export const environment = {
     retrieveToEmail: {
       option: "URLs", 
       username: "lp_service", 
-      title: "Please enter your email address where you will receive the download procedure"
-    },
+      title: "Please enter your email address where you will receive the download procedure",
+      confirmMessage: "You are about to submit a data request to the following email:"
+  },
   };
