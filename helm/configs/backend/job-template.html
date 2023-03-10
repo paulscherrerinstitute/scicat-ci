@@ -105,7 +105,9 @@
         <table>
             <tr style="background-color:lightblue">
                 <td>PID</td>
+                {{#unless (eq jobType "public")}}
                 <td>Ownergroup</td>
+                {{/unless}}
                 <td>Sourcefolder</td>
                 <td>Size</td>
                 {{#unless (eq jobType "public")}}
@@ -116,7 +118,9 @@
             {{#each jobData}}
             <tr>
                 <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
+                {{#unless (eq ../jobType "public")}}
                 <td>{{ownerGroup}}</td>
+                {{/unless}}
                 <td>{{sourceFolder}}</td>
                 <td>{{formatBytes size}}</td>
                 {{#unless (eq ../jobType "public")}}
