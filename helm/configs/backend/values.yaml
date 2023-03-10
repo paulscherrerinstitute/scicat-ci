@@ -47,7 +47,6 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
   hosts:
     - host: "{{ .Values.host }}"
       paths: 
