@@ -30,7 +30,8 @@ module.exports = {
     from: "scicatarchivemanager@YOUR.DOMAIN",
     to: undefined,
     subject: "[SciCat " + process.env.NODE_ENV + "]",
-    text: undefined, // can also set html key and this will override this
+    text: undefined, // can also set html key and this will override this,
+    publicRetrieve: true,
   },
   logbook: {
     enabled: false

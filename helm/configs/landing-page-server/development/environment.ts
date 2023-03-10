@@ -10,5 +10,10 @@ export const environment = {
     oaiProviderRoute: null,
     production: true,
     scicatBaseUrl: "https://discovery-development.psi.ch",
-    showLogoBanner: false
+    showLogoBanner: false,
+    retrieveToEmail: {
+      option: "URLs", 
+      username: "lp_service", 
+      title: "Please enter your email address where you will receive the download procedure"
+    },
   };

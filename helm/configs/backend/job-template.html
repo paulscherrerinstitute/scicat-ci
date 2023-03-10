@@ -92,7 +92,12 @@
         <!-- Template for job submission comfirmation -->
         {{#with jobSubmissionNotification}}
         <div>
+            {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
             Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job has been submitted and will be processed as soon as possible.<br>
+            {{else}}
+            Your {{jobType}} job has been submitted and will be processed as soon as possible.<br>
+            Job id: {{jobId}}
+            {{/if}}
             You will be notified by email as soon as the job is completed.<br>
         </div>
         {{#if jobData}}
@@ -103,8 +108,10 @@
                 <td>Ownergroup</td>
                 <td>Sourcefolder</td>
                 <td>Size</td>
+                {{#unless (eq jobType "public")}}
                 <td>Archivable</td>
                 <td>Retrievable</td>
+                {{/unless}}
             </tr>
             {{#each jobData}}
             <tr>
@@ -112,8 +119,10 @@
                 <td>{{ownerGroup}}</td>
                 <td>{{sourceFolder}}</td>
                 <td>{{formatBytes size}}</td>
+                {{#unless (eq ../jobType "public")}}
                 <td>{{archivable}}</td>
                 <td>{{retrievable}}</td>
+                {{/unless}}
             </tr>
             {{/each}}
         </table>
@@ -124,7 +133,11 @@
         <!-- Template for finished job  Notification -->
         {{#with jobFinishedNotification}}
         <div>
+            {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
             Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job is now finished.<br>
+            {{else}}
+            Your {{jobType}} job is now finished. Job id: {{jobId}}<br>
+            {{/if}}
             {{#if jobStatusMessage}}
             The returned job status is: <b>{{jobStatusMessage}}</b>
             {{/if}}
