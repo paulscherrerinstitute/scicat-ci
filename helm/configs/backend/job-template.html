@@ -202,7 +202,9 @@
             {{/with}}
             {{#if (eq jobParams.option "URLs")}}
             <p>You can now download the data by clicking on the download icon in the <b>Download parts</b> column of the
-                table. The data is potentially spread over several tar files which you then must untar on your destination system
+                table. The data is potentially spread over several tar files which you then must untar on your destination system. 
+                The data will be available for downoload for 30 days. <br>
+                <b>Anyone with these URLs will be able to download the data.</b>
             </p>
             {{else if (eq jobParams.option "PSI")}}
             <p>You can now use the command 'datasetRetriever' to move the retrieved datasets to their final destination.
