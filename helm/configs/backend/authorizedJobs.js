@@ -30,6 +30,12 @@ const isGlobalAccess = (currentGroups) => {
   );
 }
 
+const removeNonAuthorized = (resultList) => (
+  resultList.filter(
+    item => item.emailJobInitiator === ctx.args.options.currentUserEmail
+  )
+)
+
 module.exports = function (app) {
   app.models.Job.beforeRemote("**",function(ctx, unused, next){
     if (isGlobalAccess(ctx.args.options.currentGroups)) {
@@ -52,8 +58,11 @@ module.exports = function (app) {
       next();
       return;
     }
-    if (ctx.args.id) {
-      checkEmailJobInitiator(ctx.result, ctx.args.options.currentUserEmail);
+    if(ctx.result && ctx.methodString !== "Job.create") {
+      if (ctx.args.id)
+        checkEmailJobInitiator(ctx.result, ctx.args.options.currentUserEmail);
+      else if (Array.isArray(ctx.result)) 
+        ctx.result = removeNonAuthorized(ctx.result)
     }
     next();
   });
