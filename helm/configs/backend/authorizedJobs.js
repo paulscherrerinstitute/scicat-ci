@@ -23,17 +23,12 @@ const addEmailJobInitiatorFilter = (filter, currentUser) => {
   return filter;
 };
 
-const isGlobalAccess = (currentGroups) => {
-  return (
-    currentGroups && 
-    currentGroups.includes("globalaccess")
-  );
-}
+const isGlobalAccess = (currentGroups) => (
+  currentGroups && currentGroups.includes("globalaccess")
+)
 
-const removeNonAuthorized = (resultList) => (
-  resultList.filter(
-    item => item.emailJobInitiator === ctx.args.options.currentUserEmail
-  )
+const removeNonAuthorized = (resultList, currentUser) => (
+  resultList.filter(item => item.emailJobInitiator === currentUser)
 )
 
 module.exports = function (app) {
@@ -62,7 +57,7 @@ module.exports = function (app) {
       if (ctx.args.id)
         checkEmailJobInitiator(ctx.result, ctx.args.options.currentUserEmail);
       else if (Array.isArray(ctx.result)) 
-        ctx.result = removeNonAuthorized(ctx.result)
+        ctx.result = removeNonAuthorized(ctx.result, ctx.args.options.currentUserEmail)
     }
     next();
   });
