@@ -31,47 +31,37 @@ const removeNonAuthorized = (resultList, currentUser) => (
   resultList.filter(item => item.emailJobInitiator === currentUser)
 )
 
-module.exports = function (app) {
 
-  const getCurrentUserEmail = async (userId) => {
-    const userIdentityModel = app.models.UserIdentity;
-    const userIdentity = await userIdentityModel.findOne({where: {userId: userId}});
-    console.log(userIdentity)
-    if (userIdentity.profile && userIdentity.profile.email)
-      return userIdentity.profile.email
-    const userModel = app.models.User;
-    const user = await userModel.findById(userId);
-    return user.email
-  }
-  
-  app.models.Job.beforeRemote("**", async (ctx, unused, next) => {
+module.exports = function (app) {
+  app.models.Job.beforeRemote("**",function(ctx, unused, next){
     if (isGlobalAccess(ctx.args.options.currentGroups)) {
       next();
       return;
     }
-    if (ctx.args.data && ctx.methodString !== "Job.create") {
-      const email = await getCurrentUserEmail(ctx.options.accessToken.userId);
-      checkEmailJobInitiator(ctx.args.data, email);
-    } else if ("filter" in ctx.args) {
-      const email = await getCurrentUserEmail(ctx.options.accessToken.userId);
+    if (ctx.args.data && ctx.methodString !== "Job.create")
+      checkEmailJobInitiator(ctx.args.data, ctx.args.options.currentUserEmail);
+    else if ("filter" in ctx.args) {
       ctx.args.filter = addEmailJobInitiatorFilter(
         ctx.filter, 
-        email
+        ctx.args.options.currentUserEmail
       );
     }
+    next();
   });
 
-  app.models.Job.afterRemote("**", async (ctx, unused, next) => {
+  app.models.Job.afterRemote("**",function(ctx, unused, next){
     if (isGlobalAccess(ctx.args.options.currentGroups)) {
       next();
       return;
     }
     if(ctx.result && ctx.methodString !== "Job.create") {
-      const email = await getCurrentUserEmail(ctx.args.options.accessToken.userId);
       if (ctx.args.id)
-        checkEmailJobInitiator(ctx.result, email);
-      else if (Array.isArray(ctx.result)) 
-        ctx.result = removeNonAuthorized(ctx.result, email)
-    }
+        checkEmailJobInitiator(ctx.result, ctx.args.options.currentUserEmail);
+      else if (Array.isArray(ctx.result)) {
+        console.log(ctx.result)
+        console.log(ctx.args.options.currentUserEmail)
+        ctx.result = removeNonAuthorized(ctx.result, ctx.args.options.currentUserEmail)
+    }}
+    next();
   });
 }
