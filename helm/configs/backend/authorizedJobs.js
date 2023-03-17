@@ -35,8 +35,9 @@ module.exports = function (app) {
 
   const getCurrentUserEmail = async (userId) => {
     const userIdentityModel = app.models.UserIdentity;
-    const userIdentity = await userIdentityModel.find({userId: userId});
-    if (userIdentity.length === 1 && userIdentity.profile && userIdentity.profile.email)
+    const userIdentity = await userIdentityModel.findOne({where: {userId: userId}});
+    console.log(userIdentity)
+    if (userIdentity.profile && userIdentity.profile.email)
       return userIdentity.profile.email
     const userModel = app.models.User;
     const user = await userModel.findById(userId);
