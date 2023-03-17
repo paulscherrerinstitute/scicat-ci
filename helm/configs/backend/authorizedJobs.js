@@ -31,17 +31,18 @@ const removeNonAuthorized = (resultList, currentUser) => (
   resultList.filter(item => item.emailJobInitiator === currentUser)
 )
 
-const getCurrentUserEmail = async (userId) => {
-  const userIdentityModel = app.models.UserIdentity;
-  const userIdentity = await userIdentityModel.find({userId: userId});
-  if (userIdentity.length === 1 && userIdentity.profile && userIdentity.profile.email)
-    return userIdentity.profile.email
-  const userModel = app.models.User;
-  const user = await userModel.findById(userId);
-  return user.email
-}
-
 module.exports = function (app) {
+
+  const getCurrentUserEmail = async (userId) => {
+    const userIdentityModel = app.models.UserIdentity;
+    const userIdentity = await userIdentityModel.find({userId: userId});
+    if (userIdentity.length === 1 && userIdentity.profile && userIdentity.profile.email)
+      return userIdentity.profile.email
+    const userModel = app.models.User;
+    const user = await userModel.findById(userId);
+    return user.email
+  }
+  
   app.models.Job.beforeRemote("**", async (ctx, unused, next) => {
     if (isGlobalAccess(ctx.args.options.currentGroups)) {
       next();
