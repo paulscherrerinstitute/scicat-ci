@@ -28,7 +28,7 @@ const isGlobalAccess = (currentGroups) => (
 )
 
 const addEmailJobInitiatorField = (fields, currentUser) => {
-  if (!ctx.args.fields)
+  if (!fields)
     fields = { emailJobInitiator: currentUser };
   else
     fields.emailJobInitiator = currentUser;
