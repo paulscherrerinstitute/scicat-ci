@@ -65,6 +65,7 @@ configMaps:
     middleware.json: "{{ .Values.MIDDLEWARE }}"
     job-template.html: "{{ .Values.EMAIL_TEMPLATE }}"
     hideEmail.js: "{{ .Values.HIDE_EMAIL }}"
+    authorized-jobs.js: "{{ .Values.AUTHORIZED_JOBS }}"
 
 env:
   - name: ENV
@@ -94,6 +95,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/server/boot/hideEmail.js
     subPath: hideEmail.js
+  - name: config-volume
+    mountPath: /home/node/app/server/boot/authorized-jobs.js
+    subPath: authorized-jobs.js
   - name: secrets-volume
     mountPath: /home/node/app/server/providers.json
     subPath: providers.json

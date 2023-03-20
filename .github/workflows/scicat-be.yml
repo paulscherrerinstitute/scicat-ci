@@ -36,6 +36,7 @@ jobs:
         helm/configs/backend/job-template.html
         helm/configs/backend/${{ needs.set_env.outputs.environment }}/**
         backend/**
+        helm/configs/backend/authorizedJobs.js
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       submodule: backend
@@ -62,6 +63,7 @@ jobs:
         MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
         EMAIL_TEMPLATE=helm/configs/backend/job-template.html
         HIDE_EMAIL=helm/configs/backend/hideEmail.js
+        AUTHORIZED_JOBS=helm/configs/backend/authorizedJobs.js
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
