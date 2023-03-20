@@ -51,6 +51,8 @@ module.exports = function (app) {
     }
     else if (ctx.methodString === "Job.fullquery")
       addEmailJobInitiatorField(ctx.args.fields, ctx.args.options.currentUserEmail);
+    else if (ctx.methodString === "Job.fullfacet")
+      addEmailJobInitiatorField(ctx.args.fields, ctx.args.options.currentUserEmail);
     next();
   });
 
