@@ -123,11 +123,15 @@ services:
       context: ../landing-page-server/.
       target: installer
       dockerfile: ../dev/config/landing-page-server/Dockerfile
+    environment:
+      CHROME_BIN: /usr/bin/chromium
+      CHROME_PATH: /usr/lib/chromium/
     volumes:
       - ../landing-page-server:/home/node/app
       - /home/node/app/node_modules
       - /home/node/app/dist
-    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    user: 0:0
     profiles:
       - lp
       - lp_next
