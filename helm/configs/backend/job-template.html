@@ -92,7 +92,12 @@
         <!-- Template for job submission comfirmation -->
         {{#with jobSubmissionNotification}}
         <div>
+            {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
             Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job has been submitted and will be processed as soon as possible.<br>
+            {{else}}
+            Your {{jobType}} job has been submitted and will be processed as soon as possible.<br>
+            Job id: {{jobId}}.<br>
+            {{/if}}
             You will be notified by email as soon as the job is completed.<br>
         </div>
         {{#if jobData}}
@@ -100,20 +105,28 @@
         <table>
             <tr style="background-color:lightblue">
                 <td>PID</td>
+                {{#unless (eq jobType "public")}}
                 <td>Ownergroup</td>
+                {{/unless}}
                 <td>Sourcefolder</td>
                 <td>Size</td>
+                {{#unless (eq jobType "public")}}
                 <td>Archivable</td>
                 <td>Retrievable</td>
+                {{/unless}}
             </tr>
             {{#each jobData}}
             <tr>
                 <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
+                {{#unless (eq ../jobType "public")}}
                 <td>{{ownerGroup}}</td>
+                {{/unless}}
                 <td>{{sourceFolder}}</td>
                 <td>{{formatBytes size}}</td>
+                {{#unless (eq ../jobType "public")}}
                 <td>{{archivable}}</td>
                 <td>{{retrievable}}</td>
+                {{/unless}}
             </tr>
             {{/each}}
         </table>
@@ -124,7 +137,11 @@
         <!-- Template for finished job  Notification -->
         {{#with jobFinishedNotification}}
         <div>
+            {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
             Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job is now finished.<br>
+            {{else}}
+            Your {{jobType}} job is now finished. Job id: {{jobId}}<br>
+            {{/if}}
             {{#if jobStatusMessage}}
             The returned job status is: <b>{{jobStatusMessage}}</b>
             {{/if}}
@@ -139,7 +156,9 @@
                 <tr style="background-color:lightblue">
                     <td>PID</td>
                     <td>Name</td>
+                    {{#unless (eq ../jobType "public")}}
                     <td>Ownergroup</td>
+                    {{/unless}}
                     <td>Sourcefolder</td>
                     <td>Size</td>
                 </tr>
@@ -147,7 +166,9 @@
                 <tr>
                     <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
+                    {{#unless (eq ../../jobType "public")}}
                     <td>{{ownerGroup}}</td>
+                    {{/unless}}
                     <td>{{sourceFolder}}</td>
                     <td>{{formatBytes size}}</td>
                 </tr>
@@ -160,7 +181,9 @@
                 <tr style="background-color:lightblue">
                     <td>PID</td>
                     <td>Name</td>
+                    {{#unless (eq ../jobType "public")}}
                     <td>Ownergroup</td>
+                    {{/unless}}
                     {{#if (eq ../jobParams.option "URLs")}}
                     <td>Sourcefolder</td>
                     <td>Download parts (size)</td>
@@ -176,7 +199,9 @@
                 <tr>
                     <td><a href="{{@root.config.scicatHref}}/datasets/{{urlEncode pid}}">{{pid}}</a></td>
                     <td>{{name}}</td>
+                    {{#unless (eq ../../jobType "public")}}
                     <td>{{ownerGroup}}</td>
+                    {{/unless}}
                     {{#if (eq ../../jobParams.option "URLs")}}
                     <td>{{sourceFolder}}</td>
                     <td>
@@ -204,7 +229,7 @@
             <p>You can now download the data by clicking on the download icon in the <b>Download parts</b> column of the
                 table. The data is potentially spread over several tar files which you then must untar on your destination system. 
                 The data will be available for download for the next 30 days. <br>
-                <b>Anyone with these URLs will be able to download the data. Do not forward them to people who should not see the data.</b>
+                <b>Anyone with these URLs will be able to download the data.{{#unless (eq jobType "public")}} Do not forward them to people who should not see the data.{{/unless}}</b>
             </p>
             {{else if (eq jobParams.option "PSI")}}
             <p>You can now use the command 'datasetRetriever' to move the retrieved datasets to their final destination.
