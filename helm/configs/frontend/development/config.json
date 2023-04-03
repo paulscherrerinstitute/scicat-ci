@@ -49,7 +49,7 @@
             "name": "runNumber",
             "order": 2,
             "type": "custom",
-            "enabled": false
+            "enabled": true
         },
         {
             "name": "sourceFolder",
