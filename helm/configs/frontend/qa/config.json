@@ -48,7 +48,7 @@
         {
             "name": "runNumber",
             "order": 2,
-            "type": "standard",
+            "type": "custom",
             "enabled": true
         },
         {
