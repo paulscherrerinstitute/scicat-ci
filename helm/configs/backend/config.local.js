@@ -31,6 +31,8 @@ module.exports = {
     graphEndpoint: "https://graph.microsoft.com"
   },
   expressSessionSecret: "asecret",
+  expressSessionStore: true,
+  expressSessionSaveUninitialized: false,
   smtpMessage: {
     from: "dacatmail@psi.ch",
     replyTo: "scicatarchivemanager@psi.ch",
