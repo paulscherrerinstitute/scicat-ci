@@ -57,7 +57,6 @@ jobs:
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       submodule: backend
       helm_set_files: >-
-        SERVER=helm/configs/backend/server.js
         CONFIG_LOCAL=helm/configs/backend/config.local.js
         LOGIN_CALLBACKS=helm/configs/backend/login-callbacks.js
         MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
