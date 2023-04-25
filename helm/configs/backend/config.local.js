@@ -43,5 +43,9 @@ module.exports = {
   queue: "rabbitmq",
   logbook: {
     enabled: false
+  },
+  serverTimeout: {
+    keepAliveTimeout: 76000,
+    headersTimeout: 77000,
   }
 };
