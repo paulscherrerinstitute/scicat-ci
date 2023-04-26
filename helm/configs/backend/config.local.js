@@ -31,6 +31,8 @@ module.exports = {
     graphEndpoint: "https://graph.microsoft.com"
   },
   expressSessionSecret: "asecret",
+  expressSessionStore: true,
+  expressSessionSaveUninitialized: false,
   smtpMessage: {
     from: "dacatmail@psi.ch",
     replyTo: "scicatarchivemanager@psi.ch",
@@ -41,5 +43,9 @@ module.exports = {
   queue: "rabbitmq",
   logbook: {
     enabled: false
+  },
+  serverTimeout: {
+    keepAliveTimeout: 76000,
+    headersTimeout: 77000,
   }
 };

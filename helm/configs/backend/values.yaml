@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: "{{ .Values.ciRepository }}"
@@ -59,7 +59,6 @@ ingress:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    server.js: "{{ .Values.SERVER }}"
     config.local.js: "{{ .Values.CONFIG_LOCAL }}"
     login-callbacks.js: "{{ .Values.LOGIN_CALLBACKS }}"
     middleware.json: "{{ .Values.MIDDLEWARE }}"
@@ -77,9 +76,6 @@ env:
         key: mail_auth
 
 volumeMounts:
-  - name: config-volume
-    mountPath: /home/node/app/server/server.js
-    subPath: server.js
   - name: config-volume
     mountPath: /home/node/app/server/config.local.js
     subPath: config.local.js
