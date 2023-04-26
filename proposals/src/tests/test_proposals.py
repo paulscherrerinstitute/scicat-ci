@@ -1,5 +1,6 @@
 from types import GeneratorType
 from unittest.mock import mock_open, patch
+from urllib.error import URLError
 
 import pytest
 
@@ -39,19 +40,21 @@ def test_url(proposals_class, expected):
 @pytest.mark.parametrize(
     "request_parameter, expected",
     [
-        ["a_parameter", f"{DUO_ENDPOINT}/a_parameter"],
-        ["", f"{DUO_ENDPOINT}/"],
+        ["a_parameter", [f"{DUO_ENDPOINT}/a_parameter", 1]],
+        ["", [f"{DUO_ENDPOINT}/", 2]],
     ],
 )
 @patch.multiple(pr.Proposals, __abstractmethods__=set())
 def test_request(request_parameter, expected):
     proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
     with patch.object(pr, "ur") as mock_request:
+        if expected[1] == 2:
+            mock_request.urlopen.side_effect = (URLError(""), "")
         proposals.request(request_parameter)
         mock_request.Request.assert_called_with(
-            expected, headers={"Cookie": f"SECRET={DUO_SECRET}"}
+            expected[0], headers={"Cookie": f"SECRET={DUO_SECRET}"}
         )
-        mock_request.urlopen.assert_called_once()
+        assert mock_request.urlopen.call_count == expected[1]
 
 
 @patch.object(
