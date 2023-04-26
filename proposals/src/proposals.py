@@ -3,6 +3,8 @@ from itertools import product
 from json import loads
 from urllib import request as ur
 
+from utils import retry
+
 
 class Proposals(metaclass=abc.ABCMeta):
     def __init__(self, duo_endpoint, duo_secret):
@@ -22,6 +24,7 @@ class Proposals(metaclass=abc.ABCMeta):
     def proposals_path(self):
         return f"CalendarInfos/{self._type}"
 
+    @retry
     def request(self, path=""):
         _request = ur.Request(
             f"{self.duo_endpoint}/{path}",
