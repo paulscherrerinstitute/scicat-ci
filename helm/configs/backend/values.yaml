@@ -39,6 +39,7 @@ secrets:
       functionalAccounts.json: "{{ .Values.secretsJson.FUNCTIONAL_ACCOUNTS }}"
       providers.json: "{{ .Values.secretsJson.PROVIDERS }}"
       mail_auth: "{{ .Values.secretsJson.MAIL_AUTH }}"
+      express_session: "{{ .Values.secretsJson.EXPRESS_SESSION_SECRET }}"
 
 ingress:
   enabled: true
@@ -74,6 +75,11 @@ env:
       secretKeyRef: 
         name: "{{ .Release.Name }}-s"
         key: mail_auth
+  - name: EXPRESS_SESSION_SECRET
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: express_session
 
 volumeMounts:
   - name: config-volume
