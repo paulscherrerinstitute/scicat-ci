@@ -30,7 +30,7 @@ module.exports = {
     aadEndpoint: "https://login.microsoftonline.com",
     graphEndpoint: "https://graph.microsoft.com"
   },
-  expressSessionSecret: "asecret",
+  expressSessionSecret: process.env.EXPRESS_SESSION_SECRET,
   expressSessionStore: true,
   expressSessionSaveUninitialized: false,
   smtpMessage: {
