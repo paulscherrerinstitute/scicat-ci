@@ -1,0 +1,48 @@
+name: materialised-view
+
+on:  
+  workflow_dispatch: 
+    paths: 
+      - .github/workflows/materialised-view.yml
+      - helm/configs/materialised-view/**
+  pull_request:
+    branches: [ main ]
+    paths: 
+      - .github/workflows/materialised-view.yml
+      - helm/configs/materialised-view/**
+  release:
+    types: [ published ]
+
+jobs:
+
+  set_env: 
+    uses: ./.github/workflows/reusable.environment.yml
+
+  deploy:
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'mv'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set_env.outputs.environment }}
+    needs: 
+     - set_env
+    steps: 
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: deploy 
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+      with:
+        release: '${{ env.RELEASE_NAME }}'
+        namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
+        chart: helm/charts/cron
+        value-files: >-
+          helm/configs/${{ env.RELEASE_NAME }}/values.yaml
+          helm/configs/${{ env.RELEASE_NAME }}/${{ inputs.environment }}/values.yaml
+        secrets:  ${{ toJSON(secrets) }}
+        files: >-
+          MATARIALISE=helm/configs/materialised-view/materialise.js
+      env:
+        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+        RELEASE_NAME: materialised-view
+        ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
+        NAMESPACE_PREFIX: scicat-

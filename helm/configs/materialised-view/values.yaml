@@ -1,0 +1,46 @@
+image:
+  repository: mongo
+  pullPolicy: Always
+  tag: latest
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      mongosh $MONGO_URI materialise.js
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      mongoURI: "{{ .Values.secretsJson.MONGO_URI }}"
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    materialise.js: "{{ .Values.secretsJson.MATERIALISE }}"
+
+env:
+  - name: MONGO_URI
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: mongoURI
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /home/node/app/server/materialise.js
+    subPath: materialise.js
+
+cronjob:
+  restartPolicy: OnFailure
+  schedule: 0 5 * * 6
