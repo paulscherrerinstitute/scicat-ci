@@ -40,7 +40,3 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/server/materialise.js
     subPath: materialise.js
-
-cronjob:
-  restartPolicy: OnFailure
-  schedule: 0 5 * * 6
