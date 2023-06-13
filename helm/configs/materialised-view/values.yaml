@@ -9,7 +9,7 @@ run:
   args: 
     - -c
     - >
-      mongosh $MONGO_URI materialise.js
+      mongosh $MONGO_URI --file updateMatViews.js
 
 volumes:
   - name: config-volume
@@ -38,5 +38,5 @@ env:
 
 volumeMounts:
   - name: config-volume
-    mountPath: /home/node/app/server/materialise.js
-    subPath: materialise.js
+    mountPath: /home/node/app/server/updateMatViewsjs
+    subPath: updateMatViewsjs
