@@ -14,6 +14,9 @@ spec:
         metadata:
           labels:
             {{- include "helm_chart.selectorLabels" . | nindent 12 }}
+          annotations:
+            checksum/config: {{ .Values.configMaps | toJson |  sha256sum }}
+            checksum/secrets: {{ .Values.secrets | toJson |  sha256sum }}
         spec:
           restartPolicy: {{ .Values.cronjob.restartPolicy }}
           containers:
