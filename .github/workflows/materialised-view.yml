@@ -37,7 +37,7 @@ jobs:
         chart: helm/charts/cron
         value-files: >-
           helm/configs/${{ env.RELEASE_NAME }}/values.yaml
-          helm/configs/${{ env.RELEASE_NAME }}/${{ inputs.environment }}/values.yaml
+          helm/configs/${{ env.RELEASE_NAME }}/${{ env.environment }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
         files: >-
           MATERIALISE=helm/configs/materialised-view/updateMatViews.js
