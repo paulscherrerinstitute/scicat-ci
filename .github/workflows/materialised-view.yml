@@ -29,7 +29,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: deploy 
+    - name: deploy
       uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
       with:
         release: '${{ env.RELEASE_NAME }}'
