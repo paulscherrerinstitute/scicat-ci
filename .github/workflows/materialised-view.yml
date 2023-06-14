@@ -40,7 +40,7 @@ jobs:
           helm/configs/${{ env.RELEASE_NAME }}/${{ inputs.environment }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
         files: >-
-          MATARIALISE=helm/configs/materialised-view/materialise.js
+          MATARIALISE=helm/configs/materialised-view/updateMatViews.js
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
         RELEASE_NAME: materialised-view
