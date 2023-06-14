@@ -23,7 +23,7 @@ secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data: 
-      mongoURI: YQo=
+      mongoURI: "{{ .Values.secretsJson.MV_MONGO_URI }}"
 
 configMaps: 
   "{{ .Release.Name }}-cm":
