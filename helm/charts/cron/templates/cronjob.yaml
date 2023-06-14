@@ -28,6 +28,9 @@ spec:
             volumeMounts:
               {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
+            {{- with .Values.run }}
+            {{- tpl (toYaml .) $ | nindent 10 }}
+            {{- end }}
           {{- with .Values.volumes}}
           volumes:
             {{- tpl (toYaml .) $ | nindent 10 }}
