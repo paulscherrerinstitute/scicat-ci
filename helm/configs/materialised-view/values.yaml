@@ -1,7 +1,7 @@
 image:
   repository: mongo
-  pullPolicy: Always
-  tag: latest
+  pullPolicy: IfNotPresent
+  tag: "4.4"
 
 run:
   command: 
@@ -9,7 +9,7 @@ run:
   args: 
     - -c
     - >
-      mongosh $MONGO_URI --file updateMatViews.js
+      mongosh $MONGO_URI --file /updateMatViews.js
 
 volumes:
   - name: config-volume
@@ -27,7 +27,7 @@ secrets:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    materialise.js: "{{ .Values.secretsJson.MATERIALISE }}"
+    updateMatViews.js: "{{ .Values.secretsJson.MATERIALISE }}"
 
 env:
   - name: MONGO_URI
@@ -38,5 +38,5 @@ env:
 
 volumeMounts:
   - name: config-volume
-    mountPath: /home/node/app/server/updateMatViewsjs
-    subPath: updateMatViewsjs
+    mountPath: /updateMatViews.js
+    subPath: updateMatViews.js
