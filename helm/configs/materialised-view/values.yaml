@@ -1,0 +1,42 @@
+image:
+  repository: mongo
+  pullPolicy: IfNotPresent
+  tag: "6.0"
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      mongosh $MONGO_URI --file /updateMatViews.js
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      mongoURI: "{{ .Values.secretsJson.MV_MONGO_URI }}"
+
+configMaps: 
+  "{{ .Release.Name }}-cm":
+    updateMatViews.js: "{{ .Values.MATERIALISE }}"
+
+env:
+  - name: MONGO_URI
+    valueFrom:
+      secretKeyRef: 
+        name: "{{ .Release.Name }}-s"
+        key: mongoURI
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /updateMatViews.js
+    subPath: updateMatViews.js
