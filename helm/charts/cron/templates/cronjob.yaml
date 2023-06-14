@@ -29,7 +29,7 @@ spec:
               {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
             {{- with .Values.run }}
-            {{- tpl (toYaml .) $ | nindent 10 }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
           {{- with .Values.volumes}}
           volumes:
