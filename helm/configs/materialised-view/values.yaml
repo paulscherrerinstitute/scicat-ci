@@ -27,7 +27,7 @@ secrets:
 
 configMaps: 
   "{{ .Release.Name }}-cm":
-    updateMatViews.js: "{{ .Values.secretsJson.MATERIALISE }}"
+    updateMatViews.js: "{{ .Values.MATERIALISE }}"
 
 env:
   - name: MONGO_URI
