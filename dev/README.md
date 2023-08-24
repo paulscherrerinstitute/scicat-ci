@@ -3,6 +3,40 @@
 Build the docker containers with the suitable [profiles](https://docs.docker.com/compose/profiles/): 
 
 ```bash
-MY_PROFILE=<USER_INPUT>
-docker-compose -f docker-compose.yaml --profile $MY_PROFILE up -d --force-recreate --build --no-deps
+export COMPOSE_PROFILES=<MY_PROFILES>
+docker-compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
 ```
+
+All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so it starts, rather the applications, an environment where the development of the applications is set up. This means that, to run the application, one has to attach to the container and start it. 
+
+## Example
+
+Here are covered the two most common use case, spinning up the backend and fronted; the new backend and the frontend. 
+
+### BE and FE
+
+1. Export the COMPOSE_PROFILES:
+```bash
+export COMPOSE_PROFILES=be,fe
+```
+2. run docker-compose:
+```bash
+docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+```
+
+This will start four containers: the be container, the fe one, the mongodb database and a short lived one, called mongodb_seed_be that puts some example data into the be db of mongo.
+
+### BE_NEXT and FE
+
+1. Export the COMPOSE_PROFILES:
+```bash
+export COMPOSE_PROFILES=be,fe
+```
+2. run docker-compose:
+```bash
+docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+```
+
+As before, this will start four containers: the be_next container, the fe one, the mongo database and a short lived one, called mongodb_seed_be_next that puts some example data into the be_next db of mongo.
+
+Since the configuration of the frontend with the new backend has slightly changed, remember to set the `accessTokenPrefix` value to "Bearer " in the [config.json](./config/frontend/config.json#3) file of the fe, before starting the frontend application.
