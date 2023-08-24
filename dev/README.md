@@ -7,7 +7,7 @@ export COMPOSE_PROFILES=<MY_PROFILES>
 docker-compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
 ```
 
-All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so it starts, rather the applications, an environment where the development of the applications is set up. This means that, to run the application, one has to attach to the container and start it. 
+All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so docker-compose starts, rather the applications, environments where the development environment of each applications is set up. This means that, to run the application, one has to attach to the container and start it. 
 
 ## Example
 
@@ -26,7 +26,7 @@ docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 
 This will start four containers: the be container, the fe one, the mongodb database and a short lived one, called mongodb_seed_be that puts some example data into the be db of mongo.
 
-### BE_NEXT and FE
+### New BE and FE
 
 1. Export the COMPOSE_PROFILES:
 ```bash
