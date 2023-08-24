@@ -7,7 +7,7 @@
       "host": "mongodb",
       "port": 27017,
       "url": "",
-      "database": "scicat",
+      "database": "be",
       "password": "",
       "name": "mongo",
       "user": "",

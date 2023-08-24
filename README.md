@@ -1,6 +1,10 @@
 # scicat-ci
 CI related information to deploy SciCat
 
+# Local environment
+
+To spin up the container(s) of interest, follow the documentation in the [README](./dev/README.md) in the dev folder.
+
 # Deployment behaviour
 The CI is responsible for deploying the SciCat components in the k8s clusters (one for `development`, another for `qa` and `production`), based on some rules.
 

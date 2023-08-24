@@ -6,19 +6,41 @@ services:
     volumes:
       - mongodb_data:/data/db
     profiles:
-      - legacy
       - be
       - be_next
-      - next
-      - search_legacy
-      - search_next
-      - lp_legacy
-      - lp_next
-      - oi_next
-      - oi_legacy
-      - oi_lp
+      - oi
 
-  backend:
+  mongodb_seed:
+    image: mongo
+    volumes:
+      - "./config/seed_db/seed:/seed"
+      - "./config/seed_db/mongo_import.sh:/mnt/mongo_import.sh"
+    command:
+      - "sh"
+      - "-c"
+      - "chmod u+x /mnt/mongo_import.sh && /mnt/mongo_import.sh"
+    user: "0:0"
+    depends_on:
+      - mongodb
+    restart: on-failure
+    profiles:
+      - never
+
+  mongodb_seed_be:
+    extends: mongodb_seed
+    environment:
+      - DATABASE=be
+    profiles:
+      - be
+
+  mongodb_seed_be_next:
+    extends: mongodb_seed
+    environment:
+      - DATABASE=be_next
+    profiles:
+      - be_next
+
+  be:
     build: ../backend/.
     depends_on:
       - mongodb
@@ -32,16 +54,13 @@ services:
     environment:
       NODE_ENV: development
     command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3000:3000
     profiles:
       - be
-      - legacy
-      - search_legacy
-      - lp_legacy
-      - oi_legacy
-      - be_pr
 
-  frontend:
-    build: 
+  fe:
+    build:
       context: ../frontend/.
       target: installer
       dockerfile: ../dev/config/frontend/Dockerfile
@@ -54,13 +73,13 @@ services:
       - /frontend/node_modules
       - /frontend/dist
     command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    ports:
+      - 4200:4200
     profiles:
-      - legacy
       - fe
-      - next
 
-  backend_next:
-    build: 
+  be_next:
+    build:
       context: ../scicat-backend-next/.
       target: dev
     depends_on:
@@ -71,55 +90,39 @@ services:
       - ../scicat-backend-next:/home/node/app
       - /home/node/app/node_modules
       - /home/node/app/dist
-    environment:
-      MONGODB_URI: mongodb://mongodb:27017/scicat_next
-      EXPRESS_SESSION_SECRET: a_scicat_secret
-      JWT_SECRET: a_scicat_secret
-      PORT: 3000
-      HTTP_MAX_REDIRECTS: 5
-      HTTP_TIMEOUT: 5000
-      JWT_EXPIRES_IN: 3600
-      SITE: SAMPLE-SITE
-      PID_PREFIX: PID.SAMPLE.PREFIX
-      DOI_PREFIX: DOI.SAMPLE.PREFIX
-      METADATA_KEYS_RETURN_LIMIT: 100
-      METADATA_PARENT_INSTANCES_RETURN_LIMIT: 100
+    env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
       - be_next
-      - next
-      - search_next
-      - lp_next
-      - oi_next
 
   jupyter:
     image: python:3.10
     ports:
-     - 8888:8888
+      - 8888:8888
     volumes:
       - ../curation/requirements.txt:/requirements.txt
       - ../curation/notebooks:/notebooks
       - ./config/jupyter/.env:/.env
     command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt && pip install jupyterlab && jupyter-lab --LabApp.token='' --allow-root --port=8888 --ip=0.0.0.0 --notebook-dir=/notebooks"
-    profiles: 
+    profiles:
       - jupyter
 
-  search_api:
-    build: 
+  search:
+    build:
       context: ../search-api/.
     volumes:
       - ../search-api:/home/node/app
       - /home/node/app/node_modules
     command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3002:3000
     environment:
       NODE_ENV: development
     profiles:
       - search
-      - search_next
-      - search_legacy
 
-  landing_page:
-    build: 
+  lp:
+    build:
       context: ../landing-page-server/.
       target: installer
       dockerfile: ../dev/config/landing-page-server/Dockerfile
@@ -131,14 +134,13 @@ services:
       - /home/node/app/node_modules
       - /home/node/app/dist
     command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    ports:
+      - 4201:4200
     user: 0:0
     profiles:
       - lp
-      - lp_next
-      - lp_legacy
-      - oi_lp
 
-  oaipmh:
+  oi:
     build: ../oaipmh/.
     volumes:
       - ../oaipmh:/home/node/app
@@ -146,13 +148,12 @@ services:
       - /home/node/app/node_modules
       - /home/node/app/dist
     command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3001:3001
     profiles:
       - oi
-      - oi_next
-      - oi_legacy
-      - oi_lp
 
-  proposals:
+  pr:
     build:
       context: ../proposals/.
       target: dev
@@ -163,7 +164,6 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
     profiles:
       - pr
-      - be_pr
 
 volumes:
   mongodb_data:
