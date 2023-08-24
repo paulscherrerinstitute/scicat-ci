@@ -39,4 +39,4 @@ docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 
 As before, this will start four containers: the be_next container, the fe one, the mongo database and a short lived one, called mongodb_seed_be_next that puts some example data into the be_next db of mongo.
 
-Since the configuration of the frontend with the new backend has slightly changed, remember to set the `accessTokenPrefix` value to "Bearer " in the [config.json](./config/frontend/config.json#3) file of the fe, before starting the frontend application.
+Since the configuration of the frontend with the new backend has slightly changed, remember to set the `accessTokenPrefix` value to "Bearer " in the [config.json](./config/frontend/config.json#L3) file of the fe, before starting the frontend application.
