@@ -30,7 +30,7 @@ This will start four containers: the be container, the fe one, the mongodb datab
 
 1. Export the COMPOSE_PROFILES:
 ```bash
-export COMPOSE_PROFILES=be,fe
+export COMPOSE_PROFILES=be_next,fe
 ```
 2. run docker-compose:
 ```bash
