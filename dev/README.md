@@ -12,9 +12,9 @@ git submodule update --init --recursive --remote
 ### :warning: IMPORTANT 
 The docker-compose builds the containers from the Dockerfile of each submodule, thus using the submodule checked out to a particular commit.
 It is often the case that when setting up the environment one wants the components to be checked out automatically to the latest on main. The command above (`git submodule update --init --recursive --remote`) does that but might break any component where a non-backwards compatible change was applied. 
-We reference in each components config the latest commit (.git-commit-sha) of the submodules where the docker-compose was run and worked the last time, whenever the submodule commit is different from the one referenced in the scicat-ci repo. 
+We reference in the config of each components the latest commit (.git-commit-sha) of the submodule where the docker-compose was run and worked the last time, whenever the submodule commit is different from the one referenced in the scicat-ci repo. 
 
-To build a container basing it on a different commit, e.g. the latest on main, one has to checkout first the submodule to the commit (or branch) of interest.
+To build a container based on a different commit one has to checkout first the submodule to the commit (or branch) of interest.
 
 Build the docker containers with the suitable [profiles](https://docs.docker.com/compose/profiles/): 
 
