@@ -62,19 +62,19 @@ services:
   fe:
     build:
       context: ../frontend/.
-      target: installer
       dockerfile: ../dev/config/frontend/Dockerfile
-    environment:
-      CHROME_BIN: /usr/bin/chromium
-      CHROME_PATH: /usr/lib/chromium/
     volumes:
       - ../frontend:/frontend
       - ./config/frontend/config.json:/frontend/src/assets/config.json
       - /frontend/node_modules
       - /frontend/dist
-    command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    # browser required for test suite; move to installer layer
+    command: /bin/sh -c "while true; do sleep 600; done"
     ports:
+      # Dev image with `node start` uses port 4200
+      # For the upstream dockerfile with nginx, use 4200:80
       - 4200:4200
+
     profiles:
       - fe
 
