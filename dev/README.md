@@ -95,37 +95,34 @@ A custom Dockerfile is used because the production image uses the node alpine ba
 
 ```
 cd /home/node/app
-node .
+npm start
 ```
 
 ### Landing Page `lp`
 
 ```bash
 cd /home/node/app
-npm run serve -- --host 0.0.0.0 --disable-host-check
+npm start -- --host 0.0.0.0
 ```
 
 ### OAI-PMH `oi`
 
 ```bash
 cd /home/node/app
-node .
+npm start
 ```
 
 ### Proposals `pr`
 
 ```bash
 cd /usr/src/proposals
-
-node .
+python src/main.py
 ```
 
-### Backend `be` and `be_next`
+### Jupyter
 
-```bash
-cd /usr/src/app
-python copy_public_ds.py
-```
+Simply browse to localhost:8888
+
 ## Reclaiming space
 
 This compose file creates a new docker volume with test data. Removing this requires adding `--volumes` when shutting down the containers:
