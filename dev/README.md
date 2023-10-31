@@ -70,14 +70,14 @@ The `docker-compose.yaml` file is constructed to prepare containers with all dep
 
 ```bash
 cd /home/node/app
-node .
+npm start
 ```
 
 ### Backend-next `be_next`
 
 ```bash
 cd /home/node/app
-node dist/main
+npm start
 ```
 
 ### Frontend `fe`
@@ -86,11 +86,11 @@ The frontend uses a custom Dockerfile with the following modifications:
 
 ```bash
 cd /frontend
-npm run serve -- --host 0.0.0.0 --disable-host-check
+npm start -- --host 0.0.0.0
 ```
 
-A custom Dockerfile is used because the production image builds the static site and then serves it via nginx. The development image serves the site using `ng serve` (webpack-dev-server) so it reflects the latest code and updates when files change.
-`
+A custom Dockerfile is used because the production image uses the node alpine base image which does not crosscompile on macOS.
+
 ### Search `search`
 
 ```
