@@ -1,5 +1,8 @@
 # scicat-ci
-CI related information to deploy SciCat
+CI related information to deploy SciCat at PSI.
+
+For a simpler configuration for running and developing the SciCat core components, see
+the [SciCat Live](https://github.com/SciCatProject/scicatlive) project.
 
 # Local environment
 
@@ -8,8 +11,17 @@ To spin up the container(s) of interest, follow the documentation in the [README
 # Deployment behaviour
 The CI is responsible for deploying the SciCat components in the k8s clusters (one for `development`, another for `qa` and `production`), based on some rules.
 
-The whole pipeline relies on the existence of three deployment environments: `development` (where changes are developed), `qa` (beta testing environment) and `production` (stable environment). The components are deployed on one of two clusters depending on the environment. The `development` environment is deployed on the `development` cluster, while the `qa` and `production` environment are deployed on the `qaprod` cluster and are installed under the `scicat-{env}` namespace on the corresponding cluster. For the three GitHub CI triggers, `pull_request` to `main`, `push` to `main` and `release`, the CI extracts the environment based on the trigger (follows), builds, tags and pushes the docker image and deploys the helm chart to the corresponding k8s cluster, having applied the configuration specific to the environment. 
+The whole pipeline relies on the existence of three deployment environments: `development` (where changes are developed), `qa` (beta testing environment) and `production` (stable environment). The components are deployed on one of two clusters depending on the environment. The `development` environment is deployed on the `development` cluster, while the `qa` and `production` environment are deployed on the `qaprod` cluster and are installed under the `scicat-{env}` namespace on the corresponding cluster. For the three GitHub CI triggers, `pull_request` to `main`, `push` to `main` and `release`, the CI extracts the environment based on the trigger (follows), builds, tags and pushes the docker image and deploys the helm chart to the corresponding k8s cluster, having applied the configuration specific to the environment.
+
+| Environment | K8 Cluster  |     Namespace      |
+| ----------- | ----------- | ------------------ |
+| development | development | scicat-development |
+| qa          | qaprod      | scicat-qa          |
+| production  | qaprod      | scicat-production  |
+
 The configuration files are in the [helm/configs](helm/configs) folder and are organised in folders with the same name of the component (convention to be maintained). For each component, the files in `helm/configs/{component}` are shared by all the environments, while the ones specific to one environment are in `helm/configs/{component}/{environment}`. For example, the `backend` configuration files are in the [helm/configs/backend](helm/configs/backend) folder, and the development specific files are in [helm/configs/backend/development](helm/configs/backend/development)
+
+
 
 There is no need to explicitly specify the environment, nor the location of the files at CI time, as its value is extracted depending on the GitHub CI trigger.
 

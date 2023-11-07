@@ -62,17 +62,14 @@ services:
   fe:
     build:
       context: ../frontend/.
-      target: installer
       dockerfile: ../dev/config/frontend/Dockerfile
-    environment:
-      CHROME_BIN: /usr/bin/chromium
-      CHROME_PATH: /usr/lib/chromium/
+      target: installer
     volumes:
       - ../frontend:/frontend
       - ./config/frontend/config.json:/frontend/src/assets/config.json
       - /frontend/node_modules
       - /frontend/dist
-    command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    command: /bin/sh -c "while true; do sleep 600; done"
     ports:
       - 4200:4200
     profiles:
