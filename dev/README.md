@@ -77,7 +77,7 @@ node .
 
 ```bash
 cd /home/node/app
-node dist/main
+npm run start
 ```
 
 ### Frontend `fe`
