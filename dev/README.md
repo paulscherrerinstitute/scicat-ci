@@ -70,7 +70,7 @@ The `docker-compose.yaml` file is constructed to prepare containers with all dep
 
 ```bash
 cd /home/node/app
-node .
+npm run start
 ```
 
 ### Backend-next `be_next`
@@ -86,46 +86,43 @@ The frontend uses a custom Dockerfile with the following modifications:
 
 ```bash
 cd /frontend
-npm run serve -- --host 0.0.0.0 --disable-host-check
+npm run start -- --host 0.0.0.0 --disable-host-check
 ```
 
 A custom Dockerfile is used because the production image builds the static site and then serves it via nginx. The development image serves the site using `ng serve` (webpack-dev-server) so it reflects the latest code and updates when files change.
-`
+
 ### Search `search`
 
 ```
 cd /home/node/app
-node .
+npm run start
 ```
 
 ### Landing Page `lp`
 
 ```bash
 cd /home/node/app
-npm run serve -- --host 0.0.0.0 --disable-host-check
+npm run start -- --host 0.0.0.0 --disable-host-check
 ```
 
 ### OAI-PMH `oi`
 
 ```bash
 cd /home/node/app
-node .
+npm run start
 ```
 
 ### Proposals `pr`
 
 ```bash
 cd /usr/src/proposals
-
-node .
+python src/main.py
 ```
 
-### Backend `be` and `be_next`
+### Jupyter
 
-```bash
-cd /usr/src/app
-python copy_public_ds.py
-```
+Simply browse to localhost:8888
+
 ## Reclaiming space
 
 This compose file creates a new docker volume with test data. Removing this requires adding `--volumes` when shutting down the containers:

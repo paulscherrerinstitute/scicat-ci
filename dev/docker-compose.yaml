@@ -67,8 +67,6 @@ services:
       - ../frontend:/frontend
       - ./config/frontend/config.json:/frontend/src/assets/config.json
       - /frontend/node_modules
-      - /frontend/dist
-    # browser required for test suite; move to installer layer
     command: /bin/sh -c "while true; do sleep 600; done"
     ports:
       # Dev image with `node start` uses port 4200
