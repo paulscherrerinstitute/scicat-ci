@@ -2,9 +2,13 @@ name: deploy-helm
 description: "Helm deploy"
 
 inputs:
-  secrets: 
-    description: secrets to be set when creating the secret resource
-    required: false
+  bastion_user: 
+    description: username@host for the ssh tunnel
+    required: true
+    type: string
+  bastion_ssh_key: 
+    description: private ssh key content
+    required: true
     type: string
 
 runs:
