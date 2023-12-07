@@ -17,5 +17,5 @@ runs:
     - run: |
         mkdir .ssh;
         echo ${{ inputs.bastion_ssh_key }} | base64 -d > .ssh/github_bastion;
-        ssh -D 1080 -f -q -N ${{ inputs.bastion_user }} -i .ssh/github_bastion;
+        ssh ${{ inputs.bastion_user }} -i .ssh/github_bastion 'echo 1';
       shell: bash
