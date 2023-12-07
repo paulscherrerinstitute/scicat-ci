@@ -1,0 +1,25 @@
+name: deploy-helm
+description: "Helm deploy"
+
+inputs:
+  bastion_user: 
+    description: username@host for the ssh tunnel
+    required: true
+    type: string
+  bastion_ssh_key: 
+    description: private ssh key content
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        mkdir .ssh;
+        BASTION_USER=${{ inputs.bastion_user}};
+        echo ${{ inputs.bastion_ssh_key }} | base64 -d > .ssh/github_bastion;
+        chmod 600 .ssh/github_bastion;
+        ssh-keyscan ${BASTION_USER#*@} > .ssh/known_hosts 2> /dev/null;
+        chmod 644 .ssh/known_hosts;
+        ssh -i .ssh/github_bastion ${{ inputs.bastion_user }} -o UserKnownHostsFile=.ssh/known_hosts -D 1080 -f -q -N;
+      shell: bash
