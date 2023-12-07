@@ -18,10 +18,7 @@ on:
 
 jobs:
 
-  ssh:
-
   set_env: 
-    needs: ssh
     uses: ./.github/workflows/reusable.environment.yml
     with: 
       commit: ${{ github.event.inputs.commit }}
