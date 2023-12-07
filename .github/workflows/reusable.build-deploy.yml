@@ -138,7 +138,7 @@ jobs:
         ref: ${{ inputs.commit }}
 
     - name: Open ssh tunnel
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@bastion_ssh
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
       with: 
         bastion_user: '${{ secrets.BASTION_USER }}'
         bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
