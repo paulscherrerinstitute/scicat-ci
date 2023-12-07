@@ -161,6 +161,3 @@ jobs:
         secrets: '${{ secrets.JSON_SECRETS }}'
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
-
-    - name: Close ssh connection
-      run:       
