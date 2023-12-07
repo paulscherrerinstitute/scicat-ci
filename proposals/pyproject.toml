@@ -2,7 +2,7 @@
 name = "proposals"
 version = "0.1.0"
 description = "A microservice for syncing proposals from duo to scicat"
-authors = ["stephan.egli@psi.ch", "carlo.minotti@psi.ch", "krisztian.pozsa@psi.ch"]
+authors = ["AWI-7903 <awi-7903@psi.ch>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
