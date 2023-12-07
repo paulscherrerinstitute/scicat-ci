@@ -1,5 +1,5 @@
-name: deploy-helm
-description: "Helm deploy"
+name: ssh-tunner
+description: "Open ssh tunnel"
 
 inputs:
   bastion_user: 
