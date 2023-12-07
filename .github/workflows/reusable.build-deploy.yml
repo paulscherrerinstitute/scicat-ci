@@ -63,6 +63,12 @@ on:
       SSH_PRIVATE_KEY: 
         description: ssh key to private submodule
         required: false
+      BASTION_USER: 
+        description: ssh bastion user@server
+        required: true
+      BASTION_SSH_KEY: 
+        description: bastion ssh key
+        required: true
       
 jobs:
 
