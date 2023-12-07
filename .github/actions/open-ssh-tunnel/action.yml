@@ -1,4 +1,4 @@
-name: ssh-tunner
+name: ssh-tunnel
 description: "Open ssh tunnel"
 
 inputs:
