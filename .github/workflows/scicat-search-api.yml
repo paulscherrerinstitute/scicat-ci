@@ -21,6 +21,7 @@ jobs:
   ssh:
 
     runs-on: ubuntu-latest
+    environment: development
     steps: 
       - name: Open ssh tunnel
         uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@bastion_ssh
@@ -29,6 +30,7 @@ jobs:
           bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
 
   set_env: 
+    needs: ssh
     uses: ./.github/workflows/reusable.environment.yml
     with: 
       commit: ${{ github.event.inputs.commit }}
