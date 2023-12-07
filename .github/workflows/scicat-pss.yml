@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: deploy 
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@bastion_ssh
       with:
         release: '${{ env.RELEASE_NAME }}'
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
@@ -48,3 +48,5 @@ jobs:
         RELEASE_NAME: pss
         ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
         NAMESPACE_PREFIX: scicat-
+        BASTION_USER: ${{ secrets.BASTION_USER }}
+        BASTION_SSH_KEY: ${{ secrets.BASTION_SSH_KEY }}
