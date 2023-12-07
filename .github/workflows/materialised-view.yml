@@ -29,6 +29,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Open ssh tunnel
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@bastion_ssh
+      with: 
+        bastion_user: '${{ secrets.BASTION_USER }}'
+        bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
+
     - name: deploy
       uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@bastion_ssh
       with:
