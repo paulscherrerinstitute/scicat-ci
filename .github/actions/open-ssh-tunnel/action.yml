@@ -21,5 +21,6 @@ runs:
         chmod 600 .ssh/github_bastion;
         ssh-keyscan ${BASTION_USER#*@} > .ssh/known_hosts 2> /dev/null;
         chmod 644 .ssh/known_hosts;
-        ssh -i .ssh/github_bastion ${{ inputs.bastion_user }} -o UserKnownHostsFile=.ssh/known_hosts 'echo 1';
+        ssh -i .ssh/github_bastion ${{ inputs.bastion_user }} -o UserKnownHostsFile=.ssh/known_hosts -D 1080 -f -q -N;
+        ps -ax | grep ssh | grep -v grep | awk '{print $1}' | xargs kill;
       shell: bash
