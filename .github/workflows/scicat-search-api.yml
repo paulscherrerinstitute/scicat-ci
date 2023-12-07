@@ -10,7 +10,7 @@ on:
         description: 'Commit of the CI repo to deploy'     
         required: false
   pull_request:
-    branches: [ main ]
+    branches: [ main]
   push:
     branches: [ main ]
   release:
