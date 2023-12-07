@@ -16,7 +16,9 @@ runs:
   steps:
     - run: |
         mkdir .ssh;
+        BASTION_USER = ${{ inputs.bastion_user}}
         echo ${{ inputs.bastion_ssh_key }} | base64 -d > .ssh/github_bastion;
         chmod 600 .ssh/github_bastion;
-        ssh -o StrictHostKeyChecking=no -i .ssh/github_bastion ${{ inputs.bastion_user }} 'echo 1';
+        ssh-keyscan ${BASTION_USER#*@} > .ssh/known_hosts;
+        ssh -i .ssh/github_bastion ${{ inputs.bastion_user }} 'echo 1';
       shell: bash
