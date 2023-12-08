@@ -45,7 +45,7 @@ jobs:
       with:
         release: '${{ env.RELEASE_NAME }}'
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
-        chart: '${{ env.RELEASE_NAME }}'
+        chart: helm/charts/generic_service
         values: "db=${{ env.RELEASE_NAME }}-${{ env.ENVIRONMENT }}"
         value-files: helm/configs/${{ env.RELEASE_NAME }}/values.yaml
         secrets:  ${{ toJSON(secrets) }}
