@@ -47,3 +47,5 @@ jobs:
       commit: ${{ needs.set_env.outputs.commit }}
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      BASTION_USER: ${{ secrets.BASTION_USER }}
+      BASTION_SSH_KEY: ${{ secrets.BASTION_SSH_KEY }}

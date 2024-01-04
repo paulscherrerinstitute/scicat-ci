@@ -63,6 +63,12 @@ on:
       SSH_PRIVATE_KEY: 
         description: ssh key to private submodule
         required: false
+      BASTION_USER: 
+        description: ssh bastion user@server
+        required: true
+      BASTION_SSH_KEY: 
+        description: bastion ssh key
+        required: true
       
 jobs:
 
@@ -130,6 +136,12 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ inputs.commit }}
+
+    - name: Open ssh tunnel
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
+      with: 
+        bastion_user: '${{ secrets.BASTION_USER }}'
+        bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
 
     - name: Deploy to k8s using helm
       id: helm-deploy
