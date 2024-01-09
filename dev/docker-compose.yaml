@@ -162,6 +162,19 @@ services:
     profiles:
       - pr
 
+  panet:
+    build:
+      context: ../pan-ontologies-api/.
+    volumes:
+      - ../pan-ontologies-api:/home/node/app
+      - /home/node/app/node_modules
+    # infinite loop to keep the container running
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    profiles:
+      - panet
+    ports:
+      - 3002:3000
+
 volumes:
   mongodb_data:
     driver: local
