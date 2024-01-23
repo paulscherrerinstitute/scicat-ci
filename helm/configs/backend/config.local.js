@@ -35,7 +35,7 @@ module.exports = {
   expressSessionSaveUninitialized: false,
   smtpMessage: {
     from: "dacatmail@psi.ch",
-    replyTo: "scicatarchivemanager@psi.ch",
+    replyTo: "scicat-help@lists.psi.ch",
     subject: "[SciCat " + process.env.ENV + "]",
     scicatHref: process.env.ENV === "production"? "https://discovery.psi.ch": `https://discovery-${process.env.ENV}.psi.ch`,
     publicRetrieve: true,
