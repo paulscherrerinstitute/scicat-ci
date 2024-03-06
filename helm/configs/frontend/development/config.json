@@ -1,5 +1,5 @@
 {
-    "lbBaseURL": "https://dacat-development.psi.ch",
+    "lbBaseURL": "http://localhost:3001",
     "accessTokenPrefix": "",
     "archiveWorkflowEnabled": true,
     "retrieveDestinations": [
