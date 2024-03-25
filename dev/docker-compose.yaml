@@ -20,8 +20,6 @@ services:
       - "-c"
       - "chmod u+x /mnt/mongo_import.sh && /mnt/mongo_import.sh"
     user: "0:0"
-    depends_on:
-      - mongodb
     restart: on-failure
     profiles:
       - never
@@ -30,6 +28,8 @@ services:
     extends: mongodb_seed
     environment:
       - DATABASE=be
+    depends_on:
+      - mongodb
     profiles:
       - be
 
@@ -37,6 +37,8 @@ services:
     extends: mongodb_seed
     environment:
       - DATABASE=be_next
+    depends_on:
+      - mongodb
     profiles:
       - be_next
 
@@ -87,6 +89,7 @@ services:
       - ../scicat-backend-next:/home/node/app
       - /home/node/app/node_modules
       - /home/node/app/dist
+      - ../scicat-backend-next/functionalAccounts.json.minimal.example:home/node/app/functionalAccounts.json
     env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
