@@ -1,0 +1,146 @@
+version: "3.9"
+services:
+
+  mongodb:
+    image: mongo
+    profiles:
+      - be
+      - be_next
+      - oi
+
+  be:
+    build: ../backend/.
+    depends_on:
+      - mongodb
+    volumes:
+      - ../backend:/home/node/app
+      - ../backend/CI/ESS/envfiles/settings.sample.json:/home/node/app/test/config/settings.json
+      - /home/node/app/node_modules
+      - ./config/backend/config.local.js:/home/node/app/server/config.local.js
+      - ./config/backend/datasources.json:/home/node/app/server/datasources.json
+      - ./config/backend/providers.json:/home/node/app/server/providers.json
+    environment:
+      NODE_ENV: development
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3000:3000
+    profiles:
+      - be
+
+  fe:
+    build:
+      context: ../frontend/.
+      dockerfile: ../dev/config/frontend/Dockerfile
+      target: installer
+    volumes:
+      - ../frontend:/frontend
+      - ./config/frontend/config.json:/frontend/src/assets/config.json
+      - /frontend/node_modules
+      - /frontend/dist
+    command: /bin/sh -c "while true; do sleep 600; done"
+    ports:
+      - 4200:4200
+    profiles:
+      - fe
+
+  be_next:
+    build:
+      context: ../scicat-backend-next/.
+      target: dev
+    depends_on:
+      - mongodb
+    ports:
+      - 3000:3000
+    volumes:
+      - ../scicat-backend-next:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
+    env_file: ./config/backend_next/.test_env
+    command: /bin/sh -c "while true; do sleep 600; done"
+    profiles:
+      - be_next
+
+  jupyter:
+    image: python:3.10
+    ports:
+      - 8888:8888
+    volumes:
+      - ../curation/requirements.txt:/requirements.txt
+      - ../curation/notebooks:/notebooks
+      - ./config/jupyter/.env:/.env
+    command: /bin/sh -c "pip install --no-cache-dir -r requirements.txt && pip install jupyterlab && jupyter-lab --LabApp.token='' --allow-root --port=8888 --ip=0.0.0.0 --notebook-dir=/notebooks"
+    profiles:
+      - jupyter
+
+  search:
+    build:
+      context: ../search-api/.
+    volumes:
+      - ../search-api:/home/node/app
+      - /home/node/app/node_modules
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3002:3000
+    environment:
+      NODE_ENV: development
+    profiles:
+      - search
+
+  lp:
+    build:
+      context: ../landing-page-server/.
+      target: installer
+      dockerfile: ../dev/config/landing-page-server/Dockerfile
+    environment:
+      CHROME_BIN: /usr/bin/chromium
+      CHROME_PATH: /usr/lib/chromium/
+    volumes:
+      - ../landing-page-server:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+    command: /bin/sh -c "apt-get update && apt-get install -y chromium && while true; do sleep 600; done"
+    ports:
+      - 4201:4200
+    user: 0:0
+    profiles:
+      - lp
+
+  oi:
+    build: ../oaipmh/.
+    volumes:
+      - ../oaipmh:/home/node/app
+      - ./config/oaipmh/.env:/home/node/app/production/.env
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+    command: /bin/sh -c "npm ci && while true; do sleep 600; done"
+    ports:
+      - 3001:3001
+    profiles:
+      - oi
+
+  pr:
+    build:
+      context: ../proposals/.
+      target: dev
+    volumes:
+      - ../proposals:/usr/src/proposals
+      - ./config/proposals/.env:/usr/src/proposals/.env
+    # infinite loop to keep the container running
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    profiles:
+      - pr
+
+  panet:
+    build:
+      context: ../pan-ontologies-api/.
+    volumes:
+      - ../pan-ontologies-api:/home/node/app
+      - /home/node/app/node_modules
+    # infinite loop to keep the container running
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    profiles:
+      - panet
+    ports:
+      - 3002:3000
+
