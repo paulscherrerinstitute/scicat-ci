@@ -1,6 +1,6 @@
 [submodule "backend"]
 	path = backend
-	url = https://github.com/SciCatProject/backend.git
+	url = https://github.com/SciCatProject/backend-v3.git
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/SciCatProject/frontend.git
