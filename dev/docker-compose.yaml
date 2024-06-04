@@ -9,6 +9,8 @@ services:
       - be
       - be_next
       - oi
+    ports:
+    - 27017:27017
 
   mongodb_seed:
     image: mongo
@@ -20,8 +22,6 @@ services:
       - "-c"
       - "chmod u+x /mnt/mongo_import.sh && /mnt/mongo_import.sh"
     user: "0:0"
-    depends_on:
-      - mongodb
     restart: on-failure
     profiles:
       - never
@@ -32,6 +32,8 @@ services:
       - DATABASE=be
     profiles:
       - be
+    depends_on:
+      - mongodb
 
   mongodb_seed_be_next:
     extends: mongodb_seed
@@ -39,6 +41,8 @@ services:
       - DATABASE=be_next
     profiles:
       - be_next
+    depends_on:
+      - mongodb
 
   be:
     build: ../backend/.
@@ -71,6 +75,8 @@ services:
       - /frontend/dist
     command: /bin/sh -c "while true; do sleep 600; done"
     ports:
+      # Dev image with `node start` uses port 4200
+      # For the upstream dockerfile with nginx, use 4200:80
       - 4200:4200
     profiles:
       - fe
