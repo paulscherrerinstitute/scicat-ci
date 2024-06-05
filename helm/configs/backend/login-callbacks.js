@@ -2,7 +2,12 @@
 
 exports.accessGroupsToProfile =
   function (req, done) {
-    return function (err, user, identity, token) {
+    return async function (err, user, identity, token) {
+      await user.identities.destroyAll({and: [
+        {provider: identity.provider}, 
+        {id: {neq: identity.id}},
+        {userId: user.id}
+      ]});
       identity.updateAttributes({ 
         "profile": {
           accessGroups: identity.profile._json.pgroups,
