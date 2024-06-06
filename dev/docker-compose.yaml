@@ -8,6 +8,7 @@ services:
     profiles:
       - be
       - be_next
+      - test_be_next
       - oi
 
   mongodb_seed:
@@ -20,8 +21,6 @@ services:
       - "-c"
       - "chmod u+x /mnt/mongo_import.sh && /mnt/mongo_import.sh"
     user: "0:0"
-    depends_on:
-      - mongodb
     restart: on-failure
     profiles:
       - never
@@ -30,6 +29,8 @@ services:
     extends: mongodb_seed
     environment:
       - DATABASE=be
+    depends_on:
+      - mongodb
     profiles:
       - be
 
@@ -37,6 +38,8 @@ services:
     extends: mongodb_seed
     environment:
       - DATABASE=be_next
+    depends_on:
+      - mongodb
     profiles:
       - be_next
 
@@ -75,6 +78,24 @@ services:
     profiles:
       - fe
 
+  test_be_next:
+    build:
+      context: ../scicat-backend-next/.
+      target: dev
+    depends_on:
+      - mongodb
+    ports:
+      - 3000:3000
+    volumes:
+      - ../scicat-backend-next:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/dist
+      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
+    env_file: ./config/backend_next/.test_env
+    command: /bin/sh -c "while true; do sleep 600; done"
+    profiles:
+      - test_be_next
+
   be_next:
     build:
       context: ../scicat-backend-next/.
@@ -87,10 +108,12 @@ services:
       - ../scicat-backend-next:/home/node/app
       - /home/node/app/node_modules
       - /home/node/app/dist
+      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
     env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
       - be_next
+
 
   jupyter:
     image: python:3.10
