@@ -1,0 +1,87 @@
+{
+  "configVersion": "v1.0 2024-03-01 6f3f38",
+  "jobs": [
+  {
+    "jobType": "all_access",
+    "configVersion": "v1.0 2024-03-01 6f3f38",
+    "create": {
+      "auth": "#all",
+      "actions": [
+        {
+          "actionType": "log"
+        },
+        {
+          "actionType": "url",
+          "url": "http://localhost:3000/api/v3/health?jobid={{id}}",
+          "headers": {
+            "accept": "application/json"
+          }
+        }
+      ]
+    },
+    "statusUpdate": {
+      "auth": "#all"
+    }
+ },
+ {
+    "jobType": "public_access",
+    "configVersion": "v1.0 2024-03-01 6f3f31",
+    "create": {
+      "auth": "#datasetPublic"
+    },
+    "statusUpdate": {
+      "auth": "#all"
+    }
+  },
+  {
+    "jobType": "authenticated_access",
+    "configVersion": "v1.0 2024-03-01 6f3f32",
+    "create": {
+      "auth": "#authenticated"
+    },
+    "statusUpdate": {
+      "auth": "#all"
+    }
+  },
+  {
+    "jobType": "dataset_access",
+    "configVersion": "v1.0 2024-03-01 6f3f33",
+    "create": {
+      "auth": "#datasetAccess"
+    },
+    "statusUpdate": {
+      "auth": "#jobOwnerGroup"
+    }
+  },
+  {
+    "jobType": "owner_access",
+    "configVersion": "v1.0 2024-03-01 6f3f34",
+    "create": {
+      "auth": "#datasetOwner"
+    },
+    "statusUpdate": {
+      "auth": "#jobOwnerUser"
+    }
+  },
+  {
+    "jobType": "user_access",
+    "configVersion": "v1.0 2024-03-01 6f3f35",
+    "create": {
+      "auth": "user5.1"
+    },
+    "statusUpdate": {
+      "auth": "user5.1"
+    }
+  },
+  {
+    "jobType": "group_access",
+    "configVersion": "v1.0 2024-03-01 6f3f36",
+    "create": {
+      "auth": "@group5"
+    },
+    "statusUpdate": {
+      "auth": "@group5"
+    }
+  }
+  ]
+}
