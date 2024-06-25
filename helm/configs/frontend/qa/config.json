@@ -9,7 +9,7 @@
         },
         {
             "option": "PSI-RA",
-            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /gpfs/workfs/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
         },
         {
             "option": "URLs",
