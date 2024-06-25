@@ -214,7 +214,7 @@
                         </ol>
                     </td>
                     {{else if (eq ../../jobParams.option "PSI-RA")}}
-                    <td>/das/work/{{subString ownerGroup 0 3}}/{{ownerGroup}}/retrieve/{{strip sourceFolder "/"}}/</td>
+                    <td>/gpfs/workfs/{{subString ownerGroup 0 3}}/retrieve/{{ownerGroup}}/retrieve/{{strip sourceFolder "/"}}/</td>
                     <td>{{formatBytes size}}</td>
                     {{else}}
                     <td>{{sourceFolder}}</td>
