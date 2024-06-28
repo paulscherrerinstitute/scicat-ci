@@ -1,6 +1,6 @@
 {
-    "lbBaseURL": "https://dacat-development.psi.ch",
-    "accessTokenPrefix": "",
+    "lbBaseURL": "https://scicat.development.psi.ch",
+    "accessTokenPrefix": "Bearer ",
     "archiveWorkflowEnabled": true,
     "retrieveDestinations": [
         {
@@ -128,7 +128,7 @@
         {
             "displayText": "PSI account",
             "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
-            "authURL": "auth/keycloak"
+            "authURL": "api/v3/auth/oidc"
         }
     ],
     "helpMessages": {
