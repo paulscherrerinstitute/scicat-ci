@@ -1,6 +1,6 @@
 {
     "lbBaseURL": "https://dacat-development.psi.ch",
-    "accessTokenPrefix": "",
+    "accessTokenPrefix": "Bearer ",
     "archiveWorkflowEnabled": true,
     "retrieveDestinations": [
         {
