@@ -1,70 +1,70 @@
-name: scicat-be
+# name: scicat-be
 
-on:  
-  workflow_dispatch: 
-    inputs:
-      submodule_commit:
-        description: 'Commit of the submodule to deploy'     
-        required: false
-      commit: 
-        description: 'Commit of the CI repo to deploy'     
-        required: false
-  pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
-  release:
-    types: [published]
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       submodule_commit:
+#         description: 'Commit of the submodule to deploy'
+#         required: false
+#       commit:
+#         description: 'Commit of the CI repo to deploy'
+#         required: false
+#   pull_request:
+#     branches: [ main ]
+#   push:
+#     branches: [ main ]
+#   release:
+#     types: [published]
 
-jobs:
+# jobs:
 
-  set_env: 
-    uses: ./.github/workflows/reusable.environment.yml
-    with: 
-      commit: ${{ github.event.inputs.commit }}
-      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+#   set_env:
+#     uses: ./.github/workflows/reusable.environment.yml
+#     with:
+#       commit: ${{ github.event.inputs.commit }}
+#       submodule_commit: ${{ github.event.inputs.submodule_commit }}
 
-  check_changed:
-    needs: set_env
-    uses: ./.github/workflows/reusable.changes.yml
-    with: 
-      files: | 
-        .github/workflows/scicat-be.yml
-        helm/configs/backend/values.yaml
-        helm/configs/backend/login-callbacks.js
-        helm/configs/backend/config.local.js
-        helm/configs/backend/job-template.html
-        helm/configs/backend/${{ needs.set_env.outputs.environment }}/**
-        backend/**
-        helm/configs/backend/authorizedJobs.js
-      commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: ${{ github.event.inputs.submodule_commit }}
-      submodule: backend
+#   check_changed:
+#     needs: set_env
+#     uses: ./.github/workflows/reusable.changes.yml
+#     with:
+#       files: |
+#         .github/workflows/scicat-be.yml
+#         helm/configs/backend/values.yaml
+#         helm/configs/backend/login-callbacks.js
+#         helm/configs/backend/config.local.js
+#         helm/configs/backend/job-template.html
+#         helm/configs/backend/${{ needs.set_env.outputs.environment }}/**
+#         backend/**
+#         helm/configs/backend/authorizedJobs.js
+#       commit: ${{ needs.set_env.outputs.commit }}
+#       submodule_commit: ${{ github.event.inputs.submodule_commit }}
+#       submodule: backend
 
-  build_deploy_scicat_be:
-    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'be'
-    needs: 
-     - check_changed
-     - set_env
-    uses: ./.github/workflows/reusable.build-deploy.yml
-    with: 
-      context: backend/.
-      image_name: ${{ github.repository }}/be
-      release_name: backend
-      tag: ${{ needs.set_env.outputs.tag }}
-      environment: ${{ needs.set_env.outputs.environment }}
-      commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: ${{ github.event.inputs.submodule_commit }}
-      submodule: backend
-      helm_set_files: >-
-        CONFIG_LOCAL=helm/configs/backend/config.local.js
-        LOGIN_CALLBACKS=helm/configs/backend/login-callbacks.js
-        MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
-        EMAIL_TEMPLATE=helm/configs/backend/job-template.html
-        HIDE_EMAIL=helm/configs/backend/hideEmail.js
-        AUTHORIZED_JOBS=helm/configs/backend/authorizedJobs.js
-    secrets:
-      KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      JSON_SECRETS: ${{ toJSON(secrets) }}
-      BASTION_USER: ${{ secrets.BASTION_USER }}
-      BASTION_SSH_KEY: ${{ secrets.BASTION_SSH_KEY }}
+#   build_deploy_scicat_be:
+#     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'be'
+#     needs:
+#      - check_changed
+#      - set_env
+#     uses: ./.github/workflows/reusable.build-deploy.yml
+#     with:
+#       context: backend/.
+#       image_name: ${{ github.repository }}/be
+#       release_name: backend
+#       tag: ${{ needs.set_env.outputs.tag }}
+#       environment: ${{ needs.set_env.outputs.environment }}
+#       commit: ${{ needs.set_env.outputs.commit }}
+#       submodule_commit: ${{ github.event.inputs.submodule_commit }}
+#       submodule: backend
+#       helm_set_files: >-
+#         CONFIG_LOCAL=helm/configs/backend/config.local.js
+#         LOGIN_CALLBACKS=helm/configs/backend/login-callbacks.js
+#         MIDDLEWARE=helm/configs/backend/${{ needs.set_env.outputs.environment }}/middleware.json
+#         EMAIL_TEMPLATE=helm/configs/backend/job-template.html
+#         HIDE_EMAIL=helm/configs/backend/hideEmail.js
+#         AUTHORIZED_JOBS=helm/configs/backend/authorizedJobs.js
+#     secrets:
+#       KUBECONFIG: ${{ secrets.KUBECONFIG }}
+#       JSON_SECRETS: ${{ toJSON(secrets) }}
+#       BASTION_USER: ${{ secrets.BASTION_USER }}
+#       BASTION_SSH_KEY: ${{ secrets.BASTION_SSH_KEY }}
