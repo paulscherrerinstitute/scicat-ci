@@ -43,6 +43,9 @@ jobs:
      - check_changed
      - set_env
     uses: ./.github/workflows/reusable.build-deploy.yml
+    permissions:
+      contents: read
+      packages: write
     with:
       context: scicat-backend-next/.
       image_name: ${{ github.repository }}/backend-next
