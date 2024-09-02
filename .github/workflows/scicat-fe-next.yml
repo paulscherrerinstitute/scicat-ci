@@ -1,4 +1,4 @@
-name: scicat-fe
+name: scicat-fe-next
 
 on:
   workflow_dispatch:
