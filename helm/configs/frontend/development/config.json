@@ -119,7 +119,7 @@
     "fileDownloadEnabled": false,
     "jobsEnabled": true,
     "policiesEnabled": true,
-    "addDatasetEnabled": false,
+    "addDatasetEnabled": true,
     "editDatasetSampleEnabled": false,
     "scienceSearchUnitsEnabled": false,
     "metadataStructure": "tree",
