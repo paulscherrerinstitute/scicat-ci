@@ -24,7 +24,7 @@ ingress:
   tls:
     - hosts:
       - "{{ .Values.host }}"
-      secretName: "scicat-fe-certificate"
+      secretName: "scicat-fe-next-certificate"
 
 volumes:
   - name: config-volume
