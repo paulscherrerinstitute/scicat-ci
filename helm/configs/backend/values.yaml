@@ -61,7 +61,7 @@ ingresses:
     name: backend-login
     annotations:
       kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
+      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
     hosts:
       - host: "{{ .Values.host }}"
         paths:
