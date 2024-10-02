@@ -8,7 +8,14 @@
   {{- $_ := set $ingress.annotations "kubernetes.io/ingress.class" $ingress.className}}
   {{- end }}
 {{- end }}
-{{- $_ := include "b64decAnnotations" $ingress.annotations }}
+{{- range $annKey, $annValue := $ingress.annotations }}
+  {{- if hasPrefix "b64/" $annKey }}
+    {{- $newKey := trimPrefix "b64/" $annKey -}}
+    {{- $decodedValue := tpl $annValue $ }}
+    {{- $_ := set $ingress.annotations (trimPrefix "b64/" $annKey) ($decodedValue | include "validateSecret" | b64dec) }}
+    {{- $_ := unset $ingress.annotations $annKey }}
+  {{- end }}
+{{- end }}
 {{- if semverCompare ">=1.19-0" $gitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" $gitVersion -}}
