@@ -72,3 +72,17 @@ Validate the secret, checking if base64 encoded
 {{- $secret }}
 {{- end }}
 {{- end }}
+
+{{/*
+Decodes b64 encoded annotations
+*/}}    
+{{- define "b64decAnnotations" -}}
+{{- range $annKey, $annValue := . }}
+{{- if hasPrefix "b64/" $annKey }}
+{{- $newKey := trimPrefix "b64/" $annKey -}}
+{{- $decodedValue := $annValue | include "validateSecret" | b64dec -}}
+{{- $_ := set $ $newKey $decodedValue -}} 
+{{- $_ := unset $ $annKey -}}
+{{- end }}
+{{- end }}
+{{- end }}
