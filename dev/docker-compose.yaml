@@ -88,7 +88,7 @@ services:
       - ../scicat-backend-next:/home/node/app
       - /home/node/app/node_modules
       - /home/node/app/dist
-      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
+      - ../scicat-backend-next/functionalAccounts.json.minimal:/home/node/app/functionalAccounts.json
     env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
@@ -99,6 +99,7 @@ services:
     depends_on:
       - mongodb
     volumes:
+      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
       - ./config/test_backend_next/jobconfig.json:/home/node/app/test/config/jobconfig.json
     env_file: ./config/test_backend_next/.env
     profiles:
