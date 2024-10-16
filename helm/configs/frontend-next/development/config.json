@@ -1,6 +1,6 @@
 {
-    "lbBaseURL": "https://dacat-development.psi.ch",
-    "accessTokenPrefix": "",
+    "lbBaseURL": "https://scicat.development.psi.ch",
+    "accessTokenPrefix": "Bearer ",
     "archiveWorkflowEnabled": true,
     "retrieveDestinations": [
         {
@@ -16,7 +16,7 @@
             "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
         }
     ],
-    "externalAuthEndpoint": null,
+    "externalAuthEndpoint": "/api/v3/auth/ldap",
     "editMetadataEnabled": false,
     "editSampleEnabled": false,
     "editPublishedData": true,
@@ -128,7 +128,7 @@
         {
             "displayText": "PSI account",
             "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
-            "authURL": "api/v3/auth/oidc"
+            "authURL": "auth/keycloak"
         }
     ],
     "helpMessages": {
