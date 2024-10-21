@@ -1,13 +1,13 @@
 name: scicat-be
 
-on:
-  workflow_dispatch:
+on:  
+  workflow_dispatch: 
     inputs:
       submodule_commit:
-        description: 'Commit of the submodule to deploy'
+        description: 'Commit of the submodule to deploy'     
         required: false
-      commit:
-        description: 'Commit of the CI repo to deploy'
+      commit: 
+        description: 'Commit of the CI repo to deploy'     
         required: false
   pull_request:
     branches: [ main ]
@@ -18,17 +18,17 @@ on:
 
 jobs:
 
-  set_env:
+  set_env: 
     uses: ./.github/workflows/reusable.environment.yml
-    with:
+    with: 
       commit: ${{ github.event.inputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
 
   check_changed:
     needs: set_env
     uses: ./.github/workflows/reusable.changes.yml
-    with:
-      files: |
+    with: 
+      files: | 
         .github/workflows/scicat-be.yml
         helm/configs/backend/values.yaml
         helm/configs/backend/login-callbacks.js
@@ -43,11 +43,11 @@ jobs:
 
   build_deploy_scicat_be:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'be'
-    needs:
+    needs: 
      - check_changed
      - set_env
     uses: ./.github/workflows/reusable.build-deploy.yml
-    with:
+    with: 
       context: backend/.
       image_name: ${{ github.repository }}/be
       release_name: backend
