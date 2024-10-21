@@ -9,13 +9,6 @@ on:
       commit: 
         description: 'Commit of the CI repo to deploy'     
         required: false
-      environment: 
-        description: 'Environment to deploy to'
-        type: choice
-        default: 'development'
-        options:
-          - development
-          - qa
   pull_request:
     branches: [ main ]
   push:
@@ -30,7 +23,6 @@ jobs:
     with: 
       commit: ${{ github.event.inputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
-      environment: ${{ github.event.inputs.environment }}
 
   check_changed:
     needs: set_env

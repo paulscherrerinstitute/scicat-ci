@@ -11,10 +11,6 @@ on:
         description: commit of the CI repo to deploy on workflow dispatch
         required: false
         type: string
-      environment: 
-        description: environment to deploy to
-        required: false
-        type: string
     outputs:
       tag:
         description: tag of the docker image
@@ -50,8 +46,7 @@ jobs:
             commit=${input_commit:-${{ github.sha }}}
             submodule_append=`[ -z ${{ inputs.submodule_commit }} ] || echo "_sha-${{ inputs.submodule_commit }}" && echo ""`
             tag="sha-$commit$submodule_append"
-            env=${{ inputs.environment }}
-            environment=${env:-development}
+            environment=development
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
               tag="sha-${{ github.sha }}"
               environment=qa
