@@ -78,7 +78,7 @@ services:
     profiles:
       - fe
 
-  be_next_base: 
+  be_next_base:
     build:
       context: ../scicat-backend-next/.
       target: dev
@@ -89,10 +89,11 @@ services:
       - /home/node/app/node_modules
       - /home/node/app/dist
       - ../scicat-backend-next/functionalAccounts.json.minimal.example:/home/node/app/functionalAccounts.json
+      - ./config/backend_next/jobConfig.yaml:/home/node/app/jobConfig.yaml
     env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
-      - never 
+      - never
 
   test_be_next:
     extends: be_next_base
