@@ -22,7 +22,7 @@ secrets:
     data:
       .env: "{{ .Values.secretsJson.BENEXT_ENV }}"
       functionalAccounts.json: "{{ .Values.secretsJson.BENEXT_FUNCTIONAL_ACCOUNTS }}"
-      jobConfig.json: "{{ .Values.secretsJson.BENEXT_JOBCONFIG }}"
+      jobConfig.yaml: "{{ .Values.secretsJson.BENEXT_JOBCONFIG }}"
 
 ingress:
   enabled: true
@@ -48,7 +48,7 @@ env:
   - name: SITE
     value: "PSI"
   - name: JOB_CONFIGURATION_FILE
-    value: /home/node/app/jobConfig.json
+    value: /home/node/app/jobConfig.yaml
 
 volumeMounts:
   - name: secrets-volume
@@ -58,5 +58,5 @@ volumeMounts:
     mountPath: /home/node/app/functionalAccounts.json
     subPath: functionalAccounts.json
   - name: secrets-volume
-    mountPath: /home/node/app/jobConfig.json
-    subPath: jobConfig.json
+    mountPath: /home/node/app/jobConfig.yaml
+    subPath: jobConfig.yaml
