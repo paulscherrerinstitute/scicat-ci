@@ -1,8 +1,22 @@
 {
-    "lbBaseURL": "http://127.0.0.1:3000",
-    "accessTokenPrefix": "",
+    "lbBaseURL": "https://scicat.development.psi.ch",
+    "accessTokenPrefix": "Bearer ",
     "archiveWorkflowEnabled": true,
-    "externalAuthEndpoint": null,
+    "retrieveDestinations": [
+        {
+            "option": "PSI",
+            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
+        },
+        {
+            "option": "PSI-RA",
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
+        },
+        {
+            "option": "URLs",
+            "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
+        }
+    ],
+    "externalAuthEndpoint": "/api/v3/auth/ldap",
     "editMetadataEnabled": false,
     "editSampleEnabled": false,
     "editPublishedData": true,
@@ -34,8 +48,8 @@
         {
             "name": "runNumber",
             "order": 2,
-            "type": "custom",
-            "enabled": false
+            "type": "standard",
+            "enabled": true
         },
         {
             "name": "sourceFolder",
@@ -120,15 +134,5 @@
     "helpMessages": {
         "gettingStarted": "(PSI intranet only) gives a brief description on how to get started using the data catalog.",
         "ingestManual": "(PSI intranet only) provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
-    },
-    "retrieveDestinations": [
-        {
-            "option": "PSI",
-            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
-        },
-        {
-            "option": "PSI-RA",
-            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
-        }
-    ]
+    }
 }
