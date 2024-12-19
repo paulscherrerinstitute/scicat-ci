@@ -16,22 +16,23 @@ volumes:
     secret:
       secretName: "{{ .Release.Name }}-s"
 
-secrets: 
+secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
-    data: 
+    data:
       .env: "{{ .Values.secretsJson.BENEXT_ENV }}"
       functionalAccounts.json: "{{ .Values.secretsJson.BENEXT_FUNCTIONAL_ACCOUNTS }}"
+      jobConfig.json: "{{ .Values.secretsJson.BENEXT_JOBCONFIG }}"
 
 ingress:
   enabled: true
-  annotations: 
+  annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
   hosts:
     - host: "{{ .Values.host }}"
-      paths: 
+      paths:
         - path: "/"
           pathType: Prefix
   tls:
@@ -46,6 +47,8 @@ env:
     value: "20.500.11935"
   - name: SITE
     value: "PSI"
+  - name: JOB_CONFIGURATION_FILE
+    value: /home/node/app/jobConfig.json
 
 volumeMounts:
   - name: secrets-volume
@@ -54,3 +57,6 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/functionalAccounts.json
     subPath: functionalAccounts.json
+  - name: secrets-volume
+    mountPath: /home/node/app/jobConfig.json
+    subPath: jobConfig.json
