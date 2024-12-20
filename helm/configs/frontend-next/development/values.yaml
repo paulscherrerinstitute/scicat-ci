@@ -1,6 +1,4 @@
-envValue: development
-
-host: scicat.development.psi.ch
+host: discovery.development.psi.ch
 
 ingress:
   annotations: 
