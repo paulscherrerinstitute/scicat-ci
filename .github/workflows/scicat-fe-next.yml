@@ -35,7 +35,7 @@ jobs:
         helm/configs/frontend-next/${{ needs.set_env.outputs.environment }}/**
         frontend/**
       commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: 753ccd6209bb373230b687ff380022e44cdfed8c
+      submodule_commit: 6a220b1d8b7b257c215b2f2ef2a24e5b702e3723
       submodule: frontend
 
   build_deploy_scicat_fe_next:
