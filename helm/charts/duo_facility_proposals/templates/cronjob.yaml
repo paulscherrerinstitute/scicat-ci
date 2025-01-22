@@ -1,5 +1,5 @@
 {{- $list := include "duo_facility_proposals.facilities_schedule" . | fromYaml}}
-{{- range $_ := $list.duo_facilities }}
+{{- range $duo_facility := $list.duo_facilities }}
 {{- $facility := dict "fullname" (include "duo_facility_proposals.fullname" $) "name" .name "year" .year }}
 apiVersion: batch/v1
 kind: CronJob
@@ -12,6 +12,9 @@ spec:
   schedule: {{ .schedule | default $.Values.cronjob.schedule | quote }}
   jobTemplate:
     spec:
+      {{- with $.Values.cronjob.ttlSecondsAfterFinished }}
+      ttlSecondsAfterFinished: {{ $duo_facility.ttlSecondsAfterFinished | default . }}
+      {{- end }}
       template:
         metadata:
           labels: {{ include "duo_facility_proposals.labels" $ | nindent 12 }}
