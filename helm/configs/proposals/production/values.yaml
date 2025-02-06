@@ -5,8 +5,10 @@ duo_facilities:
    schedule: 0 2 * * 4
  - name: sls
    schedule: 0 3 * * 1,3,5
+   ttlSecondsAfterFinished: 345600 # 4 (3+1 of buffer) days
  - name: swissfel
    schedule: 0 4 * * 1,3,5
+   ttlSecondsAfterFinished: 345600 # 4 (3+1 of buffer) days
  - name: smus
    schedule: 0 5 * * 4
  - name: sinq

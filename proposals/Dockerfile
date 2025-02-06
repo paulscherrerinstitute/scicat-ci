@@ -1,5 +1,5 @@
 # build python swagger client sdk
-FROM openjdk:slim as sdk
+FROM openjdk:slim AS sdk
 WORKDIR /root
 RUN apt-get update \
     && apt-get -y upgrade \
@@ -10,14 +10,14 @@ RUN java -jar swagger-codegen-cli.jar generate -i swagger.json -l python -o swag
 
 
 # create wheel from python swagger client sdk
-FROM python:3.8-alpine as wheel
+FROM python:3.13-alpine AS wheel
 WORKDIR /root
 COPY --from=sdk /root/swagger_client ./
-RUN python setup.py bdist_wheel -d /tmp
+RUN pip install setuptools && python setup.py bdist_wheel -d /tmp
 
 
 # dev image
-FROM python:3.8-slim as dev
+FROM python:3.13-slim AS dev
 ENV PYTHONDONTWRITEBYTECODE 1
 WORKDIR /usr/src/proposals
 COPY --from=wheel /tmp/swagger_client-1.0.0-py3-none-any.whl ./
@@ -31,7 +31,7 @@ RUN poetry install --no-interaction --no-ansi \
 
 
 # prod image
-FROM python:3.8-slim AS prod
+FROM python:3.13-slim AS prod
 WORKDIR /usr/src/proposals
 # copy and install dependencies
 COPY --from=wheel /tmp/swagger_client-1.0.0-py3-none-any.whl ./
