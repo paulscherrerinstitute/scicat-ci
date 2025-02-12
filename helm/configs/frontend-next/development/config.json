@@ -21,7 +21,7 @@
     "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
     "landingPage": "doi2.psi.ch/detail/",
     "lbBaseURL": "https://scicat.development.psi.ch",
-    "depositorURL": "http://depositor.development.psi.ch",
+    "depositorURL": "https://depositor.development.psi.ch",
     "localColumns": [
         {
             "name": "select",
