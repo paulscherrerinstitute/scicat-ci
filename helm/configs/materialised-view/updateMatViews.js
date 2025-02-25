@@ -129,7 +129,22 @@ function createJobFiltered() {
   );
 }
 
+function createDatablockFiltered() {
+  aggregateWithDefaults(
+    "Datablock",
+    { $project: { dataFileList: 0 } },
+    {
+      $addFields: {
+        copies: {
+          $substrCP: ["$archiveId", 0, { $indexOfCP: ["$archiveId", "/"] }],
+        },
+      },
+    },
+  );
+}
+
 createDatasetFiltered();
 createJobFiltered();
+createDatablockFiltered();
 
 dateLog("Completed materialized view update");
