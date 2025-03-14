@@ -1,3 +1,4 @@
 cronjob:
   restartPolicy: OnFailure
   schedule: 0 5 * * 0
+

@@ -4,3 +4,4 @@ pssBaseUrl: http://pss.scicat-development
 cronjob:
   restartPolicy: OnFailure
   schedule: 0 5 * * 6
+

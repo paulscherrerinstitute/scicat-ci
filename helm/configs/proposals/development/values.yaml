@@ -2,3 +2,4 @@ secrets:
 
 ciRepository: busybox
 ciTag: latest
+
