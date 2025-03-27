@@ -102,7 +102,7 @@ npm start
 
 ```bash
 cd /home/node/app
-npm start
+npm start:dev
 ```
 
 The swagger API will be available at
@@ -118,6 +118,20 @@ Note that configuration occurs through environment variables within the containe
 Defaults are populated from `config/backend_next/.env` when the container is built, but
 can be overridden at runtime within the container or by mounting a `.env` file at
 `/home/node/app/.env`.
+The `jobConfig.yaml` file is mounted from `dev/config/backend_next/jobConfig.yaml`. This container is intended for development.
+
+### Test backend-next `test_be_next`
+
+```bash
+cd /home/node/app
+npm run start:dev
+# in another shell
+npm run
+```
+
+This container is intended for running api tests. It uses a different database than
+`be_next`. Functional accounts and jobs are taken from the test configurations in the
+scicat-backend-next repository.
 
 ### Frontend `fe`
 
