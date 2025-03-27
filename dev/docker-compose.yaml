@@ -195,6 +195,24 @@ services:
     ports:
       - 3002:3000
 
+  rabbitmq:
+    image: rabbitmq:4.0-management-alpine
+    volumes:
+      - rabbitmq_data:/bitnami
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+    env_file: ./config/rabbitmq/.env
+    ports:
+      # management plugin
+      - 15672:15672
+
 volumes:
   mongodb_data:
+    driver: local
+  rabbitmq_data:
     driver: local
