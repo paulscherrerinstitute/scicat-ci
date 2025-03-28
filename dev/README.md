@@ -2,7 +2,7 @@
 
 ## Overview
 
-Development can be done running local docker containers. First `docker-compose` is used to launch containers for each service. Most containers do not start the service directly, allowing this to be done manually from inside the container (eg using VS Code Dev Containers). Commands for each service are given below.
+Development can be done running local docker containers. First `docker compose` is used to launch containers for each service. Most containers do not start the service directly, allowing this to be done manually from inside the container (eg using VS Code Dev Containers). Commands for each service are given below.
 
 ## Clone the repo and the submodules
 
@@ -14,24 +14,24 @@ git submodule update --init --recursive --remote
 ## Starting containers
 
 ### :warning: IMPORTANT
-The docker-compose builds the containers from the Dockerfile of each submodule, thus using the submodule checked out to a particular commit.
-It is often the case that when setting up the environment one wants the components to be checked out automatically to the latest on main. The command above (`git submodule update --init --recursive --remote`) does that but might break any component where a non-backwards compatible change was applied. 
-We reference in the config of each components the latest commit (.git-commit-sha) of the submodule where the docker-compose was run and worked the last time, whenever the submodule commit is different from the one referenced in the scicat-ci repo. 
+The `docker compose` builds the containers from the Dockerfile of each submodule, thus using the submodule checked out to a particular commit.
+It is often the case that when setting up the environment one wants the components to be checked out automatically to the latest on main. The command above (`git submodule update --init --recursive --remote`) does that but might break any component where a non-backwards compatible change was applied.
+We reference in the config of each components the latest commit (.git-commit-sha) of the submodule where the `docker compose` was run and worked the last time, whenever the submodule commit is different from the one referenced in the scicat-ci repo.
 
 To build a container based on a different commit one has to checkout first the submodule to the commit (or branch) of interest.
 
-Build the docker containers with the suitable [profiles](https://docs.docker.com/compose/profiles/): 
+Build the docker containers with the suitable [profiles](https://docs.docker.com/compose/profiles/):
 
 ```bash
 export COMPOSE_PROFILES=<MY_PROFILES>
-docker-compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
+docker compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
 ```
 
-All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so docker-compose starts, rather than the applications, environments where the development environment of each application is set up. This means that, to run the application, one has to attach to the container and start it. 
+All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so `docker compose` starts, rather than the applications, environments where the development environment of each application is set up. This means that, to run the application, one has to attach to the container and start it.
 
 ### Examples
 
-Here are the two most common use cases, spinning up the backend and fronted; the new backend and the frontend. 
+Here are the two most common use cases, spinning up the backend and fronted; the new backend and the frontend.
 
 #### BE and FE
 
@@ -39,9 +39,9 @@ Here are the two most common use cases, spinning up the backend and fronted; the
 ```bash
 export COMPOSE_PROFILES=be,fe
 ```
-2. run docker-compose:
+2. run docker compose:
 ```bash
-docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+docker compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 ```
 
 This will start four containers: the be container, the fe one, the mongodb database and a short-lived one, called mongodb_seed_be that puts some example data into the be db of mongo.
@@ -52,9 +52,9 @@ This will start four containers: the be container, the fe one, the mongodb datab
 ```bash
 export COMPOSE_PROFILES=be_next,fe
 ```
-2. run docker-compose:
+2. run docker compose:
 ```bash
-docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+docker compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 ```
 
 As before, this will start four containers: the be_next container, the fe one, the mongo database and a short-lived one, called mongodb_seed_be_next that puts some example data into the be_next db of mongo.
@@ -77,8 +77,23 @@ npm start
 
 ```bash
 cd /home/node/app
-npm start
+npm start:dev
 ```
+
+The `jobConfig.yaml` file is mounted from `dev/config/backend_next/jobConfig.yaml`. This container is intended for development.
+
+### Test backend-next `test_be_next`
+
+```bash
+cd /home/node/app
+npm run start:dev
+# in another shell
+npm run
+```
+
+This container is intended for running api tests. It uses a different database than
+`be_next`. Functional accounts and jobs are taken from the test configurations in the
+scicat-backend-next repository.
 
 ### Frontend `fe`
 
@@ -128,7 +143,7 @@ Simply browse to localhost:8888
 This compose file creates a new docker volume with test data. Removing this requires adding `--volumes` when shutting down the containers:
 
 ```bash
-docker-compose -f docker-compose.yaml down --volumes
+docker compose -f docker-compose.yaml down --volumes
 ```
 
 If this is omitted it may eventually lead to your docker virtual disk filling up. If this happens, remove old volumes:
