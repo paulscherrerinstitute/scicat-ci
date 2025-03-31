@@ -92,7 +92,7 @@
         <!-- Template for job submission comfirmation -->
         {{#with jobSubmissionNotification}}
         <div>
-            {{#if (and (eq jobType "retrieve") (eq jobParams.option "URLs"))}}
+            {{#if (eq jobParams.option "URLs")}}
             Our data retrieval service is currently out of service. Please retry later.
             {{else}}
             {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
