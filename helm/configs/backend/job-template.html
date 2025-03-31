@@ -91,10 +91,12 @@
         <h2>{{subject}}</h2>
         <!-- Template for job submission comfirmation -->
         {{#with jobSubmissionNotification}}
-        <div>
-            {{#if (eq jobType "public")}}
+        {{#if (eq jobType "public")}}
+        <div style="color: red; font-weight: bold;">
             Our data retrieval service is currently out of service. Please retry later.
-            {{else}}
+        </div>
+        {{else}}            
+        <div>            
             {{#if (or (eq jobType "retrieve") (eq jobType "archive"))}}
             Your <a href="{{@root.config.scicatHref}}/user/jobs?id={{urlEncode jobId}}">{{jobType}}</a> job has been submitted and will be processed as soon as possible.<br>
             {{else}}
@@ -102,7 +104,6 @@
             Job id: {{jobId}}.<br>
             {{/if}}
             You will be notified by email as soon as the job is completed.<br>
-            {{/if}}
         </div>
         {{#if jobData}}
         <p><b>Job will be perfomed on the following dataset(s):</b></p>
@@ -136,6 +137,7 @@
         </table>
         {{/if}}
         <p>{{additionalMsg}}</p>
+        {{/if}}
         {{/with}}
 
         <!-- Template for finished job  Notification -->
