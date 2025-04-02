@@ -2,7 +2,10 @@
 
 ## Overview
 
-Development can be done running local docker containers. First `docker-compose` is used to launch containers for each service. Most containers do not start the service directly, allowing this to be done manually from inside the container (eg using VS Code Dev Containers). Commands for each service are given below.
+Development can be done running local docker containers. First `docker compose` is used
+to launch containers for each service. Most containers do not start the service
+directly, allowing this to be done manually from inside the container (eg using VS Code
+Dev Containers). Commands for each service are given below.
 
 ## Clone the repo and the submodules
 
@@ -14,24 +17,37 @@ git submodule update --init --recursive --remote
 ## Starting containers
 
 ### :warning: IMPORTANT
-The docker-compose builds the containers from the Dockerfile of each submodule, thus using the submodule checked out to a particular commit.
-It is often the case that when setting up the environment one wants the components to be checked out automatically to the latest on main. The command above (`git submodule update --init --recursive --remote`) does that but might break any component where a non-backwards compatible change was applied. 
-We reference in the config of each components the latest commit (.git-commit-sha) of the submodule where the docker-compose was run and worked the last time, whenever the submodule commit is different from the one referenced in the scicat-ci repo. 
+The `docker compose` builds the containers from the Dockerfile of each submodule, thus
+using the submodule checked out to a particular commit. It is often the case that when
+setting up the environment one wants the components to be checked out automatically to
+the latest on main. The command above (`git submodule update --init --recursive
+--remote`) does that but might break any component where a non-backwards compatible
+change was applied. We reference in the config of each components the latest commit
+(.git-commit-sha) of the submodule where `docker compose` was run and worked the last
+time, whenever the submodule commit is different from the one referenced in the
+scicat-ci repo.
 
-To build a container based on a different commit one has to checkout first the submodule to the commit (or branch) of interest.
+To build a container based on a different commit one has to checkout first the submodule
+to the commit (or branch) of interest.
 
-Build the docker containers with the suitable [profiles](https://docs.docker.com/compose/profiles/): 
+Build the docker containers with the suitable
+[profiles](https://docs.docker.com/compose/profiles/):
 
 ```bash
 export COMPOSE_PROFILES=<MY_PROFILES>
-docker-compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
+docker compose -f docker-compose.yaml up -d --force-recreate --build --no-deps
 ```
 
-All the application containers (excluding the db -mongo- and the db_seeding -mongo_seed-) are meant to be used for development so docker-compose starts, rather than the applications, environments where the development environment of each application is set up. This means that, to run the application, one has to attach to the container and start it. 
+All the application containers (excluding the db -mongo- and the db_seeding
+-mongo_seed-) are meant to be used for development so `docker compose` starts, rather than
+the applications, environments where the development environment of each application is
+set up. This means that, to run the application, one has to attach to the container and
+start it.
 
 ### Examples
 
-Here are the two most common use cases, spinning up the backend and fronted; the new backend and the frontend. 
+Here are the two most common use cases, spinning up the backend and fronted; the new
+backend and the frontend.
 
 #### BE and FE
 
@@ -39,12 +55,14 @@ Here are the two most common use cases, spinning up the backend and fronted; the
 ```bash
 export COMPOSE_PROFILES=be,fe
 ```
-2. run docker-compose:
+2. run docker compose:
 ```bash
-docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+docker compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 ```
 
-This will start four containers: the be container, the fe one, the mongodb database and a short-lived one, called mongodb_seed_be that puts some example data into the be db of mongo.
+This will start four containers: the be container, the fe one, the mongodb database and
+a short-lived one, called mongodb_seed_be that puts some example data into the be db of
+mongo.
 
 #### New BE and FE
 
@@ -52,19 +70,26 @@ This will start four containers: the be container, the fe one, the mongodb datab
 ```bash
 export COMPOSE_PROFILES=be_next,fe
 ```
-2. run docker-compose:
+2. run docker compose:
 ```bash
-docker-compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
+docker compose -f docker-compose.yaml up --force-recreate --build --no-deps -d
 ```
 
-As before, this will start four containers: the be_next container, the fe one, the mongo database and a short-lived one, called mongodb_seed_be_next that puts some example data into the be_next db of mongo.
+As before, this will start four containers: the be_next container, the fe one, the mongo
+database and a short-lived one, called mongodb_seed_be_next that puts some example data
+into the be_next db of mongo.
 
-Since the configuration of the frontend with the new backend has slightly changed, remember to set the `accessTokenPrefix` value to "Bearer " in the [config.json](./config/frontend/config.json#L3) file of the fe, before starting the frontend application.
+Since the configuration of the frontend with the new backend has slightly changed,
+remember to set the `accessTokenPrefix` value to "Bearer " in the
+[config.json](./config/frontend/config.json#L3) file of the fe, before starting the
+frontend application.
 
 
 ## Starting services
 
-The `docker-compose.yaml` file is constructed to prepare containers with all dependencies but not to start the services. This is generally done by overriding the command with an infinite loop.
+The `docker-compose.yaml` file is constructed to prepare containers with all
+dependencies but not to start the services. This is generally done by overriding the
+command with an infinite loop.
 
 ### Backend `be`
 
@@ -80,16 +105,36 @@ cd /home/node/app
 npm start
 ```
 
+The swagger API will be available at
+[http://127.0.0.1:3000/explorer](http://127.0.0.1:3000/explorer).
+
+For development you can also start with live file monitoring using the command:
+
+```sh
+npm run start:dev
+```
+
+Note that configuration occurs through environment variables within the container.
+Defaults are populated from `config/backend_next/.env` when the container is built, but
+can be overridden at runtime within the container or by mounting a `.env` file at
+`/home/node/app/.env`.
+
 ### Frontend `fe`
 
 The frontend uses a custom Dockerfile with the following modifications:
 
 ```bash
 cd /frontend
-npm start -- --host 0.0.0.0
+npm start -- --host 0.0.0.0 --disable-host-check
 ```
 
-A custom Dockerfile is used because the production image uses the node alpine base image which does not crosscompile on macOS.
+The frontend will be available at [http://127.0.0.1:4200/](http://127.0.0.1:4200/).
+
+A custom Dockerfile is used because the production image uses the node alpine base image
+which does not cross-compile on macOS. Additionally, the production image builds the
+static site and then serves it via nginx. The development image serves the site using
+`ng serve` (webpack-dev-server) so it reflects the latest code and updates when files
+change.
 
 ### Search `search`
 
@@ -98,12 +143,19 @@ cd /home/node/app
 npm start
 ```
 
+The PANOSC search API will be available at
+[localhost:3002/explorer/](localhost:3002/explorer/).
+
 ### Landing Page `lp`
 
 ```bash
 cd /home/node/app
-npm start -- --host 0.0.0.0
+npm start -- --host 0.0.0.0 --disable-host-check
 ```
+
+The DOI landing page will be available at
+[http://localhost:4201/](http://localhost:4201/).
+
 
 ### OAI-PMH `oi`
 
@@ -111,6 +163,16 @@ npm start -- --host 0.0.0.0
 cd /home/node/app
 npm start
 ```
+
+Or for development,
+
+```sh
+npm run dev
+```
+
+The OAI-PMG landing page will be available at
+[http://localhost:3001/](http://localhost:3001/).
+
 
 ### Proposals `pr`
 
@@ -125,13 +187,15 @@ Simply browse to localhost:8888
 
 ## Reclaiming space
 
-This compose file creates a new docker volume with test data. Removing this requires adding `--volumes` when shutting down the containers:
+This compose file creates a new docker volume with test data. Removing this requires
+adding `--volumes` when shutting down the containers:
 
 ```bash
-docker-compose -f docker-compose.yaml down --volumes
+docker compose -f docker-compose.yaml down --volumes
 ```
 
-If this is omitted it may eventually lead to your docker virtual disk filling up. If this happens, remove old volumes:
+If this is omitted it may eventually lead to your docker virtual disk filling up. If
+this happens, remove old volumes:
 
 ```bash
 docker volume prune
