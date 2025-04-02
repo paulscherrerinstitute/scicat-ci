@@ -102,13 +102,16 @@ npm start
 
 ```bash
 cd /home/node/app
-npm start
+npm start:dev
 ```
 
 The swagger API will be available at
 [http://127.0.0.1:3000/explorer](http://127.0.0.1:3000/explorer).
 
-For development you can also start with live file monitoring using the command:
+This container is intended for development. The `jobConfig.yaml` file is mounted from
+`dev/config/backend_next/jobConfig.yaml`.
+
+You can also start with live file monitoring using the command:
 
 ```sh
 npm run start:dev
@@ -118,6 +121,19 @@ Note that configuration occurs through environment variables within the containe
 Defaults are populated from `config/backend_next/.env` when the container is built, but
 can be overridden at runtime within the container or by mounting a `.env` file at
 `/home/node/app/.env`.
+
+### Test backend-next `test_be_next`
+
+```bash
+cd /home/node/app
+npm run start:dev
+# in another shell
+npm run
+```
+
+This container is intended for running api tests. It uses a different database than
+`be_next`. Functional accounts and jobs are taken from the test configurations in the
+scicat-backend-next repository.
 
 ### Frontend `fe`
 
