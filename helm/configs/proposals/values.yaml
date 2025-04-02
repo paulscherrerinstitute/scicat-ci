@@ -23,3 +23,6 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /usr/src/proposals/.env
     subPath: .env
+
+cronjob:
+  ttlSecondsAfterFinished: 691200 # 8 days (7+1 of buffer)

@@ -41,22 +41,34 @@ secrets:
       mail_auth: "{{ .Values.secretsJson.MAIL_AUTH }}"
       express_session: "{{ .Values.secretsJson.EXPRESS_SESSION_SECRET }}"
 
-ingress:
-  enabled: true
-  annotations: 
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/proxy-body-size: 50m
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-  hosts:
-    - host: "{{ .Values.host }}"
-      paths: 
-        - path: "/"
-          pathType: Prefix
-  tls:
-    - hosts:
-      - "{{ .Values.host }}"
-      secretName: "scicat-be-certificate"
+ingresses:
+  - enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: 50m
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    hosts:
+      - host: "{{ .Values.host }}"
+        paths: 
+          - path: "/"
+            pathType: Prefix
+    tls:
+      - hosts:
+        - "{{ .Values.host }}"
+        secretName: "scicat-be-certificate"
+  - enabled: true
+    name: backend-login
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
+    hosts:
+      - host: "{{ .Values.host }}"
+        paths:
+          - path: /api/v3/Users/login
+            pathType: Exact
+          - path: /api/v3/auth/msad
+            pathType: Exact
 
 configMaps: 
   "{{ .Release.Name }}-cm":

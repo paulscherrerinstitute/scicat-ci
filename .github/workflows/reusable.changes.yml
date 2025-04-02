@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check changed-files
     outputs:
-      changed: ${{ steps.changed-files.outputs.any_changed }}
+      changed: ${{ steps.changed-files.outputs.any_modified }}
 
     steps:
       - uses: actions/checkout@v3

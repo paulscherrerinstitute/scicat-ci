@@ -76,10 +76,13 @@ The following table lists the configurable parameters of the chart and their def
 | `service.externalPort`               | Service external port                                                             | `3000`                         |
 | `service.internalPort`               | Service internal port name                                                        | `80`                           |
 | `ingress.enabled`                    | Enable ingress resource for Management console                                    | `false`                        |
+| `ingress.name`                       | Name of the ingress | `fullname`                                                  |                                |
+| `ingress.annotations`                | Map of annotations. Keys prefixed with `b64/` must be 64enc and the chart b64dec  | `{}`                           |
 | `ingress.hosts[0].host`              | Host                                                                              | `nil`                          |
 | `ingress.hosts[0].paths[0].path`     | Path for the default host                                                         | `/`                            |
 | `ingress.hosts[0].tls[0].secretName` | Name of existing secret contiaining the tls certificate                           | `nil`                          |
 | `ingress.hosts[0].tls[0].hosts[0]`   | Host on which to apply the tls encription                                         | `nil`                          |
+| `ingresses`                          | Optional array of ingresses. If not specified, defaults to the `ingress` object   | `ingress`                      |
 
 Specify each parameter using the `--set key=value[,key=value]` or `--set-file key=value[,key=value]` argument to `helm install`. For example,
 

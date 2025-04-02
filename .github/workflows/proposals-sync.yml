@@ -46,19 +46,19 @@ jobs:
       - name: Build
         run: |
           cp docker-compose.dev.yml docker-compose.yml
-          docker-compose up -d --build
+          docker compose up -d --build
 
       - name: Test
-        run: docker-compose exec -T app pytest
+        run: docker compose exec -T app pytest
 
       - name: Black
-        run: docker-compose exec -T app black --check --diff --no-color ./src
+        run: docker compose exec -T app black --check --diff --no-color ./src
 
       - name: Isort
-        run: docker-compose exec -T app isort --check --diff ./src
+        run: docker compose exec -T app isort --check --diff ./src
 
       - name: Pylint
-        run: docker-compose exec -T app pylint ./src
+        run: docker compose exec -T app pylint ./src
         continue-on-error: true
 
       - name: Build prod
@@ -66,7 +66,7 @@ jobs:
 
       - name: Cleanup
         if: ${{ always() }}
-        run: docker-compose down 
+        run: docker compose down 
 
   build_deploy:
     if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component && needs.set_env.outputs.environment != 'development') || needs.set_env.outputs.component == 'pr'
