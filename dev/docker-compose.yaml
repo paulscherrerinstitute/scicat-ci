@@ -210,6 +210,8 @@ services:
     ports:
       # management plugin
       - 15672:15672
+    profiles:
+    - rabbitmq
 
 volumes:
   mongodb_data:
