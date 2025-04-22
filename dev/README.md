@@ -199,6 +199,16 @@ python src/main.py
 
 Simply browse to localhost:8888
 
+### RabbitMQ
+
+RabbitMQ can be started by including rabbitmq in the profiles, eg `COMPOSE_PROFILES=be_next,rabbitmq`.
+The management console can be accessed at http://localhost:15672.
+
+The `be_next` configuration files need to be modified to reach RABBITMQ. In
+`backend_next/.env` set `RABBITMQ_ENABLED=yes`. You may want to update the password as
+well, both there and in `rabbitmq/.env`. After this rabbitmq actions can be added to
+`jobConfig.yaml` on the backend.
+
 ## Reclaiming space
 
 This compose file creates a new docker volume with test data. Removing this requires
