@@ -15,6 +15,13 @@ volumes:
   - name: secrets-volume
     secret:
       secretName: "{{ .Release.Name }}-s"
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+
+configMaps:
+  "{{ .Release.Name }}-cm":
+    job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -60,3 +67,6 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/jobConfig.yaml
     subPath: jobConfig.yaml
+  - name: config-volume
+    mountPath: /home/node/app/email-templates/job-template-simplified.html
+    subPath: job-template-simplified.html
