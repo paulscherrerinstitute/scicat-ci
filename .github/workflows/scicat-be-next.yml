@@ -31,6 +31,7 @@ jobs:
       files: |
         .github/workflows/scicat-be-next.yml
         helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/**
+        helm/configs/backend-next/job-template-simplified.html
         helm/configs/backend-next/values.yaml
         scicat-backend-next/**
       commit: ${{ needs.set_env.outputs.commit }}
@@ -54,6 +55,9 @@ jobs:
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       # submodule_commit: 6c5112a40ee0e25bbfc0af37308c6a42c3c9b163
       submodule: scicat-backend-next
+      helm_set_files: >-
+        JOB_TEMPLATE_SIMPLIFIED=helm/configs/backend-next/job-template-simplified.html
+
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
