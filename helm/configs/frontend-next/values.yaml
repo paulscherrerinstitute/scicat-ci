@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: "{{ .Values.ciRepository }}"
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "{{ .Values.ciTag }}"
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 80
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "scicat-fe-next-certificate"
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: downloaddir
+    emptyDir: {}
+
+configMaps:
+  "{{ .Release.Name }}-cm":
+    config.json: "{{ .Values.ENVIRONMENT }}"
+    keycloak-icon-256px.svg: "{{ .Values.KEYCLOAK_ICON }}"
+
+initContainers:
+  - name: install
+    image: alpine
+    command:
+      - "/bin/sh"
+      - -c
+    args:
+      - >-
+        apk update && apk add ca-certificates && update-ca-certificates;
+        wget
+        -O /download-dir/site.png
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm/configs/frontend/site.png;
+        wget
+        -O /download-dir/site-logo.png
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/helm/configs/frontend/site-logo.png;
+    volumeMounts:
+      - name: downloaddir
+        mountPath: "/download-dir"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/share/nginx/html/assets/config.json
+    subPath: config.json
+  - name: config-volume
+    mountPath: /usr/share/nginx/html/assets/images/keycloak_icon_256px.svg
+    subPath: keycloak-icon-256px.svg
+  - name: downloaddir
+    mountPath: /usr/share/nginx/html/assets/images/site.png
+    subPath: site.png
+  - name: downloaddir
+    mountPath: /usr/share/nginx/html/assets/images/site-logo.png
+    subPath: site-logo.png
