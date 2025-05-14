@@ -36,7 +36,7 @@ jobs:
         frontend/**
       commit: ${{ needs.set_env.outputs.commit }}
       #submodule_commit: ${{ github.event.inputs.submodule_commit }}
-      submodule_commit: 6c5112a40ee0e25bbfc0af37308c6a42c3c9b163
+      submodule_commit: psi-deployment-openem
       submodule: frontend
 
   build_deploy_scicat_fe_next:
@@ -53,7 +53,7 @@ jobs:
       environment: ${{ needs.set_env.outputs.environment }}
       commit: ${{ needs.set_env.outputs.commit }}
       #submodule_commit: ${{ github.event.inputs.submodule_commit }}
-      submodule_commit: 6c5112a40ee0e25bbfc0af37308c6a42c3c9b163
+      submodule_commit: psi-deployment-openem
       submodule: frontend
       helm_set_files: >-
         KEYCLOAK_ICON=helm/configs/frontend-next/keycloak_icon_256px.svg
