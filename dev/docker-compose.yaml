@@ -98,7 +98,7 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
+      - ../scicat-backend-next/test/config/functionalAccounts.json:/home/node/app/functionalAccounts.json
     env_file: ./config/test_backend_next/.env
     profiles:
       - test_be_next
