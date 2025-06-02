@@ -1,0 +1,13 @@
+scicatUrl: "http://backend-next.scicat-development/"
+facilityCollectionIDs:
+  PSI: b2064a13-571b-4314-a7ec-db58c7a5b423
+globusScopes: 
+  - "urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/b2064a13-571b-4314-a7ec-db58c7a5b423/data_access]"
+port: 8080
+facilitySrcGroupTemplate: "SRC-{{ .FacilityName }}"
+facilityDstGroupTemplate: "DST-{{ .FacilityName }}"
+destinationPathTemplate: "/service_user/{{ .PidShort }}"
+task:
+  maxConcurrency: 10
+  queueSize: 100
+  pollInterval: 10
