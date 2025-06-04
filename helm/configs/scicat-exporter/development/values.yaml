@@ -4,4 +4,4 @@ env:
   - name: QUARKUS_PROFILE
     value: dev
   - name: _DEV_QUARKUS_REST_CLIENT_SCICAT_API_URL
-    value: https://dacat-development.psi.ch/api/v3
+    value: http://backend.scicat-development/api/v3
