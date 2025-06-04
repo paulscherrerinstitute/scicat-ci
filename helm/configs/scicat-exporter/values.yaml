@@ -25,7 +25,3 @@ ingress:
     - hosts:
         - "{{ .Values.host }}"
       secretName: "scicat-exporter-certificate"
-
-env:
-  - name: QUARKUS_PROFILE
-    value: "{{ .Values.profile }}"
