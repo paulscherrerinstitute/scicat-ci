@@ -1,3 +1,5 @@
+replicatCount: 0
+
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
   pullPolicy: Always
