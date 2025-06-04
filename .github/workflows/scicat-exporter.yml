@@ -49,9 +49,6 @@ jobs:
           value-files: >-
             helm/configs/${{ env.RELEASE_NAME }}/values.yaml
             helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml
-          files: >-
-            CONFIG=helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/config.yaml
-          secrets: ${{ toJSON(secrets) }}
         env:
           KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
           RELEASE_NAME: scicat-exporter
