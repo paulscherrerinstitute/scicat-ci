@@ -24,7 +24,7 @@ ingress:
   tls:
     - hosts:
         - "{{ .Values.host }}"
-      secretName: "scicat-rocrate-certificate"
+      secretName: "scicat-exporter-certificate"
 
 env:
   - name: QUARKUS_PROFILE
