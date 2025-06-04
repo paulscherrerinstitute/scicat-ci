@@ -1,0 +1,31 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
+  pullPolicy: Always
+  tag: 1.0.0-SNAPSHOT
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  probePath: /api/v1/health/live
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+        - "{{ .Values.host }}"
+      secretName: "scicat-rocrate-certificate"
+
+env:
+  - name: QUARKUS_PROFILE
+    value: "{{ .Values.profile }}"
