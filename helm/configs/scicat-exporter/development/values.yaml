@@ -1,3 +1,7 @@
 profile: dev
 
 host: scicat-exporter.development.psi.ch
+
+env:
+  - name: _DEV_QUARKUS_REST_CLIENT_SCICAT_API_URL
+    value: https://dacat-development.psi.ch/api/v3
