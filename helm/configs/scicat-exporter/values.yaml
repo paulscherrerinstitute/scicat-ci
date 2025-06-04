@@ -1,5 +1,3 @@
-replicaCount: 1
-
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
   pullPolicy: Always
