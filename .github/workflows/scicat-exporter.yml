@@ -1,0 +1,59 @@
+name: scicat-exporter
+
+on:
+  workflow_dispatch:
+    paths:
+      - .github/workflows/scicat-exporter.yml
+      - helm/configs/scicat-exporter/values.yaml
+      - helm/configs/scicat-exporter/development/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/scicat-exporter.yml
+      - helm/configs/scicat-exporter/values.yaml
+      - helm/configs/scicat-exporter/development/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/scicat-exporter.yml
+      - helm/configs/scicat-exporter/values.yaml
+  release:
+    types: [published]
+
+jobs:
+  set_env:
+    uses: ./.github/workflows/reusable.environment.yml
+
+  deploy:
+    if: (!needs.set_env.outputs.component) || needs.set_env.outputs.component == 'gp'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set_env.outputs.environment }}
+    needs:
+      - set_env
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Open ssh tunnel
+        uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
+        with:
+          bastion_user: "${{ secrets.BASTION_USER }}"
+          bastion_ssh_key: "${{ secrets.BASTION_SSH_KEY }}"
+
+      - name: deploy
+        uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+        with:
+          release: "${{ env.RELEASE_NAME }}"
+          namespace: "${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}"
+          chart: helm/charts/generic_service
+          value-files: >-
+            helm/configs/${{ env.RELEASE_NAME }}/values.yaml
+            helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml
+          files: >-
+            CONFIG=helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/config.yaml
+          secrets: ${{ toJSON(secrets) }}
+        env:
+          KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
+          RELEASE_NAME: scicat-exporter
+          ENVIRONMENT: "${{ needs.set_env.outputs.environment }}"
+          NAMESPACE_PREFIX: scicat-
