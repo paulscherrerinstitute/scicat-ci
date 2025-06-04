@@ -1,4 +1,4 @@
-replicatCount: 0
+replicatCount: 1
 
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
