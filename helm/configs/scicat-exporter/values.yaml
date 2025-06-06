@@ -3,7 +3,8 @@ replicatCount: 1
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
   pullPolicy: Always
-  tag: 1.0.0-SNAPSHOT
+  tag: " sha256:35afc3cdeb8ffbe2979ea70d2d6f29ff6d4d010fc86be4bf0c68d147363ea1ea"
+  # tag: 1.0.0-SNAPSHOT
 
 service:
   type: ClusterIP
