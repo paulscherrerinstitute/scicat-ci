@@ -17,4 +17,6 @@ export const environment = {
       title: "Please enter your email address where you will receive the download procedure",
       confirmMessage: "Are you sure you want to continue?"
     },
-  };
+  statusMessage: "URL retrieve is currently down. Please check <a href='https://scistatus.psi.ch/' target=_blank>https://scistatus.psi.ch/</a> for latest updates.",
+  statusCode: "WARN",
+};
