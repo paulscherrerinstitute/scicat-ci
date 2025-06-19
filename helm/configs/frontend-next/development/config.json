@@ -228,5 +228,44 @@
         "conditions": []
     },
     "accessTokenPrefix": "Bearer ",
-    "externalAuthEndpoint": "/api/v3/auth/ldap"
+    "externalAuthEndpoint": "/api/v3/auth/ldap",
+    "ingestorEnabled": true,
+    "ingestorMode": "transfer",
+    "ingestorAutodiscoveryOptions": [
+        {
+            "mailDomain": "psi.ch",
+            "description": "PSI Electron Microscopy Facility",
+            "facilityBackend": "https://emf-ingestor.psi.ch/"
+        },
+        {
+            "mailDomain": "unil.ch",
+            "description": "DCI-Lausanne (EPFL/UNIL)",
+            "facilityBackend": "https://dci-globus.unil.ch"
+        },
+        {
+            "mailDomain": "epfl.ch",
+            "description": "DCI-Lausanne (EPFL/UNIL)",
+            "facilityBackend": "https://dci-globus.unil.ch"
+        },
+        {
+            "mailDomain": "unibe.ch",
+            "description": "University of Bern",
+            "facilityBackend": "https://openem-ingestor.id.unibe.ch"
+        },
+        {
+            "mailDomain": "ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        },
+        {
+            "mailDomain": "scopem.ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        },
+        {
+            "mailDomain": "id.ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        }
+    ]
 }
