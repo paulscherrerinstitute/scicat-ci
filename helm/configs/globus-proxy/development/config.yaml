@@ -1,7 +1,8 @@
 scicatUrl: "http://backend-next.scicat-development/"
 facilityCollectionIDs:
+  UNIBAS: d35e9477-400d-4069-b571-d678847373f1
   PSI: b2064a13-571b-4314-a7ec-db58c7a5b423
-globusScopes: 
+globusScopes:
   - "urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/b2064a13-571b-4314-a7ec-db58c7a5b423/data_access]"
 port: 8080
 facilitySrcGroupTemplate: "SRC-{{ .FacilityName }}"
