@@ -12,13 +12,6 @@ on:
       - .github/workflows/scicat-globus-proxy.yml
       - helm/configs/globus-proxy/values.yaml
       - helm/configs/globus-proxy/development/**
-  push:
-    branches: [ main ]
-    paths: 
-      - .github/workflows/scicat-globus-proxy.yml
-      - helm/configs/globus-proxy/values.yaml
-  release:
-    types: [ published ]
 
 jobs:
 
