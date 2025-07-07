@@ -17,4 +17,5 @@ export const environment = {
       title: "Please enter your email address where you will receive the download procedure",
       confirmMessage: "Are you sure you want to continue?"
     },
+    contactEmail: "scicat-help@lists.psi.ch",
   };

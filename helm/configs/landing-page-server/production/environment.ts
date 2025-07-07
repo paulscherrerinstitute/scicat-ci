@@ -19,4 +19,5 @@ export const environment = {
     },
   statusMessage: "Retrieving datasets > 5GB currently fails, due to technical issues at <a href='https://cscs.ch/' target=_blank>CSCS</a>. Please check <a href='https://scistatus.psi.ch/' target=_blank>https://scistatus.psi.ch/</a> for latest updates.",
   statusCode: "WARN",
+  contactEmail: "scicat-help@lists.psi.ch",
 };
