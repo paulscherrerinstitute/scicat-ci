@@ -240,12 +240,12 @@
         {
             "mailDomain": "unil.ch",
             "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-globus.unil.ch"
+            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
         },
         {
             "mailDomain": "epfl.ch",
             "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-globus.unil.ch"
+            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
         },
         {
             "mailDomain": "unibe.ch",
