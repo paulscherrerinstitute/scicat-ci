@@ -17,5 +17,7 @@ export const environment = {
       title: "Please enter your email address where you will receive the download procedure",
       confirmMessage: "Are you sure you want to continue?"
     },
+    statusCode: "INFO",
+    statusMessage: "Dataset retrieval is fully operational again, including for datasets exceeding 5 GB.",
     contactEmail: "scicat-help@lists.psi.ch",
   };
