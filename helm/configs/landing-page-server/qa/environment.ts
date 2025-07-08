@@ -17,7 +17,7 @@ export const environment = {
       title: "Please enter your email address where you will receive the download procedure",
       confirmMessage: "Are you sure you want to continue?"
     },
-    statusMessage: "Retrieving datasets > 5GB currently fails, due to technical issues at <a href='https://cscs.ch/' target=_blank>CSCS</a>. Please check <a href='https://scistatus.psi.ch/' target=_blank>https://scistatus.psi.ch/</a> for latest updates.",
-    statusCode: "WARN",
+    statusCode: "INFO",
+    statusMessage: "Dataset retrieval is fully operational again, including for datasets exceeding 5 GB.",
     contactEmail: "scicat-help@lists.psi.ch",
   };
