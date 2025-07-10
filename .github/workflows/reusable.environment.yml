@@ -55,7 +55,7 @@ jobs:
             environment=production
             component=${tag:0:2}
           fi
-          echo "::set-output name=tag::$(echo $tag)"
-          echo "::set-output name=environment::$(echo $environment)"
-          echo "::set-output name=component::$(echo $component)"
-          echo "::set-output name=commit::$(echo $commit)"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "environment=$environment" >> $GITHUB_OUTPUT
+          echo "component=$component" >> $GITHUB_OUTPUT
+          echo "commit=$commit" >> $GITHUB_OUTPUT

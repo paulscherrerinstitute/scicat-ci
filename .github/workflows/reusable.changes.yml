@@ -68,8 +68,8 @@ jobs:
       - if: github.event_name == 'workflow_dispatch'
         id: shas
         run: |
-          echo "::set-output name=sha::$(git rev-parse HEAD)"
-          echo "::set-output name=base_sha::$(git rev-parse ${{ inputs.main }})"
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "base_sha=$(git rev-parse ${{ inputs.main }})" >> $GITHUB_OUTPUT
 
       - name: Get changed files
         id: changed-files
