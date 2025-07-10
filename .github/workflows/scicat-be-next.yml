@@ -11,10 +11,10 @@ on:
         required: false
   pull_request:
     branches: [ main ]
-  push:
-    branches: [ main ]
-  release:
-    types: [ published ]
+  # push:
+  #   branches: [ main ]
+  # release:
+  #   types: [ published ]
 
 jobs:
 
