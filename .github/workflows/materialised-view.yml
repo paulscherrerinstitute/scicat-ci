@@ -2,9 +2,6 @@ name: materialised-view
 
 on:  
   workflow_dispatch:
-    paths: 
-      - .github/workflows/materialised-view.yml
-      - helm/configs/materialised-view/**
   pull_request:
     branches: [ main ]
     paths: 

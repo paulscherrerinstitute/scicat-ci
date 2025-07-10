@@ -1,11 +1,7 @@
 name: scicat-globus-proxy
 
-on:  
-  workflow_dispatch: 
-    paths: 
-      - .github/workflows/scicat-globus-proxy.yml
-      - helm/configs/globus-proxy/values.yaml
-      - helm/configs/globus-proxy/development/**
+on:
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
     paths: 

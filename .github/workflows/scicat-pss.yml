@@ -1,10 +1,7 @@
 name: scicat-pss
 
-on:  
-  workflow_dispatch: 
-    paths: 
-      - .github/workflows/scicat-pss.yml
-      - helm/configs/pss/**
+on:
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
     paths: 
