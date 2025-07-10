@@ -99,7 +99,9 @@
             Job id: {{jobId}}.<br>
             {{/if}}
             You will be notified by email as soon as the job is completed.<br>
+            {{#if eq @root.config.subject "[SciCat production]"}}
             You can find the current running jobs <a href="https://metabase.psi.ch/public/dashboard/40ace253-1c45-4d8f-9b98-8f3cda2488c7">here; it updates on page refresh.<br>
+            {{/if}}
         </div>
         {{#if jobData}}
         <p><b>Job will be perfomed on the following dataset(s):</b></p>
