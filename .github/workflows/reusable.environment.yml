@@ -44,7 +44,7 @@ jobs:
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             input_commit=${{ inputs.commit }}
             commit=${input_commit:-${{ github.sha }}}
-            submodule_append=`[ -z ${{ inputs.submodule_commit }} ] || echo "_sha-${{ inputs.submodule_commit }}" && echo ""`
+            submodule_append=$([ -z ${{ inputs.submodule_commit }} ] || echo "_sha-${{ inputs.submodule_commit }}" && echo "")
             tag="sha-$commit$submodule_append"
             environment=development
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -55,7 +55,9 @@ jobs:
             environment=production
             component=${tag:0:2}
           fi
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-          echo "environment=$environment" >> $GITHUB_OUTPUT
-          echo "component=$component" >> $GITHUB_OUTPUT
-          echo "commit=$commit" >> $GITHUB_OUTPUT
+          {
+            echo "tag=$tag";
+            echo "environment=$environment";
+            echo "component=$component";
+            echo "commit=$commit";
+          } >> "$GITHUB_OUTPUT"
