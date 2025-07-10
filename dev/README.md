@@ -102,7 +102,7 @@ npm start
 
 ```bash
 cd /home/node/app
-npm start
+npm start:dev
 ```
 
 The swagger API will be available at
@@ -118,6 +118,20 @@ Note that configuration occurs through environment variables within the containe
 Defaults are populated from `config/backend_next/.env` when the container is built, but
 can be overridden at runtime within the container or by mounting a `.env` file at
 `/home/node/app/.env`.
+The `jobConfig.yaml` file is mounted from `dev/config/backend_next/jobConfig.yaml`. This container is intended for development.
+
+### Test backend-next `test_be_next`
+
+```bash
+cd /home/node/app
+npm run start:dev
+# in another shell
+npm run
+```
+
+This container is intended for running api tests. It uses a different database than
+`be_next`. Functional accounts and jobs are taken from the test configurations in the
+scicat-backend-next repository.
 
 ### Frontend `fe`
 
@@ -184,6 +198,16 @@ python src/main.py
 ### Jupyter
 
 Simply browse to localhost:8888
+
+### RabbitMQ
+
+RabbitMQ can be started by including rabbitmq in the profiles, eg `COMPOSE_PROFILES=be_next,rabbitmq`.
+The management console can be accessed at http://localhost:15672.
+
+The `be_next` configuration files need to be modified to reach RABBITMQ. In
+`backend_next/.env` set `RABBITMQ_ENABLED=yes`. You may want to update the password as
+well, both there and in `rabbitmq/.env`. After this rabbitmq actions can be added to
+`jobConfig.yaml` on the backend.
 
 ## Reclaiming space
 
