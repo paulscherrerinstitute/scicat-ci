@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: "{{ .Values.ciRepository }}"
@@ -15,23 +15,31 @@ volumes:
   - name: secrets-volume
     secret:
       secretName: "{{ .Release.Name }}-s"
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
 
-secrets: 
+configMaps:
+  "{{ .Release.Name }}-cm":
+    job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
+
+secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
-    data: 
+    data:
       .env: "{{ .Values.secretsJson.BENEXT_ENV }}"
       functionalAccounts.json: "{{ .Values.secretsJson.BENEXT_FUNCTIONAL_ACCOUNTS }}"
+      jobConfig.yaml: "{{ .Values.secretsJson.BENEXT_JOBCONFIG }}"
 
 ingress:
   enabled: true
-  annotations: 
+  annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
   hosts:
     - host: "{{ .Values.host }}"
-      paths: 
+      paths:
         - path: "/"
           pathType: Prefix
   tls:
@@ -46,6 +54,8 @@ env:
     value: "20.500.11935"
   - name: SITE
     value: "PSI"
+  - name: JOB_CONFIGURATION_FILE
+    value: /home/node/app/jobConfig.yaml
 
 volumeMounts:
   - name: secrets-volume
@@ -54,3 +64,9 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/functionalAccounts.json
     subPath: functionalAccounts.json
+  - name: secrets-volume
+    mountPath: /home/node/app/jobConfig.yaml
+    subPath: jobConfig.yaml
+  - name: config-volume
+    mountPath: /home/node/app/email-templates/job-template-simplified.html
+    subPath: job-template-simplified.html
