@@ -40,17 +40,17 @@ jobs:
       changed: ${{ steps.changed-files.outputs.any_modified }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ref: ${{ inputs.commit }}
       - run: |
-          current_commit=`git rev-parse HEAD`;
-          checkout_branch=`[[ $(git rev-parse --abbrev-ref HEAD) == "${{ inputs.main }}" ]] && echo "HEAD^" || echo "${{ inputs.main }}"`;
-          git checkout $checkout_branch && git submodule update --recursive;
-          git checkout $current_commit && git submodule update --recursive;
+          current_commit=$(git rev-parse HEAD)
+          checkout_branch=$(if [[ $(git rev-parse --abbrev-ref HEAD) == "${{ inputs.main }}" ]]; then echo "HEAD^"; else echo "${{ inputs.main }}"; fi)
+          git checkout "$checkout_branch" && git submodule update --recursive;
+          git checkout "$current_commit" && git submodule update --recursive;
 
       - if: ${{ inputs.submodule_commit }}
         uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
@@ -68,8 +68,10 @@ jobs:
       - if: github.event_name == 'workflow_dispatch'
         id: shas
         run: |
-          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-          echo "base_sha=$(git rev-parse ${{ inputs.main }})" >> $GITHUB_OUTPUT
+          {
+            echo "sha=$(git rev-parse HEAD)";
+            echo "base_sha=$(git rev-parse ${{ inputs.main }})"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Get changed files
         id: changed-files
