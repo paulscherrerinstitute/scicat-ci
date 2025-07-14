@@ -1,4 +1,3 @@
-version: "3.9"
 services:
 
   mongodb:
@@ -78,7 +77,7 @@ services:
     profiles:
       - fe
 
-  be_next_base: 
+  be_next_base:
     build:
       context: ../scicat-backend-next/.
       target: dev
@@ -92,21 +91,22 @@ services:
     env_file: ./config/backend_next/.env
     command: /bin/sh -c "while true; do sleep 600; done"
     profiles:
-      - never 
+      - never
 
   test_be_next:
     extends: be_next_base
     depends_on:
       - mongodb
     volumes:
-      - ../scicat-backend-next/functionalAccounts.json.test:/home/node/app/functionalAccounts.json
-      - ./config/test_backend_next/jobconfig.json:/home/node/app/test/config/jobconfig.json
+      - ../scicat-backend-next/test/config/functionalAccounts.json:/home/node/app/functionalAccounts.json
     env_file: ./config/test_backend_next/.env
     profiles:
       - test_be_next
 
   be_next:
     extends: be_next_base
+    volumes:
+      - ./config/backend_next/jobConfig.yaml:/home/node/app/jobConfig.yaml
     depends_on:
       - mongodb
     profiles:
@@ -195,6 +195,26 @@ services:
     ports:
       - 3002:3000
 
+  rabbitmq:
+    image: rabbitmq:4.0-management-alpine
+    volumes:
+      - rabbitmq_data:/bitnami
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 5s
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+    env_file: ./config/rabbitmq/.env
+    ports:
+      # management plugin
+      - 15672:15672
+    profiles:
+    - rabbitmq
+
 volumes:
   mongodb_data:
+    driver: local
+  rabbitmq_data:
     driver: local

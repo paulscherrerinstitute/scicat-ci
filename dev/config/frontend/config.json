@@ -114,7 +114,7 @@
         {
             "displayText": "PSI account",
             "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
-            "authURL": "auth/keycloak"
+            "authURL": "api/v3/auth/oidc"
         }
     ],
     "helpMessages": {
