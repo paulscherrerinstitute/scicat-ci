@@ -2,10 +2,8 @@
 """Tool that synchronizes the proposal data for a given beamline and year
 """
 import datetime
-import json
 import os
 import sys
-import urllib.request
 import uuid
 from collections import defaultdict
 
