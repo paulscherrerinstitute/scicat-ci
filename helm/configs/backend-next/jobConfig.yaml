@@ -1,0 +1,212 @@
+configVersion: v0.1.3 2025-05-14
+jobs:
+  - jobType: archive
+    create:
+      auth: '#datasetOwner'
+      actions: &archiveActions
+        - actionType: log
+
+        - actionType: validate
+          datasets:
+            "datasetlifecycle.archivable":
+              const: true
+
+        - &validStorage
+          # Validate PSI storageLocations
+          actionType: validate
+          datasets:
+            datasetlifecycle:
+              type: object
+              properties:
+                storageLocation:
+                  type: string
+                  enum:
+                    - ""
+                    - PSI
+                    - ETHZ
+              additionalProperties: true
+
+        - &switchStorage
+          actionType: switch
+          phase: perform
+          property: datasets[].datasetlifecycle.storageLocation
+          cases:
+          - match: ETHZ
+            actions:
+            - actionType: log
+              perform: "(Job {{job.jobId}}) Directing to ETHZ"
+
+            - &scopemUrl
+              actionType: url
+              url: 'https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs'
+              method: POST
+              headers:
+                accept: application/json
+                content-type: application/json
+                Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
+              body: '{{{jsonify job}}}'
+
+          - # PSI default
+            actions:
+            - actionType: log
+              perform: "(Job {{job.jobId}}) Directing to PSI"
+
+            - &rabbitmq
+              actionType: rabbitmq
+              exchange: jobs.write
+              queue: client.jobs.write.v4
+              key: jobqueuev4
+
+    update:
+      auth: archiveManager
+      actions: *archiveActions
+
+  - jobType: retrieve
+    create:
+      auth: '#datasetAccess'
+      actions: &retrieveActions
+        - actionType: log
+        - actionType: validate
+          datasets:
+            "datasetlifecycle.retrievable":
+              const: true
+        - *validStorage
+        - *switchStorage
+
+    update:
+      auth: archiveManager
+      actions: *retrieveActions
+
+  # TODO Make public work for ETHZ
+  - jobType: public
+    create:
+      auth: '#datasetPublic'
+      actions: &publicActions
+        - actionType: log
+        - actionType: validate
+          datasets:
+            isPublished:
+              const: true
+        #- *validStorage
+        - &psiStorage
+          # Only allow PSI storage (TODO)
+          actionType: validate
+          datasets:
+            datasetlifecycle:
+              type: object
+              properties:
+                storageLocation:
+                  type: string
+                  enum:
+                    - ""
+                    - PSI
+              additionalProperties: true
+
+        - *rabbitmq
+
+    update:
+      auth: 'archiveManager'
+      actions: *publicActions
+
+  - jobType: reset
+    create:
+      auth: archiveManager
+      actions: &resetActions
+        - actionType: log
+        - *psiStorage
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions: *resetActions
+
+  - jobType: rabbitmq_demo
+    create:
+      auth: admin
+      actions:
+        - *rabbitmq
+    update:
+      auth: "#jobOwnerUser"
+      actions: []
+
+
+  - jobType: email_demo
+    create:
+      auth: admin
+      actions:
+        - &email_validate
+          actionType: validate
+          request:
+            jobParams.subject:
+              type: string
+        - &email
+          actionType: email
+          to: "{{request.contactEmail}}"
+          subject: "[SciCat] {{request.jobParams.subject}}"
+          bodyTemplateFile: email-templates/job-template-simplified.html
+    update:
+      auth: "#jobOwnerUser"
+      actions:
+        - actionType: log
+        - *email
+
+  - jobType: scopem_livez
+    create:
+      auth: admin
+      actions:
+        - # Call a REST endpoint
+          actionType: url
+          url: https://scopem-openem.ethz.ch/archiver/api/v1/health/livez
+          method: GET
+          headers:
+            accept: application/json
+            content-type: application/json
+    update:
+      auth: "#jobOwnerUser"
+      actions: []
+
+
+  - jobType: url_demo
+    create:
+      auth: admin
+      actions:
+        - # Call a REST endpoint
+          actionType: url
+          url: http://echo/scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
+          method: POST
+          headers:
+            accept: application/json
+            content-type: application/json
+            Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
+          body: |-
+            {
+              "type": "archive"
+              "jobParams": {
+                "job": {{{jsonify job}}}
+              }
+            }
+    update:
+      auth: "#jobOwnerUser"
+      actions: []
+
+  - jobType: scopem_test
+    create:
+      auth: "@unx-openem"
+      actions:
+        - actionType: log
+        - *scopemUrl
+    update:
+      auth: "@unx-openem"
+      actions:
+        - actionType: log
+        - *scopemUrl
+
+  - jobType: env_test
+    create:
+      auth: "admin"
+      actions:
+        - actionType: log
+          perform: "env: {{{jsonify env}}}"
+    update:
+      auth: "admin"
+      actions: []
+

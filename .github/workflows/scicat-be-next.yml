@@ -55,7 +55,7 @@ jobs:
       submodule: scicat-backend-next
       helm_set_files: >-
         JOB_TEMPLATE_SIMPLIFIED=helm/configs/backend-next/job-template-simplified.html
-
+        JOB_CONFIG=helm/configs/backend-next/jobConfig.yaml
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}

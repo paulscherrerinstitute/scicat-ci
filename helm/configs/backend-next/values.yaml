@@ -22,6 +22,7 @@ volumes:
 configMaps:
   "{{ .Release.Name }}-cm":
     job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
+    jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -29,7 +30,6 @@ secrets:
     data:
       .env: "{{ .Values.secretsJson.BENEXT_ENV }}"
       functionalAccounts.json: "{{ .Values.secretsJson.BENEXT_FUNCTIONAL_ACCOUNTS }}"
-      jobConfig.yaml: "{{ .Values.secretsJson.BENEXT_JOBCONFIG }}"
 
 ingress:
   enabled: true
@@ -64,7 +64,7 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /home/node/app/functionalAccounts.json
     subPath: functionalAccounts.json
-  - name: secrets-volume
+  - name: config-volume
     mountPath: /home/node/app/jobConfig.yaml
     subPath: jobConfig.yaml
   - name: config-volume
