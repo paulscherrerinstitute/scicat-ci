@@ -1,6 +1,7 @@
 import os
+from copy import deepcopy
 from importlib import reload
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 
@@ -157,3 +158,120 @@ def test__set_scicat_token():
             m.Configuration().api_client.default_headers["Authorization"]
             == "test_token"
         )
+
+
+class TestCreateOrUpdateProposal:
+
+    proposal = {
+        "proposalId": "20.500.11935/123",
+        "pi_email": "pi_email",
+        "pi_firstname": "John",
+        "pi_lastname": "Doe",
+        "email": "",
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "title": "Test Proposal",
+        "abstract": "This is a test proposal.",
+        "ownerGroup": "test_group",
+        "accessGroups": ["test_access"],
+    }
+
+    policy = {
+        "manager": ["pi_email"],
+        "tapeRedundancy": "low",
+        "autoArchive": False,
+        "autoArchiveDelay": 0,
+        "archiveEmailNotification": True,
+        "archiveEmailsToBeNotified": [],
+        "retrieveEmailNotification": True,
+        "retrieveEmailsToBeNotified": [],
+        "embargoPeriod": 3,
+        "ownerGroup": "abc",
+        "accessGroups": ["SLSmx"],
+    }
+
+    measurement_periods = [
+        {
+            "id": "to_include_new_from_duo",
+            "instrument": "/PSI/SLS/PX",
+            "start": "2024-12-31T23:00:00+00:00",
+            "end": "2025-01-01T23:00:00+00:00",
+            "comment": "",
+        },
+        {
+            "id": "to_exclude_on_update_because_789_scicat",
+            "instrument": "/PSI/SLS/PX",
+            "start": "2023-12-31T23:00:00+00:00",
+            "end": "2024-01-01T23:00:00+00:00",
+            "comment": "",
+        },
+    ]
+
+    class MockProposalApi:
+
+        def __init__(self, exists=True):
+            self.proposal_exists_get_proposalsid_exists = Mock(
+                return_value=Mock(exists=exists)
+            )
+            self.proposal_find_by_id = Mock(side_effect=self._proposal_find_by_id)
+            self.proposal_create = Mock()
+            self.proposal_prototype_patch_attributes = Mock()
+
+        def _proposal_find_by_id(self, proposal_id):
+            return Mock(
+                measurement_period_list=[
+                    Mock(
+                        id=789,
+                        instrument="/PSI/SLS/PX",
+                        start="2023-12-31T23:00:00+00:00",
+                        end="2024-01-01T23:00:00+00:00",
+                        comment="",
+                    ),
+                    Mock(
+                        id=000,
+                        instrument="/PSI/SLS/PX",
+                        start="2021-12-31T23:00:00+00:00",
+                        end="2022-01-01T23:00:00+00:00",
+                        comment="",
+                    ),
+                ]
+            )
+
+    def test_update_existing_proposal(self):
+        mock_proposal = self.MockProposalApi()
+        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
+            proposal = deepcopy(self.proposal)
+
+            m.create_or_update_proposal(self.policy, proposal, self.measurement_periods)
+            expeted_measurement_periods = [
+                {
+                    "id": "to_include_new_from_duo",
+                    "instrument": "/PSI/SLS/PX",
+                    "start": "2024-12-31T23:00:00+00:00",
+                    "end": "2025-01-01T23:00:00+00:00",
+                    "comment": "",
+                },
+            ]
+            mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
+                proposal["proposalId"],
+                data={
+                    "MeasurementPeriodList": expeted_measurement_periods,
+                },
+            )
+
+    @patch(
+        "main.swagger_client.PolicyApi.policy_create",
+        autospec=True,
+    )
+    def test_create_new_proposal(self, mock_policy_create):
+        mock_proposal = self.MockProposalApi(exists=False)
+        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
+            proposal = deepcopy(self.proposal)
+            m.create_or_update_proposal(self.policy, proposal, self.measurement_periods)
+            mock_proposal.proposal_create.assert_called_once_with(
+                data={
+                    **self.proposal,
+                    "MeasurementPeriodList": self.measurement_periods,
+                }
+            )
+            mock_policy_create.assert_called_once_with(ANY, data=self.policy)
