@@ -6,8 +6,10 @@ services:
         environment:
             DUO_ENDPOINT: https://duo.psi.ch/duo/api.php/v1
             DUO_FACILITY: sinq  # for a list of possible values see the README.md
+            DUO_SECRET: A_DUO_SECRET
             SCICAT_ENDPOINT: https://dacat-development.psi.ch/api/v3
             SCICAT_USERNAME: proposalIngestor
+            SCICAT_PASSWORD: A_SCICAT_PASSWORD
             DUO_YEAR: 2025
         volumes:
             - .:/usr/src/proposals
