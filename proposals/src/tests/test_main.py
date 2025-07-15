@@ -11,6 +11,18 @@ import main as m
 @pytest.mark.parametrize(
     "row, expected",
     [
+        [{"pgroup": "g1", "proposal": 123}, "g1"],
+        [{"pgroup": "", "proposal": 123}, "p123"],
+    ],
+)
+def test_compose_owner_group(row, expected):
+    owner_group = m.compose_owner_group(row)
+    assert owner_group == expected
+
+
+@pytest.mark.parametrize(
+    "row, expected",
+    [
         [{"pi_email": "pi", "email": "email"}, "pi"],
         [{"pi_email": "", "email": "email"}, "email"],
     ],
@@ -59,10 +71,9 @@ def test_compose_proposal():
         "lastname": "Smith",
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
+        "pgroup": "test_group",
     }
-    proposal = m.compose_proposal(
-        row, "pi_email", {"ownerGroup": "test_group", "accessGroups": ["test_access"]}
-    )
+    proposal = m.compose_proposal(row, "pi_email", {"accessGroups": ["test_access"]})
     assert proposal == {
         "proposalId": "20.500.11935/123",
         "pi_email": "pi_email",

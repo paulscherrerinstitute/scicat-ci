@@ -160,7 +160,7 @@ def compose_proposal(row, principal_investigator, policy):
     proposal["lastname"] = row["lastname"]
     proposal["title"] = row["title"]
     proposal["abstract"] = row["abstract"]
-    proposal["ownerGroup"] = policy["ownerGroup"]
+    proposal["ownerGroup"] = compose_owner_group(row)
     proposal["accessGroups"] = policy["accessGroups"]
     return proposal
 
@@ -176,7 +176,7 @@ def compose_policy(row, accelerator, principal_investigator):
     policy["retrieveEmailNotification"] = True
     policy["retrieveEmailsToBeNotified"] = []
     policy["embargoPeriod"] = 3
-    policy["ownerGroup"] = row["pgroup"] or f'p{row["proposal"]}'
+    policy["ownerGroup"] = compose_owner_group(row)
     # TODO for SINQ (? still correct ?)
     # policy['ownerGroup'] = 'p'+row['proposal']
     # special mapping for MX needed
@@ -185,6 +185,10 @@ def compose_policy(row, accelerator, principal_investigator):
         bl = "mx"
     policy["accessGroups"] = [f"{accelerator}{bl}"]
     return policy
+
+
+def compose_owner_group(row):
+    return row["pgroup"] or f'p{row["proposal"]}'
 
 
 def compose_principal_investigator(row):
