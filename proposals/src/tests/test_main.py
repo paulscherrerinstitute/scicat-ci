@@ -135,3 +135,25 @@ def test_compose_measurement_periods():
             "comment": "",
         },
     ]
+
+
+@patch(
+    "main.swagger_client.UserApi.user_login",
+    return_value={"id": "test_token"},
+    autospec=True,
+)
+def test__get_scicat_token(_):
+    access_token = m._get_scicat_token()
+    assert access_token == "test_token"
+
+
+@patch.dict(os.environ, {"SCICAT_ENDPOINT": "http://scicat"})
+def test__set_scicat_token():
+    reload(m)
+    with patch("main._get_scicat_token", return_value="test_token", autospec=True):
+        m._set_scicat_token()
+        assert m.Configuration().host == "http://scicat"
+        assert (
+            m.Configuration().api_client.default_headers["Authorization"]
+            == "test_token"
+        )
