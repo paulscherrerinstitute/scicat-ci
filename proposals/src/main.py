@@ -51,6 +51,10 @@ def fill_proposal(row, accelerator):
     measurement_periods = compose_measurement_periods(row, accelerator)
 
     # print("========= New measuring periods:",measurementPeriods)
+    create_or_update_proposal(policy, proposal, measurement_periods)
+
+
+def create_or_update_proposal(policy, proposal, measurement_periods):
     api = swagger_client.ProposalApi()
     try:
         # check for existence of Proposal data and merge schedules into it
