@@ -206,16 +206,20 @@ def _get_scicat_token() -> str:
         sys.exit(1)
 
 
-def main() -> None:
-    year = DUO_YEAR or datetime.datetime.now().year
-    print("Fetching proposals for accelerator ", DUO_FACILITY, " and year ", year)
-    print("Connecting to scicat on ", SCICAT_ENDPOINT)
-
+def _set_scicat_token():
     Configuration().host = SCICAT_ENDPOINT
 
     # set token for auth header - scicat
     access_token = _get_scicat_token()
     Configuration().api_client.default_headers["Authorization"] = access_token
+
+
+def main() -> None:
+    year = DUO_YEAR or datetime.datetime.now().year
+    print("Fetching proposals for accelerator ", DUO_FACILITY, " and year ", year)
+    print("Connecting to scicat on ", SCICAT_ENDPOINT)
+
+    _set_scicat_token()
 
     # read proposal data from DUO
 
