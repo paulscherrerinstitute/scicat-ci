@@ -23,6 +23,18 @@ def test_compose_owner_group(row, expected):
 @pytest.mark.parametrize(
     "row, expected",
     [
+        [{"beamline": "px"}, ["slsmx"]],
+        [{"beamline": "lx"}, ["slslx"]],
+    ],
+)
+def test_compose_access_groups(row, expected):
+    access_groups = m.compose_access_groups(row, "sls")
+    assert access_groups == expected
+
+
+@pytest.mark.parametrize(
+    "row, expected",
+    [
         [{"pi_email": "pi", "email": "email"}, "pi"],
         [{"pi_email": "", "email": "email"}, "email"],
     ],
@@ -72,8 +84,9 @@ def test_compose_proposal():
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
         "pgroup": "test_group",
+        "beamline": "PX",
     }
-    proposal = m.compose_proposal(row, "pi_email", {"accessGroups": ["test_access"]})
+    proposal = m.compose_proposal(row, "pi_email", "sls")
     assert proposal == {
         "proposalId": "20.500.11935/123",
         "pi_email": "pi_email",
@@ -85,7 +98,7 @@ def test_compose_proposal():
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
         "ownerGroup": "test_group",
-        "accessGroups": ["test_access"],
+        "accessGroups": ["slsmx"],
     }
 
 

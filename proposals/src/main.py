@@ -146,7 +146,7 @@ def compose_measurement_period(row, accelerator, schedule):
     return mp
 
 
-def compose_proposal(row, principal_investigator, policy):
+def compose_proposal(row, principal_investigator, accelerator):
     proposal = {}
     proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
     proposal["pi_email"] = principal_investigator
@@ -161,7 +161,7 @@ def compose_proposal(row, principal_investigator, policy):
     proposal["title"] = row["title"]
     proposal["abstract"] = row["abstract"]
     proposal["ownerGroup"] = compose_owner_group(row)
-    proposal["accessGroups"] = policy["accessGroups"]
+    proposal["accessGroups"] = compose_access_groups(row, accelerator)
     return proposal
 
 
@@ -180,15 +180,19 @@ def compose_policy(row, accelerator, principal_investigator):
     # TODO for SINQ (? still correct ?)
     # policy['ownerGroup'] = 'p'+row['proposal']
     # special mapping for MX needed
-    bl = row["beamline"].lower()
-    if bl.startswith("px"):
-        bl = "mx"
-    policy["accessGroups"] = [f"{accelerator}{bl}"]
+    policy["accessGroups"] = compose_access_groups(row, accelerator)
     return policy
 
 
 def compose_owner_group(row):
     return row["pgroup"] or f'p{row["proposal"]}'
+
+
+def compose_access_groups(row, accelerator):
+    bl = row["beamline"].lower()
+    if bl.startswith("px"):
+        bl = "mx"
+    return [f"{accelerator}{bl}"]
 
 
 def compose_principal_investigator(row):
