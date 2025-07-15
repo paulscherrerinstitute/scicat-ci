@@ -188,12 +188,7 @@ def compose_policy(row, accelerator, principal_investigator):
 
 
 def compose_principal_investigator(row):
-    main_proposer_email = row["email"]
-    if row["pi_email"] != "":
-        principal_investigator = row["pi_email"]
-    else:
-        principal_investigator = main_proposer_email
-    return principal_investigator
+    return row["pi_email"] or row["email"]
 
 
 def _get_scicat_token() -> str:
