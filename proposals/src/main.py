@@ -27,14 +27,9 @@ DUO_ENDPOINT = os.environ["DUO_ENDPOINT"]
 DUO_SECRET = os.environ["DUO_SECRET"]
 DUO_YEAR = os.environ["DUO_YEAR"]
 DUO_FACILITY = os.environ["DUO_FACILITY"]
-DUO_FACILITY_DATETIME_FORMAT = defaultdict(
-    lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
-)
 PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFacility)(
     DUO_ENDPOINT, DUO_SECRET
 )
-
-local = pytz.timezone("Europe/Amsterdam")
 
 
 def fill_proposal(row, accelerator):
@@ -119,14 +114,23 @@ def compose_measurement_periods(row, accelerator):
     return measurement_periods
 
 
-def compose_measurement_period(row, accelerator, schedule):
+def compose_measurement_period(
+    row,
+    accelerator,
+    schedule,
+    duo_facility=DUO_FACILITY,
+):
+    local = pytz.timezone("Europe/Amsterdam")
+    duo_facility_datetime_format = defaultdict(
+        lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
+    )
     mp = {}
     mp["id"] = uuid.uuid4().hex
     mp["instrument"] = f'/PSI/{accelerator.upper()}/{row["beamline"].upper()}'
     # convert date to format according 5.6 internet date/time format in RFC 3339"
     # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
     start_naive = datetime.datetime.strptime(
-        schedule["start"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
+        schedule["start"], duo_facility_datetime_format[duo_facility]
     )
     local_start = local.localize(start_naive, is_dst=True)
     # no point to use local here, because this information get lost when data is stored
@@ -136,7 +140,7 @@ def compose_measurement_period(row, accelerator, schedule):
     # mp['start'] = utc_start
 
     end_naive = datetime.datetime.strptime(
-        schedule["end"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
+        schedule["end"], duo_facility_datetime_format[duo_facility]
     )
     local_end = local.localize(end_naive, is_dst=True)
     utc_end = local_end.astimezone(pytz.utc)
