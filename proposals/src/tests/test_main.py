@@ -11,6 +11,30 @@ import main as m
 @pytest.mark.parametrize(
     "row, expected",
     [
+        [{"pgroup": "g1", "proposal": 123}, "g1"],
+        [{"pgroup": "", "proposal": 123}, "p123"],
+    ],
+)
+def test_compose_owner_group(row, expected):
+    owner_group = m.compose_owner_group(row)
+    assert owner_group == expected
+
+
+@pytest.mark.parametrize(
+    "row, expected",
+    [
+        [{"beamline": "px"}, ["slsmx"]],
+        [{"beamline": "lx"}, ["slslx"]],
+    ],
+)
+def test_compose_access_groups(row, expected):
+    access_groups = m.compose_access_groups(row, "sls")
+    assert access_groups == expected
+
+
+@pytest.mark.parametrize(
+    "row, expected",
+    [
         [{"pi_email": "pi", "email": "email"}, "pi"],
         [{"pi_email": "", "email": "email"}, "email"],
     ],
@@ -34,7 +58,7 @@ def test_compose_principal_investigator(row, expected):
     ],
 )
 def test_compose_policy(row, expected):
-    policy = m.compose_policy(row, "SLS", "pi_email")
+    policy = m.compose_policy({**row, "pi_email": "pi_email"}, "SLS")
     static_properties = {
         "manager": ["pi_email"],
         "tapeRedundancy": "low",
@@ -59,10 +83,10 @@ def test_compose_proposal():
         "lastname": "Smith",
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
+        "pgroup": "test_group",
+        "beamline": "PX",
     }
-    proposal = m.compose_proposal(
-        row, "pi_email", {"ownerGroup": "test_group", "accessGroups": ["test_access"]}
-    )
+    proposal = m.compose_proposal({**row, "pi_email": "pi_email"}, "sls")
     assert proposal == {
         "proposalId": "20.500.11935/123",
         "pi_email": "pi_email",
@@ -74,7 +98,7 @@ def test_compose_proposal():
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
         "ownerGroup": "test_group",
-        "accessGroups": ["test_access"],
+        "accessGroups": ["slsmx"],
     }
 
 
@@ -143,21 +167,19 @@ def test_compose_measurement_periods():
     return_value={"id": "test_token"},
     autospec=True,
 )
-def test__get_scicat_token(_):
-    access_token = m._get_scicat_token()
+def test__get_scicat_token(mock_user_login):
+    access_token = m._get_scicat_token("test_user", "test_password")
     assert access_token == "test_token"
+    mock_user_login.assert_called_once_with(
+        ANY, {"username": "test_user", "password": "test_password"}
+    )
 
 
-@patch.dict(os.environ, {"SCICAT_ENDPOINT": "http://scicat"})
-def test__set_scicat_token():
-    reload(m)
-    with patch("main._get_scicat_token", return_value="test_token", autospec=True):
-        m._set_scicat_token()
-        assert m.Configuration().host == "http://scicat"
-        assert (
-            m.Configuration().api_client.default_headers["Authorization"]
-            == "test_token"
-        )
+@patch("main._get_scicat_token", return_value="test_token", autospec=True)
+def test__set_scicat_token(_):
+    m._set_scicat_token("test_user", "test_password", "http://scicat")
+    assert m.Configuration().host == "http://scicat"
+    assert m.Configuration().api_client.default_headers["Authorization"] == "test_token"
 
 
 @pytest.mark.parametrize(
@@ -189,6 +211,26 @@ def test_main(duo_facility, expected):
             mock_set_scicat_token.assert_called_once()
             mock_proposals.assert_called_once_with(duo_facility, "2023")
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
+
+
+@patch("main.compose_policy")
+@patch("main.compose_proposal")
+@patch("main.compose_measurement_periods")
+@patch("main.create_or_update_proposal")
+def test_fill_proposal(
+    mock_create_or_update, mock_compose_mp, mock_compose_proposal, mock_compose_policy
+):
+    row = {"proposal": "123"}
+    accellerator = "SLS"
+    m.fill_proposal(row, accellerator)
+    mock_compose_policy.assert_called_once_with(row, accellerator)
+    mock_compose_proposal.assert_called_once_with(row, accellerator)
+    mock_compose_mp.assert_called_once_with(row, accellerator)
+    mock_create_or_update.assert_called_once_with(
+        mock_compose_policy.return_value,
+        mock_compose_proposal.return_value,
+        mock_compose_mp.return_value,
+    )
 
 
 class TestCreateOrUpdateProposal:

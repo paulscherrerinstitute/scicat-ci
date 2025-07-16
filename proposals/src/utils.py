@@ -1,4 +1,5 @@
 from functools import wraps
+from logging import getLogger
 from time import sleep
 from urllib.error import URLError
 
@@ -15,3 +16,6 @@ def retry(func):
                 return res
 
     return wrap
+
+
+log = getLogger("duo_sync")
