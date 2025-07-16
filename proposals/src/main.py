@@ -80,32 +80,17 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
 
 
 def compose_new_measurement_periods(measurement_periods, pid, ml):
-    existing_entries = []
-    for entry in ml:
-        existing_entry = {}
-        log.info(f"entry.start: {entry.start}")
-        existing_entry["start"] = entry.start  # .isoformat("T")
-        existing_entry["end"] = entry.end  # .isoformat("T")
-        existing_entry["instrument"] = entry.instrument
-        existing_entries.append(existing_entry)
-        # now check which of new measurement periods are really new
+    existing_measurements_dict = {f"{m.instrument}_{m.start}_{m.end}": m for m in ml}
     new_entries = []
     for new_entry in measurement_periods:
-        is_new = True
-        for entry in existing_entries:
-            if (
-                entry["start"] == new_entry["start"]
-                and entry["end"] == new_entry["end"]
-                and entry["instrument"] == new_entry["instrument"]
-            ):
-                log.info("This entry exists already, nothing appended")
-                is_new = False
-                break
-        if is_new:
-            log.info(
-                f"Merge calendar entry to existing proposal data {pid}, {new_entry}"
-            )
-            new_entries.append(new_entry)
+        if (
+            f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
+            in existing_measurements_dict
+        ):
+            log.info("This entry exists already, nothing appended")
+            continue
+        log.info(f"Merge calendar entry to existing proposal data {pid}, {new_entry}")
+        new_entries.append(new_entry)
     return new_entries
 
 
