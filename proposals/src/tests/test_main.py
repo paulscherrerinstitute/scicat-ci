@@ -9,100 +9,6 @@ import main as m
 
 
 @pytest.mark.parametrize(
-    "row, expected",
-    [
-        [{"pgroup": "g1", "proposal": 123}, "g1"],
-        [{"pgroup": "", "proposal": 123}, "p123"],
-    ],
-)
-def test_compose_owner_group(row, expected):
-    owner_group = m.compose_owner_group(row)
-    assert owner_group == expected
-
-
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [{"beamline": "px"}, ["slsmx"]],
-        [{"beamline": "lx"}, ["slslx"]],
-    ],
-)
-def test_compose_access_groups(row, expected):
-    access_groups = m.compose_access_groups(row, "sls")
-    assert access_groups == expected
-
-
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [{"pi_email": "pi", "email": "email"}, "pi"],
-        [{"pi_email": "", "email": "email"}, "email"],
-    ],
-)
-def test_compose_principal_investigator(row, expected):
-    pi = m.compose_principal_investigator(row)
-    assert pi == expected
-
-
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [
-            {"pgroup": "abc", "proposal": "123", "beamline": "PX"},
-            {"ownerGroup": "abc", "accessGroups": ["SLSmx"]},
-        ],
-        [
-            {"pgroup": "", "proposal": "123", "beamline": "kl"},
-            {"ownerGroup": "p123", "accessGroups": ["SLSkl"]},
-        ],
-    ],
-)
-def test_compose_policy(row, expected):
-    policy = m.compose_policy({**row, "pi_email": "pi_email"}, "SLS")
-    static_properties = {
-        "manager": ["pi_email"],
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-    }
-    assert policy == {**static_properties, **expected}
-
-
-def test_compose_proposal():
-    row = {
-        "proposal": "123",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "pgroup": "test_group",
-        "beamline": "PX",
-    }
-    proposal = m.compose_proposal({**row, "pi_email": "pi_email"}, "sls")
-    assert proposal == {
-        "proposalId": "20.500.11935/123",
-        "pi_email": "pi_email",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "ownerGroup": "test_group",
-        "accessGroups": ["slsmx"],
-    }
-
-
-@pytest.mark.parametrize(
     "duo_facility, schedule, expected",
     [
         [
@@ -268,8 +174,8 @@ def test_fill_proposal_acceptance():
         )
 
 
-@patch("main.compose_policy")
-@patch("main.compose_proposal")
+@patch("main.SciCatPolicyFromDuo")
+@patch("main.SciCatProposalFromDuo")
 @patch("main.compose_measurement_periods")
 @patch("main.create_or_update_proposal")
 def test_fill_proposal(
@@ -278,12 +184,20 @@ def test_fill_proposal(
     row = {"proposal": "123"}
     accellerator = "SLS"
     m.fill_proposal(row, accellerator)
+
     mock_compose_policy.assert_called_once_with(row, accellerator)
+    mock_compose_policy_instance = mock_compose_policy.return_value
+    mock_compose_policy_instance.compose_policy.assert_called_once()
+
     mock_compose_proposal.assert_called_once_with(row, accellerator)
+    mock_compose_proposal_instance = mock_compose_proposal.return_value
+    mock_compose_proposal_instance.compose_proposal.assert_called_once()
+
     mock_compose_mp.assert_called_once_with(row, accellerator)
+
     mock_create_or_update.assert_called_once_with(
-        mock_compose_policy.return_value,
-        mock_compose_proposal.return_value,
+        mock_compose_policy_instance.compose_policy.return_value,
+        mock_compose_proposal_instance.compose_proposal.return_value,
         mock_compose_mp.return_value,
     )
 

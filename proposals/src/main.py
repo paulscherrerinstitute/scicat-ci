@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
-from scicat import SciCatAuth
+from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
 from utils import log
 
 load_dotenv()
@@ -35,9 +35,9 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    policy = compose_policy(row, accelerator)
+    policy = SciCatPolicyFromDuo(row, accelerator).compose_policy()
 
-    proposal = compose_proposal(row, accelerator)
+    proposal = SciCatProposalFromDuo(row, accelerator).compose_proposal()
 
     measurement_periods = compose_measurement_periods(row, accelerator)
 
@@ -143,59 +143,6 @@ def compose_measurement_period(
     # mp['end']=utc_end
     mp["comment"] = ""
     return mp
-
-
-def compose_proposal(row, accelerator):
-    proposal = {}
-    proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
-    proposal["pi_email"] = compose_principal_investigator(row)
-    proposal["pi_firstname"] = row["pi_firstname"]
-    proposal["pi_lastname"] = row["pi_lastname"]
-    proposal["email"] = row["email"]
-    if row["email"] == "":
-        log.warning(f"Empty email: {row}")
-
-    proposal["firstname"] = row["firstname"]
-    proposal["lastname"] = row["lastname"]
-    proposal["title"] = row["title"]
-    proposal["abstract"] = row["abstract"]
-    proposal["ownerGroup"] = compose_owner_group(row)
-    proposal["accessGroups"] = compose_access_groups(row, accelerator)
-    return proposal
-
-
-def compose_policy(row, accelerator):
-    policy = {}
-    policy["manager"] = [compose_principal_investigator(row)]
-    policy["tapeRedundancy"] = "low"
-    policy["autoArchive"] = False
-    policy["autoArchiveDelay"] = 0
-    policy["archiveEmailNotification"] = True
-    policy["archiveEmailsToBeNotified"] = []
-    policy["retrieveEmailNotification"] = True
-    policy["retrieveEmailsToBeNotified"] = []
-    policy["embargoPeriod"] = 3
-    policy["ownerGroup"] = compose_owner_group(row)
-    # TODO for SINQ (? still correct ?)
-    # policy['ownerGroup'] = 'p'+row['proposal']
-    # special mapping for MX needed
-    policy["accessGroups"] = compose_access_groups(row, accelerator)
-    return policy
-
-
-def compose_owner_group(row):
-    return row["pgroup"] or f'p{row["proposal"]}'
-
-
-def compose_access_groups(row, accelerator):
-    bl = row["beamline"].lower()
-    if bl.startswith("px"):
-        bl = "mx"
-    return [f"{accelerator}{bl}"]
-
-
-def compose_principal_investigator(row):
-    return row["pi_email"] or row["email"]
 
 
 def main() -> None:
