@@ -162,26 +162,6 @@ def test_compose_measurement_periods():
     ]
 
 
-@patch(
-    "main.swagger_client.UserApi.user_login",
-    return_value={"id": "test_token"},
-    autospec=True,
-)
-def test__get_scicat_token(mock_user_login):
-    access_token = m._get_scicat_token("test_user", "test_password")
-    assert access_token == "test_token"
-    mock_user_login.assert_called_once_with(
-        ANY, {"username": "test_user", "password": "test_password"}
-    )
-
-
-@patch("main._get_scicat_token", return_value="test_token", autospec=True)
-def test__set_scicat_token(_):
-    m._set_scicat_token("test_user", "test_password", "http://scicat")
-    assert m.Configuration().host == "http://scicat"
-    assert m.Configuration().api_client.default_headers["Authorization"] == "test_token"
-
-
 @pytest.mark.parametrize(
     "duo_facility, expected",
     [
@@ -195,6 +175,9 @@ def test_main(duo_facility, expected):
         {
             "DUO_FACILITY": duo_facility,
             "DUO_YEAR": "2023",
+            "SCICAT_ENDPOINT": "http://scicat",
+            "SCICAT_USERNAME": "test_user",
+            "SCICAT_PASSWORD": "test_password",
         },
     ):
         reload(m)
@@ -202,13 +185,15 @@ def test_main(duo_facility, expected):
         with patch(
             f"main.{expected}.proposals",
             return_value=iter([("proposal", "facility")]),
-        ) as mock_proposals, patch(
-            "main._set_scicat_token"
-        ) as mock_set_scicat_token, patch(
+        ) as mock_proposals, patch("main.SciCatAuth") as mock_scicat_auth, patch(
             "main.fill_proposal"
         ) as mock_fill_proposal:
             m.main()
-            mock_set_scicat_token.assert_called_once()
+            mock_instance = mock_scicat_auth.return_value
+            mock_scicat_auth.assert_called_once_with(
+                "test_user", "test_password", "http://scicat"
+            )
+            mock_instance.authenticate.assert_called_once()
             mock_proposals.assert_called_once_with(duo_facility, "2023")
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
 

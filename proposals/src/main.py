@@ -9,10 +9,10 @@ from collections import defaultdict
 import pytz
 import swagger_client
 from dotenv import load_dotenv
-from swagger_client.configuration import Configuration
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
+from scicat import SciCatAuth
 from utils import log
 
 load_dotenv()
@@ -198,37 +198,12 @@ def compose_principal_investigator(row):
     return row["pi_email"] or row["email"]
 
 
-def _get_scicat_token(scicat_username, scicat_password) -> str:
-    credentials = {}
-    credentials["username"] = scicat_username
-    credentials["password"] = scicat_password
-    try:
-        response = swagger_client.UserApi().user_login(credentials)
-        access_token = response["id"]
-        return access_token
-    except Exception as e:
-        log.error("Login to data catalog did not succeed")
-        raise e
-
-
-def _set_scicat_token(
-    scicat_username=SCICAT_USERNAME,
-    scicat_password=SCICAT_PASSWORD,
-    scicat_endpoint=SCICAT_ENDPOINT,
-):
-    Configuration().host = scicat_endpoint
-
-    # set token for auth header - scicat
-    access_token = _get_scicat_token(scicat_username, scicat_password)
-    Configuration().api_client.default_headers["Authorization"] = access_token
-
-
 def main() -> None:
     year = DUO_YEAR or datetime.datetime.now().year
     log.info(f"Fetching proposals for accelerator {DUO_FACILITY} and year {year}")
     log.info(f"Connecting to scicat on {SCICAT_ENDPOINT}")
 
-    _set_scicat_token()
+    SciCatAuth(SCICAT_USERNAME, SCICAT_PASSWORD, SCICAT_ENDPOINT).authenticate()
 
     # read proposal data from DUO
 
