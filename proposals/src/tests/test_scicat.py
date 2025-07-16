@@ -157,3 +157,100 @@ class TestSciCatProposalFromDuo:
         }
 
         assert proposal == expected
+
+
+class TestSciCatMeasurementsFromDuo:
+
+    scicat_measurements = scicat.SciCatMeasurementsFromDuo(
+        "test_duo_facility",
+        {
+            "beamline": "px",
+            "schedule": [
+                {"start": "01/01/2023", "end": "02/01/2023"},
+                {"start": "01/01/2024", "end": "02/01/2024"},
+            ],
+        },
+        "test_accelerator",
+    )
+
+    def test_init(self):
+        assert self.scicat_measurements.duo_proposal == {
+            "beamline": "px",
+            "schedule": [
+                {"start": "01/01/2023", "end": "02/01/2023"},
+                {"start": "01/01/2024", "end": "02/01/2024"},
+            ],
+        }
+
+        assert self.scicat_measurements.accelerator == "test_accelerator"
+        assert self.scicat_measurements.duo_facility == "test_duo_facility"
+
+    @pytest.mark.parametrize(
+        "duo_facility, expected",
+        [
+            ["sinq", "%d/%m/%Y"],
+            ["smus", "%d/%m/%Y"],
+            ["sls", "%d/%m/%Y %H:%M:%S"],
+        ],
+    )
+    def test_duo_facility_datetime_format(self, duo_facility, expected):
+        self.scicat_measurements.duo_facility = duo_facility
+        assert self.scicat_measurements.duo_facility_datetime_format == expected
+
+    @pytest.mark.parametrize(
+        "duo_facility, schedule, expected",
+        [
+            [
+                "sls",
+                {"start": "01/01/2023 01:00:00", "end": "02/01/2023 01:00:00"},
+                {
+                    "start": "2023-01-01T00:00:00+00:00",
+                    "end": "2023-01-02T00:00:00+00:00",
+                },
+            ],
+            [
+                "sinq",
+                {"start": "01/01/2023", "end": "02/01/2023"},
+                {
+                    "start": "2022-12-31T23:00:00+00:00",
+                    "end": "2023-01-01T23:00:00+00:00",
+                },
+            ],
+            [
+                "smus",
+                {"start": "01/01/2023", "end": "02/01/2023"},
+                {
+                    "start": "2022-12-31T23:00:00+00:00",
+                    "end": "2023-01-01T23:00:00+00:00",
+                },
+            ],
+        ],
+    )
+    def test_compose_measurement_period(self, duo_facility, schedule, expected):
+        self.scicat_measurements.duo_facility = duo_facility
+        mp = self.scicat_measurements.compose_measurement_period(schedule)
+        assert mp == {
+            "id": ANY,
+            "instrument": "/PSI/TEST_ACCELERATOR/PX",
+            **expected,
+            "comment": "",
+        }
+
+    def test_compose_measurement_periods(self):
+        measurement_periods = self.scicat_measurements.compose_measurement_periods()
+        assert measurement_periods == [
+            {
+                "id": ANY,
+                "instrument": "/PSI/TEST_ACCELERATOR/PX",
+                "start": "2022-12-31T23:00:00+00:00",
+                "end": "2023-01-01T23:00:00+00:00",
+                "comment": "",
+            },
+            {
+                "id": ANY,
+                "instrument": "/PSI/TEST_ACCELERATOR/PX",
+                "start": "2023-12-31T23:00:00+00:00",
+                "end": "2024-01-01T23:00:00+00:00",
+                "comment": "",
+            },
+        ]
