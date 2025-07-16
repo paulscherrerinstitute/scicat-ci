@@ -59,32 +59,7 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
             # check if this is a new entry
             ml = existing_proposal.measurement_period_list
             # to avoid problems with Dates: convert Dates back to strings
-            existing_entries = []
-            for entry in ml:
-                existing_entry = {}
-                log.info(f"entry.start: {entry.start}")
-                existing_entry["start"] = entry.start  # .isoformat("T")
-                existing_entry["end"] = entry.end  # .isoformat("T")
-                existing_entry["instrument"] = entry.instrument
-                existing_entries.append(existing_entry)
-            # now check which of new measurement periods are really new
-            new_entries = []
-            for new_entry in measurement_periods:
-                is_new = True
-                for entry in existing_entries:
-                    if (
-                        entry["start"] == new_entry["start"]
-                        and entry["end"] == new_entry["end"]
-                        and entry["instrument"] == new_entry["instrument"]
-                    ):
-                        log.info("This entry exists already, nothing appended")
-                        is_new = False
-                        break
-                if is_new:
-                    log.info(
-                        f"Merge calendar entry to existing proposal data {pid}, {new_entry}"
-                    )
-                    new_entries.append(new_entry)
+            new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
             if len(new_entries) > 0:
                 patch = {}
                 patch["MeasurementPeriodList"] = new_entries
@@ -102,6 +77,36 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
             swagger_client.PolicyApi().policy_create(data=policy)
     except ApiException as e:
         log.error(e)
+
+
+def compose_new_measurement_periods(measurement_periods, pid, ml):
+    existing_entries = []
+    for entry in ml:
+        existing_entry = {}
+        log.info(f"entry.start: {entry.start}")
+        existing_entry["start"] = entry.start  # .isoformat("T")
+        existing_entry["end"] = entry.end  # .isoformat("T")
+        existing_entry["instrument"] = entry.instrument
+        existing_entries.append(existing_entry)
+        # now check which of new measurement periods are really new
+    new_entries = []
+    for new_entry in measurement_periods:
+        is_new = True
+        for entry in existing_entries:
+            if (
+                entry["start"] == new_entry["start"]
+                and entry["end"] == new_entry["end"]
+                and entry["instrument"] == new_entry["instrument"]
+            ):
+                log.info("This entry exists already, nothing appended")
+                is_new = False
+                break
+        if is_new:
+            log.info(
+                f"Merge calendar entry to existing proposal data {pid}, {new_entry}"
+            )
+            new_entries.append(new_entry)
+    return new_entries
 
 
 def main() -> None:
