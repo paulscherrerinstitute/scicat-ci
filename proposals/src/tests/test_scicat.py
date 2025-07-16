@@ -1,5 +1,7 @@
 from unittest.mock import ANY, patch
 
+import pytest
+
 import scicat
 
 
@@ -39,3 +41,53 @@ class TestSciCatAuth:
     def test_authenticate(self, mock_set_token):
         self.scicat_auth.authenticate()
         mock_set_token.assert_called_once()
+
+
+class TestSciCatFromDuo:
+
+    scicat_from_duo = scicat.SciCatFromDuo(
+        {"proposal": "test_proposal"}, "test_accelerator"
+    )
+
+    def test_init(self):
+        assert self.scicat_from_duo.duo_proposal == {"proposal": "test_proposal"}
+        assert self.scicat_from_duo.accelerator == "test_accelerator"
+
+
+class TestSciCatCreatorFromDuoMixin:
+
+    scicat_creator = scicat.SciCatCreatorFromDuoMixin()
+
+    @pytest.mark.parametrize(
+        "duo_proposal, expected",
+        [
+            [{"pi_email": "pi", "email": "email"}, "pi"],
+            [{"pi_email": "", "email": "email"}, "email"],
+        ],
+    )
+    def test_principal_investigator(self, duo_proposal, expected):
+        self.scicat_creator.duo_proposal = duo_proposal
+        assert self.scicat_creator.principal_investigator == expected
+
+    @pytest.mark.parametrize(
+        "duo_proposal, expected",
+        [
+            [{"pgroup": "g1", "proposal": 123}, "g1"],
+            [{"pgroup": "", "proposal": 123}, "p123"],
+        ],
+    )
+    def test_owner_group(self, duo_proposal, expected):
+        self.scicat_creator.duo_proposal = duo_proposal
+        assert self.scicat_creator.owner_group == expected
+
+    @pytest.mark.parametrize(
+        "duo_proposal, expected",
+        [
+            [{"beamline": "px"}, ["slsmx"]],
+            [{"beamline": "lx"}, ["slslx"]],
+        ],
+    )
+    def test_access_groups(self, duo_proposal, expected):
+        self.scicat_creator.duo_proposal = duo_proposal
+        self.scicat_creator.accelerator = "sls"
+        assert self.scicat_creator.access_groups == expected

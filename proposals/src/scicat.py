@@ -1,3 +1,5 @@
+from abc import ABCMeta
+
 from swagger_client import Configuration, UserApi
 
 from utils import log
@@ -31,3 +33,30 @@ class SciCatAuth:
         Configuration().host = self.url
         access_token = self._get_scicat_token()
         Configuration().api_client.default_headers["Authorization"] = access_token
+
+
+class SciCatFromDuo(metaclass=ABCMeta):
+    def __init__(self, duo_proposal, accelerator):
+        self.accelerator = accelerator
+        self.duo_proposal = duo_proposal
+
+
+class SciCatCreatorFromDuoMixin:
+
+    @property
+    def principal_investigator(self):
+        row = self.duo_proposal
+        return row["pi_email"] or row["email"]
+
+    @property
+    def owner_group(self):
+        row = self.duo_proposal
+        return row["pgroup"] or f'p{row["proposal"]}'
+
+    @property
+    def access_groups(self):
+        row = self.duo_proposal
+        bl = row["beamline"].lower()
+        if bl.startswith("px"):
+            bl = "mx"
+        return [f"{self.accelerator}{bl}"]
