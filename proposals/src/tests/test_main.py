@@ -58,7 +58,7 @@ def test_compose_principal_investigator(row, expected):
     ],
 )
 def test_compose_policy(row, expected):
-    policy = m.compose_policy(row, "SLS", "pi_email")
+    policy = m.compose_policy({**row, "pi_email": "pi_email"}, "SLS")
     static_properties = {
         "manager": ["pi_email"],
         "tapeRedundancy": "low",
@@ -86,7 +86,7 @@ def test_compose_proposal():
         "pgroup": "test_group",
         "beamline": "PX",
     }
-    proposal = m.compose_proposal(row, "pi_email", "sls")
+    proposal = m.compose_proposal({**row, "pi_email": "pi_email"}, "sls")
     assert proposal == {
         "proposalId": "20.500.11935/123",
         "pi_email": "pi_email",

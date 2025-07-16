@@ -35,11 +35,9 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    principal_investigator = compose_principal_investigator(row)
+    policy = compose_policy(row, accelerator)
 
-    policy = compose_policy(row, accelerator, principal_investigator)
-
-    proposal = compose_proposal(row, principal_investigator, policy)
+    proposal = compose_proposal(row, policy)
 
     measurement_periods = compose_measurement_periods(row, accelerator)
 
@@ -147,10 +145,10 @@ def compose_measurement_period(
     return mp
 
 
-def compose_proposal(row, principal_investigator, accelerator):
+def compose_proposal(row, accelerator):
     proposal = {}
     proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
-    proposal["pi_email"] = principal_investigator
+    proposal["pi_email"] = compose_principal_investigator(row)
     proposal["pi_firstname"] = row["pi_firstname"]
     proposal["pi_lastname"] = row["pi_lastname"]
     proposal["email"] = row["email"]
@@ -166,9 +164,9 @@ def compose_proposal(row, principal_investigator, accelerator):
     return proposal
 
 
-def compose_policy(row, accelerator, principal_investigator):
+def compose_policy(row, accelerator):
     policy = {}
-    policy["manager"] = [principal_investigator]
+    policy["manager"] = [compose_principal_investigator(row)]
     policy["tapeRedundancy"] = "low"
     policy["autoArchive"] = False
     policy["autoArchiveDelay"] = 0
