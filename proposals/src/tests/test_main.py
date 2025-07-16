@@ -160,6 +160,37 @@ def test__set_scicat_token():
         )
 
 
+@pytest.mark.parametrize(
+    "duo_facility, expected",
+    [
+        ["sls", "ProposalsFromFacility"],
+        ["pgroups", "ProposalsFromPgroups"],
+    ],
+)
+def test_main(duo_facility, expected):
+    with patch.dict(
+        os.environ,
+        {
+            "DUO_FACILITY": duo_facility,
+            "DUO_YEAR": "2023",
+        },
+    ):
+        reload(m)
+        assert m.PROPOSALS.__class__.__name__ == expected
+        with patch(
+            f"main.{expected}.proposals",
+            return_value=iter([("proposal", "facility")]),
+        ) as mock_proposals, patch(
+            "main._set_scicat_token"
+        ) as mock_set_scicat_token, patch(
+            "main.fill_proposal"
+        ) as mock_fill_proposal:
+            m.main()
+            mock_set_scicat_token.assert_called_once()
+            mock_proposals.assert_called_once_with(duo_facility, "2023")
+            mock_fill_proposal.assert_called_once_with("proposal", "facility")
+
+
 class TestCreateOrUpdateProposal:
 
     proposal = {
