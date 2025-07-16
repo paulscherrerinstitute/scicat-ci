@@ -119,3 +119,41 @@ class TestSciCatPolicyFromDuo:
             "accessGroups": ["slsmx"],
         }
         assert policy == {**self.static_properties, **expected}
+
+
+class TestSciCatProposalFromDuo:
+
+    scicat_proposal = scicat.SciCatProposalFromDuo(
+        {
+            "proposal": "123",
+            "pi_firstname": "John",
+            "pi_lastname": "Doe",
+            "email": "",
+            "firstname": "Jane",
+            "lastname": "Smith",
+            "title": "Test Proposal",
+            "abstract": "This is a test proposal.",
+            "pgroup": "test_group",
+            "beamline": "PX",
+            "pi_email": "pi_email",
+        },
+        "sls",
+    )
+
+    def test_compose_proposal(self):
+        proposal = self.scicat_proposal.compose_proposal()
+        expected = {
+            "proposalId": "20.500.11935/123",
+            "pi_email": "pi_email",
+            "pi_firstname": "John",
+            "pi_lastname": "Doe",
+            "email": "",
+            "firstname": "Jane",
+            "lastname": "Smith",
+            "title": "Test Proposal",
+            "abstract": "This is a test proposal.",
+            "ownerGroup": "test_group",
+            "accessGroups": ["slsmx"],
+        }
+
+        assert proposal == expected

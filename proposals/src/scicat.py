@@ -62,6 +62,28 @@ class SciCatCreatorFromDuoMixin:
         return [f"{self.accelerator}{bl}"]
 
 
+class SciCatProposalFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
+
+    def compose_proposal(self):
+        row = self.duo_proposal
+        proposal = {}
+        proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
+        proposal["pi_email"] = self.principal_investigator
+        proposal["pi_firstname"] = row["pi_firstname"]
+        proposal["pi_lastname"] = row["pi_lastname"]
+        proposal["email"] = row["email"]
+        if row["email"] == "":
+            log.warning(f"Empty email: {row}")
+
+        proposal["firstname"] = row["firstname"]
+        proposal["lastname"] = row["lastname"]
+        proposal["title"] = row["title"]
+        proposal["abstract"] = row["abstract"]
+        proposal["ownerGroup"] = self.owner_group
+        proposal["accessGroups"] = self.access_groups
+        return proposal
+
+
 class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
     def compose_policy(self):
