@@ -3,7 +3,6 @@
 """
 import datetime
 import os
-import sys
 import uuid
 from collections import defaultdict
 
@@ -14,6 +13,7 @@ from swagger_client.configuration import Configuration
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
+from utils import log
 
 load_dotenv()
 
@@ -33,19 +33,16 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 
 
 def fill_proposal(row, accelerator):
-    print("============= Input proposal:", row["proposal"])
+    log.info(f"============= Input proposal: {row['proposal']}")
 
     principal_investigator = compose_principal_investigator(row)
 
     policy = compose_policy(row, accelerator, principal_investigator)
 
-    # print("Policy:",policy)
-
     proposal = compose_proposal(row, principal_investigator, policy)
 
     measurement_periods = compose_measurement_periods(row, accelerator)
 
-    # print("========= New measuring periods:",measurementPeriods)
     create_or_update_proposal(policy, proposal, measurement_periods)
 
 
@@ -63,7 +60,7 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
             existing_entries = []
             for entry in ml:
                 existing_entry = {}
-                print("entry.start:", entry.start)
+                log.info(f"entry.start: {entry.start}")
                 existing_entry["start"] = entry.start  # .isoformat("T")
                 existing_entry["end"] = entry.end  # .isoformat("T")
                 existing_entry["instrument"] = entry.instrument
@@ -78,18 +75,18 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
                         and entry["end"] == new_entry["end"]
                         and entry["instrument"] == new_entry["instrument"]
                     ):
-                        print("This entry exists already, nothing appended")
+                        log.info("This entry exists already, nothing appended")
                         is_new = False
                         break
                 if is_new:
-                    print(
-                        "Merge calendar entry to existing proposal data", pid, new_entry
+                    log.info(
+                        f"Merge calendar entry to existing proposal data {pid}, {new_entry}"
                     )
                     new_entries.append(new_entry)
             if len(new_entries) > 0:
                 patch = {}
                 patch["MeasurementPeriodList"] = new_entries
-                print("Modified proposal, patch object:", patch)
+                log.info(f"Modified proposal, patch object: {patch}")
                 # the following call appends to the existing array
                 swagger_client.ProposalApi().proposal_prototype_patch_attributes(
                     pid, data=patch
@@ -97,12 +94,12 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
         else:
             # create new proposal
             proposal["MeasurementPeriodList"] = measurement_periods
-            print("Create new proposal", proposal)
+            log.info(f"Create new proposal {proposal}")
             swagger_client.ProposalApi().proposal_create(data=proposal)
-            print("Create new policy for pgroup ", policy)
+            log.info(f"Create new policy for pgroup {policy}")
             swagger_client.PolicyApi().policy_create(data=policy)
     except ApiException as e:
-        print(e)
+        log.error(e)
 
 
 def compose_measurement_periods(row, accelerator):
@@ -158,7 +155,7 @@ def compose_proposal(row, principal_investigator, accelerator):
     proposal["pi_lastname"] = row["pi_lastname"]
     proposal["email"] = row["email"]
     if row["email"] == "":
-        print("Empty email:", row)
+        log.warning(f"Empty email: {row}")
 
     proposal["firstname"] = row["firstname"]
     proposal["lastname"] = row["lastname"]
@@ -210,11 +207,10 @@ def _get_scicat_token(scicat_username, scicat_password) -> str:
     try:
         response = swagger_client.UserApi().user_login(credentials)
         access_token = response["id"]
-        print(access_token)
         return access_token
-    except Exception:
-        print("Login to data catalog did not succeed")
-        sys.exit(1)
+    except Exception as e:
+        log.error("Login to data catalog did not succeed")
+        raise e
 
 
 def _set_scicat_token(
@@ -231,8 +227,8 @@ def _set_scicat_token(
 
 def main() -> None:
     year = DUO_YEAR or datetime.datetime.now().year
-    print("Fetching proposals for accelerator ", DUO_FACILITY, " and year ", year)
-    print("Connecting to scicat on ", SCICAT_ENDPOINT)
+    log.info(f"Fetching proposals for accelerator {DUO_FACILITY} and year {year}")
+    log.info(f"Connecting to scicat on {SCICAT_ENDPOINT}")
 
     _set_scicat_token()
 
