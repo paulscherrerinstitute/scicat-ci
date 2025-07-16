@@ -9,66 +9,6 @@ import main as m
 
 
 @pytest.mark.parametrize(
-    "duo_facility, schedule, expected",
-    [
-        [
-            "sls",
-            {"start": "01/01/2023 01:00:00", "end": "02/01/2023 01:00:00"},
-            {"start": "2023-01-01T00:00:00+00:00", "end": "2023-01-02T00:00:00+00:00"},
-        ],
-        [
-            "sinq",
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "2022-12-31T23:00:00+00:00", "end": "2023-01-01T23:00:00+00:00"},
-        ],
-        [
-            "smus",
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "2022-12-31T23:00:00+00:00", "end": "2023-01-01T23:00:00+00:00"},
-        ],
-    ],
-)
-def test_compose_measurement_period(duo_facility, schedule, expected):
-
-    with patch.dict(os.environ, {"DUO_FACILITY": duo_facility}):
-        reload(m)
-        row = {
-            "beamline": "PX",
-        }
-        accelerator = "SLS"
-        mp = m.compose_measurement_period(row, accelerator, schedule)
-        assert mp == {"id": ANY, "instrument": "/PSI/SLS/PX", **expected, "comment": ""}
-
-
-def test_compose_measurement_periods():
-    accelerator = "SLS"
-    row = {
-        "beamline": "PX",
-        "schedule": [
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "01/01/2024", "end": "02/01/2024"},
-        ],
-    }
-    measurement_periods = m.compose_measurement_periods(row, accelerator)
-    assert measurement_periods == [
-        {
-            "id": ANY,
-            "instrument": "/PSI/SLS/PX",
-            "start": "2022-12-31T23:00:00+00:00",
-            "end": "2023-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-        {
-            "id": ANY,
-            "instrument": "/PSI/SLS/PX",
-            "start": "2023-12-31T23:00:00+00:00",
-            "end": "2024-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-    ]
-
-
-@pytest.mark.parametrize(
     "duo_facility, expected",
     [
         ["sls", "ProposalsFromFacility"],
@@ -176,7 +116,7 @@ def test_fill_proposal_acceptance():
 
 @patch("main.SciCatPolicyFromDuo")
 @patch("main.SciCatProposalFromDuo")
-@patch("main.compose_measurement_periods")
+@patch("main.SciCatMeasurementsFromDuo")
 @patch("main.create_or_update_proposal")
 def test_fill_proposal(
     mock_create_or_update, mock_compose_mp, mock_compose_proposal, mock_compose_policy
@@ -193,12 +133,14 @@ def test_fill_proposal(
     mock_compose_proposal_instance = mock_compose_proposal.return_value
     mock_compose_proposal_instance.compose_proposal.assert_called_once()
 
-    mock_compose_mp.assert_called_once_with(row, accellerator)
+    mock_compose_mp.assert_called_once_with(m.DUO_FACILITY, row, accellerator)
+    mock_compose_mp_instance = mock_compose_mp.return_value
+    mock_compose_mp_instance.compose_measurement_periods.assert_called_once()
 
     mock_create_or_update.assert_called_once_with(
         mock_compose_policy_instance.compose_policy.return_value,
         mock_compose_proposal_instance.compose_proposal.return_value,
-        mock_compose_mp.return_value,
+        mock_compose_mp_instance.compose_measurement_periods.return_value,
     )
 
 

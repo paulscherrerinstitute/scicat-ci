@@ -3,16 +3,18 @@
 """
 import datetime
 import os
-import uuid
-from collections import defaultdict
 
-import pytz
 import swagger_client
 from dotenv import load_dotenv
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
-from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
+from scicat import (
+    SciCatAuth,
+    SciCatMeasurementsFromDuo,
+    SciCatPolicyFromDuo,
+    SciCatProposalFromDuo,
+)
 from utils import log
 
 load_dotenv()
@@ -39,7 +41,9 @@ def fill_proposal(row, accelerator):
 
     proposal = SciCatProposalFromDuo(row, accelerator).compose_proposal()
 
-    measurement_periods = compose_measurement_periods(row, accelerator)
+    measurement_periods = SciCatMeasurementsFromDuo(
+        DUO_FACILITY, row, accelerator
+    ).compose_measurement_periods()
 
     create_or_update_proposal(policy, proposal, measurement_periods)
 
@@ -98,51 +102,6 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
             swagger_client.PolicyApi().policy_create(data=policy)
     except ApiException as e:
         log.error(e)
-
-
-def compose_measurement_periods(row, accelerator):
-    measurement_periods = []
-    schedules = row["schedule"]
-    for schedule in schedules:
-        mp = compose_measurement_period(row, accelerator, schedule)
-        measurement_periods.append(mp)
-    return measurement_periods
-
-
-def compose_measurement_period(
-    row,
-    accelerator,
-    schedule,
-    duo_facility=DUO_FACILITY,
-):
-    local = pytz.timezone("Europe/Amsterdam")
-    duo_facility_datetime_format = defaultdict(
-        lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
-    )
-    mp = {}
-    mp["id"] = uuid.uuid4().hex
-    mp["instrument"] = f'/PSI/{accelerator.upper()}/{row["beamline"].upper()}'
-    # convert date to format according 5.6 internet date/time format in RFC 3339"
-    # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
-    start_naive = datetime.datetime.strptime(
-        schedule["start"], duo_facility_datetime_format[duo_facility]
-    )
-    local_start = local.localize(start_naive, is_dst=True)
-    # no point to use local here, because this information get lost when data is stored
-    utc_start = local_start.astimezone(pytz.utc)
-    mp["start"] = utc_start.isoformat("T")
-    # do not convert to string here for better comparison with existing entries
-    # mp['start'] = utc_start
-
-    end_naive = datetime.datetime.strptime(
-        schedule["end"], duo_facility_datetime_format[duo_facility]
-    )
-    local_end = local.localize(end_naive, is_dst=True)
-    utc_end = local_end.astimezone(pytz.utc)
-    mp["end"] = utc_end.isoformat("T")
-    # mp['end']=utc_end
-    mp["comment"] = ""
-    return mp
 
 
 def main() -> None:
