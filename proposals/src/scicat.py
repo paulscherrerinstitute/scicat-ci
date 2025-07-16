@@ -60,3 +60,28 @@ class SciCatCreatorFromDuoMixin:
         if bl.startswith("px"):
             bl = "mx"
         return [f"{self.accelerator}{bl}"]
+
+
+class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
+
+    def compose_policy(self):
+        row = self.duo_proposal
+        policy = {}
+        policy["manager"] = [self.principal_investigator]
+        policy["tapeRedundancy"] = "low"
+        policy["autoArchive"] = False
+        policy["autoArchiveDelay"] = 0
+        policy["archiveEmailNotification"] = True
+        policy["archiveEmailsToBeNotified"] = []
+        policy["retrieveEmailNotification"] = True
+        policy["retrieveEmailsToBeNotified"] = []
+        policy["embargoPeriod"] = 3
+        policy["ownerGroup"] = self.owner_group
+        # TODO for SINQ (? still correct ?)
+        # policy['ownerGroup'] = 'p'+row['proposal']
+        # special mapping for MX needed
+        bl = row["beamline"].lower()
+        if bl.startswith("px"):
+            bl = "mx"
+        policy["accessGroups"] = self.access_groups
+        return policy

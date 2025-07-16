@@ -91,3 +91,31 @@ class TestSciCatCreatorFromDuoMixin:
         self.scicat_creator.duo_proposal = duo_proposal
         self.scicat_creator.accelerator = "sls"
         assert self.scicat_creator.access_groups == expected
+
+
+class TestSciCatPolicyFromDuo:
+
+    static_properties = {
+        "tapeRedundancy": "low",
+        "autoArchive": False,
+        "autoArchiveDelay": 0,
+        "archiveEmailNotification": True,
+        "archiveEmailsToBeNotified": [],
+        "retrieveEmailNotification": True,
+        "retrieveEmailsToBeNotified": [],
+        "embargoPeriod": 3,
+    }
+
+    scicat_policy = scicat.SciCatPolicyFromDuo(
+        {"pgroup": "abc", "proposal": "123", "beamline": "PX", "pi_email": "pi_email"},
+        "sls",
+    )
+
+    def test_compose_policy(self):
+        policy = self.scicat_policy.compose_policy()
+        expected = {
+            "manager": ["pi_email"],
+            "ownerGroup": "abc",
+            "accessGroups": ["slsmx"],
+        }
+        assert policy == {**self.static_properties, **expected}
