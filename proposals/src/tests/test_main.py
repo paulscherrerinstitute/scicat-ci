@@ -198,6 +198,76 @@ def test_main(duo_facility, expected):
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
 
 
+def test_fill_proposal_acceptance():
+    reload(m)
+    row = {
+        "proposal": "123",
+        "pi_firstname": "John",
+        "pi_lastname": "Doe",
+        "email": "",
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "title": "Test Proposal",
+        "abstract": "This is a test proposal.",
+        "pgroup": "test_group",
+        "beamline": "PX",
+        "pi_email": "pi_email",
+        "schedule": [
+            {"start": "01/01/2023", "end": "02/01/2023"},
+            {"start": "01/01/2024", "end": "02/01/2024"},
+        ],
+    }
+
+    accelerator = "sls"
+    expected_proposal = {
+        "proposalId": "20.500.11935/123",
+        "pi_email": "pi_email",
+        "pi_firstname": "John",
+        "pi_lastname": "Doe",
+        "email": "",
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "title": "Test Proposal",
+        "abstract": "This is a test proposal.",
+        "ownerGroup": "test_group",
+        "accessGroups": ["slsmx"],
+    }
+    expected_policy = {
+        "tapeRedundancy": "low",
+        "autoArchive": False,
+        "autoArchiveDelay": 0,
+        "archiveEmailNotification": True,
+        "archiveEmailsToBeNotified": [],
+        "retrieveEmailNotification": True,
+        "retrieveEmailsToBeNotified": [],
+        "embargoPeriod": 3,
+        "manager": ["pi_email"],
+        "ownerGroup": "test_group",
+        "accessGroups": ["slsmx"],
+    }
+    expected_measurement = [
+        {
+            "id": ANY,
+            "instrument": "/PSI/SLS/PX",
+            "start": "2022-12-31T23:00:00+00:00",
+            "end": "2023-01-01T23:00:00+00:00",
+            "comment": "",
+        },
+        {
+            "id": ANY,
+            "instrument": "/PSI/SLS/PX",
+            "start": "2023-12-31T23:00:00+00:00",
+            "end": "2024-01-01T23:00:00+00:00",
+            "comment": "",
+        },
+    ]
+    with patch("main.create_or_update_proposal") as mock_create_or_update:
+        m.fill_proposal(row, accelerator)
+        mock_create_or_update.assert_called_once_with(
+            expected_policy, expected_proposal, expected_measurement
+        )
+
+
 @patch("main.compose_policy")
 @patch("main.compose_proposal")
 @patch("main.compose_measurement_periods")
