@@ -199,10 +199,10 @@ def compose_principal_investigator(row):
     return row["pi_email"] or row["email"]
 
 
-def _get_scicat_token() -> str:
+def _get_scicat_token(scicat_username, scicat_password) -> str:
     credentials = {}
-    credentials["username"] = SCICAT_USERNAME
-    credentials["password"] = SCICAT_PASSWORD
+    credentials["username"] = scicat_username
+    credentials["password"] = scicat_password
     try:
         response = swagger_client.UserApi().user_login(credentials)
         access_token = response["id"]
@@ -213,11 +213,15 @@ def _get_scicat_token() -> str:
         sys.exit(1)
 
 
-def _set_scicat_token():
-    Configuration().host = SCICAT_ENDPOINT
+def _set_scicat_token(
+    scicat_username=SCICAT_USERNAME,
+    scicat_password=SCICAT_PASSWORD,
+    scicat_endpoint=SCICAT_ENDPOINT,
+):
+    Configuration().host = scicat_endpoint
 
     # set token for auth header - scicat
-    access_token = _get_scicat_token()
+    access_token = _get_scicat_token(scicat_username, scicat_password)
     Configuration().api_client.default_headers["Authorization"] = access_token
 
 

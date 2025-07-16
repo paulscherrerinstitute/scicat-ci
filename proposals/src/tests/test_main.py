@@ -167,21 +167,19 @@ def test_compose_measurement_periods():
     return_value={"id": "test_token"},
     autospec=True,
 )
-def test__get_scicat_token(_):
-    access_token = m._get_scicat_token()
+def test__get_scicat_token(mock_user_login):
+    access_token = m._get_scicat_token("test_user", "test_password")
     assert access_token == "test_token"
+    mock_user_login.assert_called_once_with(
+        ANY, {"username": "test_user", "password": "test_password"}
+    )
 
 
-@patch.dict(os.environ, {"SCICAT_ENDPOINT": "http://scicat"})
-def test__set_scicat_token():
-    reload(m)
-    with patch("main._get_scicat_token", return_value="test_token", autospec=True):
-        m._set_scicat_token()
-        assert m.Configuration().host == "http://scicat"
-        assert (
-            m.Configuration().api_client.default_headers["Authorization"]
-            == "test_token"
-        )
+@patch("main._get_scicat_token", return_value="test_token", autospec=True)
+def test__set_scicat_token(_):
+    m._set_scicat_token("test_user", "test_password", "http://scicat")
+    assert m.Configuration().host == "http://scicat"
+    assert m.Configuration().api_client.default_headers["Authorization"] == "test_token"
 
 
 @pytest.mark.parametrize(
