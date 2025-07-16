@@ -2,10 +2,8 @@
 """Tool that synchronizes the proposal data for a given beamline and year
 """
 import datetime
-import json
 import os
 import sys
-import urllib.request
 import uuid
 from collections import defaultdict
 
@@ -42,78 +40,21 @@ local = pytz.timezone("Europe/Amsterdam")
 def fill_proposal(row, accelerator):
     print("============= Input proposal:", row["proposal"])
 
-    main_proposer_email = row["email"]
-    if row["pi_email"] != "":
-        principal_investigator = row["pi_email"]
-    else:
-        principal_investigator = main_proposer_email
+    principal_investigator = compose_principal_investigator(row)
 
-    policy = {}
-    policy["manager"] = [principal_investigator]
-    policy["tapeRedundancy"] = "low"
-    policy["autoArchive"] = False
-    policy["autoArchiveDelay"] = 0
-    policy["archiveEmailNotification"] = True
-    policy["archiveEmailsToBeNotified"] = []
-    policy["retrieveEmailNotification"] = True
-    policy["retrieveEmailsToBeNotified"] = []
-    policy["embargoPeriod"] = 3
-    policy["ownerGroup"] = row["pgroup"] or f'p{row["proposal"]}'
-    # TODO for SINQ (? still correct ?)
-    # policy['ownerGroup'] = 'p'+row['proposal']
-    # special mapping for MX needed
-    bl = row["beamline"].lower()
-    if bl.startswith("px"):
-        bl = "mx"
-    policy["accessGroups"] = [f"{accelerator}{bl}"]
+    policy = compose_policy(row, accelerator, principal_investigator)
 
     # print("Policy:",policy)
 
-    proposal = {}
-    proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
-    proposal["pi_email"] = principal_investigator
-    proposal["pi_firstname"] = row["pi_firstname"]
-    proposal["pi_lastname"] = row["pi_lastname"]
-    proposal["email"] = row["email"]
-    if row["email"] == "":
-        print("Empty email:", row)
+    proposal = compose_proposal(row, principal_investigator, policy)
 
-    proposal["firstname"] = row["firstname"]
-    proposal["lastname"] = row["lastname"]
-    proposal["title"] = row["title"]
-    proposal["abstract"] = row["abstract"]
-    proposal["ownerGroup"] = policy["ownerGroup"]
-    proposal["accessGroups"] = policy["accessGroups"]
-
-    measurement_periods = []
-    schedules = row["schedule"]
-    for schedule in schedules:
-        mp = {}
-        mp["id"] = uuid.uuid4().hex
-        mp["instrument"] = f'/PSI/{accelerator.upper()}/{row["beamline"].upper()}'
-        # convert date to format according 5.6 internet date/time format in RFC 3339"
-        # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
-        start_naive = datetime.datetime.strptime(
-            schedule["start"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
-        )
-        local_start = local.localize(start_naive, is_dst=True)
-        # no point to use local here, because this information get lost when data is stored
-        utc_start = local_start.astimezone(pytz.utc)
-        mp["start"] = utc_start.isoformat("T")
-        # do not convert to string here for better comparison with existing entries
-        # mp['start'] = utc_start
-
-        end_naive = datetime.datetime.strptime(
-            schedule["end"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
-        )
-        local_end = local.localize(end_naive, is_dst=True)
-        utc_end = local_end.astimezone(pytz.utc)
-        mp["end"] = utc_end.isoformat("T")
-        # mp['end']=utc_end
-        mp["comment"] = ""
-        measurement_periods.append(mp)
+    measurement_periods = compose_measurement_periods(row, accelerator)
 
     # print("========= New measuring periods:",measurementPeriods)
+    create_or_update_proposal(policy, proposal, measurement_periods)
+
+
+def create_or_update_proposal(policy, proposal, measurement_periods):
     api = swagger_client.ProposalApi()
     try:
         # check for existence of Proposal data and merge schedules into it
@@ -169,6 +110,92 @@ def fill_proposal(row, accelerator):
         print(e)
 
 
+def compose_measurement_periods(row, accelerator):
+    measurement_periods = []
+    schedules = row["schedule"]
+    for schedule in schedules:
+        mp = compose_measurement_period(row, accelerator, schedule)
+        measurement_periods.append(mp)
+    return measurement_periods
+
+
+def compose_measurement_period(row, accelerator, schedule):
+    mp = {}
+    mp["id"] = uuid.uuid4().hex
+    mp["instrument"] = f'/PSI/{accelerator.upper()}/{row["beamline"].upper()}'
+    # convert date to format according 5.6 internet date/time format in RFC 3339"
+    # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
+    start_naive = datetime.datetime.strptime(
+        schedule["start"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
+    )
+    local_start = local.localize(start_naive, is_dst=True)
+    # no point to use local here, because this information get lost when data is stored
+    utc_start = local_start.astimezone(pytz.utc)
+    mp["start"] = utc_start.isoformat("T")
+    # do not convert to string here for better comparison with existing entries
+    # mp['start'] = utc_start
+
+    end_naive = datetime.datetime.strptime(
+        schedule["end"], DUO_FACILITY_DATETIME_FORMAT[DUO_FACILITY]
+    )
+    local_end = local.localize(end_naive, is_dst=True)
+    utc_end = local_end.astimezone(pytz.utc)
+    mp["end"] = utc_end.isoformat("T")
+    # mp['end']=utc_end
+    mp["comment"] = ""
+    return mp
+
+
+def compose_proposal(row, principal_investigator, policy):
+    proposal = {}
+    proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
+    proposal["pi_email"] = principal_investigator
+    proposal["pi_firstname"] = row["pi_firstname"]
+    proposal["pi_lastname"] = row["pi_lastname"]
+    proposal["email"] = row["email"]
+    if row["email"] == "":
+        print("Empty email:", row)
+
+    proposal["firstname"] = row["firstname"]
+    proposal["lastname"] = row["lastname"]
+    proposal["title"] = row["title"]
+    proposal["abstract"] = row["abstract"]
+    proposal["ownerGroup"] = policy["ownerGroup"]
+    proposal["accessGroups"] = policy["accessGroups"]
+    return proposal
+
+
+def compose_policy(row, accelerator, principal_investigator):
+    policy = {}
+    policy["manager"] = [principal_investigator]
+    policy["tapeRedundancy"] = "low"
+    policy["autoArchive"] = False
+    policy["autoArchiveDelay"] = 0
+    policy["archiveEmailNotification"] = True
+    policy["archiveEmailsToBeNotified"] = []
+    policy["retrieveEmailNotification"] = True
+    policy["retrieveEmailsToBeNotified"] = []
+    policy["embargoPeriod"] = 3
+    policy["ownerGroup"] = row["pgroup"] or f'p{row["proposal"]}'
+    # TODO for SINQ (? still correct ?)
+    # policy['ownerGroup'] = 'p'+row['proposal']
+    # special mapping for MX needed
+    bl = row["beamline"].lower()
+    if bl.startswith("px"):
+        bl = "mx"
+    policy["accessGroups"] = [f"{accelerator}{bl}"]
+    return policy
+
+
+def compose_principal_investigator(row):
+    main_proposer_email = row["email"]
+    if row["pi_email"] != "":
+        principal_investigator = row["pi_email"]
+    else:
+        principal_investigator = main_proposer_email
+    return principal_investigator
+
+
 def _get_scicat_token() -> str:
     credentials = {}
     credentials["username"] = SCICAT_USERNAME
@@ -183,16 +210,20 @@ def _get_scicat_token() -> str:
         sys.exit(1)
 
 
-def main() -> None:
-    year = DUO_YEAR or datetime.datetime.now().year
-    print("Fetching proposals for accelerator ", DUO_FACILITY, " and year ", year)
-    print("Connecting to scicat on ", SCICAT_ENDPOINT)
-
+def _set_scicat_token():
     Configuration().host = SCICAT_ENDPOINT
 
     # set token for auth header - scicat
     access_token = _get_scicat_token()
     Configuration().api_client.default_headers["Authorization"] = access_token
+
+
+def main() -> None:
+    year = DUO_YEAR or datetime.datetime.now().year
+    print("Fetching proposals for accelerator ", DUO_FACILITY, " and year ", year)
+    print("Connecting to scicat on ", SCICAT_ENDPOINT)
+
+    _set_scicat_token()
 
     # read proposal data from DUO
 
