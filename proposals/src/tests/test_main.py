@@ -213,6 +213,26 @@ def test_main(duo_facility, expected):
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
 
 
+@patch("main.compose_policy")
+@patch("main.compose_proposal")
+@patch("main.compose_measurement_periods")
+@patch("main.create_or_update_proposal")
+def test_fill_proposal(
+    mock_create_or_update, mock_compose_mp, mock_compose_proposal, mock_compose_policy
+):
+    row = {"proposal": "123"}
+    accellerator = "SLS"
+    m.fill_proposal(row, accellerator)
+    mock_compose_policy.assert_called_once_with(row, accellerator)
+    mock_compose_proposal.assert_called_once_with(row, accellerator)
+    mock_compose_mp.assert_called_once_with(row, accellerator)
+    mock_create_or_update.assert_called_once_with(
+        mock_compose_policy.return_value,
+        mock_compose_proposal.return_value,
+        mock_compose_mp.return_value,
+    )
+
+
 class TestCreateOrUpdateProposal:
 
     proposal = {

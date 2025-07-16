@@ -37,7 +37,7 @@ def fill_proposal(row, accelerator):
 
     policy = compose_policy(row, accelerator)
 
-    proposal = compose_proposal(row, policy)
+    proposal = compose_proposal(row, accelerator)
 
     measurement_periods = compose_measurement_periods(row, accelerator)
 
