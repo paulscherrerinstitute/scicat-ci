@@ -49,32 +49,34 @@ def fill_proposal(row, accelerator):
 
 
 def create_or_update_proposal(policy, proposal, measurement_periods):
-    api = swagger_client.ProposalApi()
     try:
         # check for existence of Proposal data and merge schedules into it
         pid = proposal["proposalId"]
-        res = api.proposal_exists_get_proposalsid_exists(pid)
-        if res.exists:
-            existing_proposal = api.proposal_find_by_id(pid)
-            # check if this is a new entry
-            ml = existing_proposal.measurement_period_list
-            # to avoid problems with Dates: convert Dates back to strings
-            new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
-            if len(new_entries) > 0:
-                patch = {}
-                patch["MeasurementPeriodList"] = new_entries
-                log.info(f"Modified proposal, patch object: {patch}")
-                # the following call appends to the existing array
-                swagger_client.ProposalApi().proposal_prototype_patch_attributes(
-                    pid, data=patch
-                )
-        else:
+        try:
+            existing_proposal = swagger_client.ProposalApi().proposal_find_by_id(pid)
+        except ApiException as e:
+            if e.status != 404:
+                raise e
             # create new proposal
             proposal["MeasurementPeriodList"] = measurement_periods
             log.info(f"Create new proposal {proposal}")
             swagger_client.ProposalApi().proposal_create(data=proposal)
             log.info(f"Create new policy for pgroup {policy}")
             swagger_client.PolicyApi().policy_create(data=policy)
+        else:
+            # check if this is a new entry
+            ml = existing_proposal.measurement_period_list
+            # to avoid problems with Dates: convert Dates back to strings
+            new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
+            if len(new_entries) == 0:
+                return
+            patch = {"MeasurementPeriodList": new_entries}
+            log.info(f"Modified proposal, patch object: {patch}")
+            # the following call appends to the existing array
+            swagger_client.ProposalApi().proposal_prototype_patch_attributes(
+                pid, data=patch
+            )
+
     except ApiException as e:
         log.error(e)
 
