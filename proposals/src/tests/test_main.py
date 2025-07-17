@@ -127,20 +127,20 @@ def test_fill_proposal(
 
     mock_compose_policy.assert_called_once_with(row, accellerator)
     mock_compose_policy_instance = mock_compose_policy.return_value
-    mock_compose_policy_instance.compose_policy.assert_called_once()
+    mock_compose_policy_instance.compose.assert_called_once()
 
     mock_compose_proposal.assert_called_once_with(row, accellerator)
     mock_compose_proposal_instance = mock_compose_proposal.return_value
-    mock_compose_proposal_instance.compose_proposal.assert_called_once()
+    mock_compose_proposal_instance.compose.assert_called_once()
 
     mock_compose_mp.assert_called_once_with(m.DUO_FACILITY, row, accellerator)
     mock_compose_mp_instance = mock_compose_mp.return_value
-    mock_compose_mp_instance.compose_measurement_periods.assert_called_once()
+    mock_compose_mp_instance.compose.assert_called_once()
 
     mock_create_or_update.assert_called_once_with(
-        mock_compose_policy_instance.compose_policy.return_value,
-        mock_compose_proposal_instance.compose_proposal.return_value,
-        mock_compose_mp_instance.compose_measurement_periods.return_value,
+        mock_compose_policy_instance.compose.return_value,
+        mock_compose_proposal_instance.compose.return_value,
+        mock_compose_mp_instance.compose.return_value,
     )
 
 

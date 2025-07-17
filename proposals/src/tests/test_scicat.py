@@ -45,7 +45,11 @@ class TestSciCatAuth:
 
 class TestSciCatFromDuo:
 
-    scicat_from_duo = scicat.SciCatFromDuo(
+    class DummySciCatFromDuo(scicat.SciCatFromDuo):
+        def compose(self):
+            pass
+
+    scicat_from_duo = DummySciCatFromDuo(
         {"proposal": "test_proposal"}, "test_accelerator"
     )
 
@@ -111,8 +115,8 @@ class TestSciCatPolicyFromDuo:
         "sls",
     )
 
-    def test_compose_policy(self):
-        policy = self.scicat_policy.compose_policy()
+    def test_compose(self):
+        policy = self.scicat_policy.compose()
         expected = {
             "manager": ["pi_email"],
             "ownerGroup": "abc",
@@ -140,8 +144,8 @@ class TestSciCatProposalFromDuo:
         "sls",
     )
 
-    def test_compose_proposal(self):
-        proposal = self.scicat_proposal.compose_proposal()
+    def test_compose(self):
+        proposal = self.scicat_proposal.compose()
         expected = {
             "proposalId": "20.500.11935/123",
             "pi_email": "pi_email",
@@ -236,8 +240,8 @@ class TestSciCatMeasurementsFromDuo:
             "comment": "",
         }
 
-    def test_compose_measurement_periods(self):
-        measurement_periods = self.scicat_measurements.compose_measurement_periods()
+    def test_compose(self):
+        measurement_periods = self.scicat_measurements.compose()
         assert measurement_periods == [
             {
                 "id": ANY,

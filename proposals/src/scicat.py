@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
 import pytz
@@ -42,6 +42,10 @@ class SciCatFromDuo(metaclass=ABCMeta):
         self.accelerator = accelerator
         self.duo_proposal = duo_proposal
 
+    @abstractmethod
+    def compose(self):
+        raise NotImplementedError
+
 
 class SciCatCreatorFromDuoMixin:
 
@@ -66,7 +70,7 @@ class SciCatCreatorFromDuoMixin:
 
 class SciCatProposalFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
-    def compose_proposal(self):
+    def compose(self):
         row = self.duo_proposal
         if not row["email"]:
             log.warning(f"Empty email: {row}")
@@ -87,7 +91,7 @@ class SciCatProposalFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
 class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
-    def compose_policy(self):
+    def compose(self):
         return {
             "manager": [self.principal_investigator],
             "tapeRedundancy": "low",
@@ -145,7 +149,7 @@ class SciCatMeasurementsFromDuo(SciCatFromDuo):
         utc_date = local_date.astimezone(pytz.utc)
         return utc_date.isoformat("T")
 
-    def compose_measurement_periods(self):
+    def compose(self):
         row = self.duo_proposal
         measurement_periods = []
         schedules = row["schedule"]

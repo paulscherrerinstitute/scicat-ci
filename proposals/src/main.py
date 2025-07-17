@@ -37,13 +37,13 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    policy = SciCatPolicyFromDuo(row, accelerator).compose_policy()
+    policy = SciCatPolicyFromDuo(row, accelerator).compose()
 
-    proposal = SciCatProposalFromDuo(row, accelerator).compose_proposal()
+    proposal = SciCatProposalFromDuo(row, accelerator).compose()
 
     measurement_periods = SciCatMeasurementsFromDuo(
         DUO_FACILITY, row, accelerator
-    ).compose_measurement_periods()
+    ).compose()
 
     create_or_update_proposal(policy, proposal, measurement_periods)
 
