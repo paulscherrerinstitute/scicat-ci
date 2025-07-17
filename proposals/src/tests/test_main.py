@@ -271,3 +271,32 @@ class TestCreateOrUpdateProposal:
             self.MockProposalApi.measurement_period_list,
         )
         assert new_measures == self.expeted_measurement_periods
+
+    @patch("main.swagger_client.PolicyApi.policy_create")
+    def test_create_policy(self, mock_policy_create):
+        policy = {"policy": "policy"}
+        m.create_policy(policy)
+        mock_policy_create.assert_called_once_with(data=policy)
+
+    @patch("main.swagger_client.ProposalApi.proposal_create")
+    def test_create_proposal(self, mock_proposal_create):
+        proposal = deepcopy(self.proposal)
+        m.create_proposal(proposal, self.measurement_periods)
+        mock_proposal_create.assert_called_once_with(
+            data={**proposal, "MeasurementPeriodList": self.measurement_periods}
+        )
+
+    def test_update_proposal(self):
+        mock_proposal = self.MockProposalApi()
+        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
+            proposal = deepcopy(self.proposal)
+            m.update_proposal(self.proposal, self.measurement_periods)
+            mock_proposal.proposal_find_by_id.assert_called_once_with(
+                proposal["proposalId"]
+            )
+            mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
+                proposal["proposalId"],
+                data={
+                    "MeasurementPeriodList": self.expeted_measurement_periods,
+                },
+            )

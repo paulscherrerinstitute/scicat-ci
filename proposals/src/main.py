@@ -50,34 +50,44 @@ def fill_proposal(row, accelerator):
 
 def create_or_update_proposal(policy, proposal, measurement_periods):
     try:
-        # check for existence of Proposal data and merge schedules into it
-        pid = proposal["proposalId"]
         try:
-            existing_proposal = swagger_client.ProposalApi().proposal_find_by_id(pid)
-            # check if this is a new entry
-            ml = existing_proposal.measurement_period_list
-            # to avoid problems with Dates: convert Dates back to strings
-            new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
-            if len(new_entries) == 0:
-                return
-            patch = {"MeasurementPeriodList": new_entries}
-            log.info(f"Modified proposal, patch object: {patch}")
-            # the following call appends to the existing array
-            swagger_client.ProposalApi().proposal_prototype_patch_attributes(
-                pid, data=patch
-            )
+            # check for existence of Proposal data and merge schedules into it
+            update_proposal(proposal, measurement_periods)
         except ApiException as e:
             if e.status != 404:
                 raise e
             # create new proposal
-            proposal["MeasurementPeriodList"] = measurement_periods
-            log.info(f"Create new proposal {proposal}")
-            swagger_client.ProposalApi().proposal_create(data=proposal)
-            log.info(f"Create new policy for pgroup {policy}")
-            swagger_client.PolicyApi().policy_create(data=policy)
+            create_proposal(proposal, measurement_periods)
+            create_policy(policy)
 
     except ApiException as e:
         log.error(e)
+
+
+def update_proposal(proposal, measurement_periods):
+    pid = proposal["proposalId"]
+    existing_proposal = swagger_client.ProposalApi().proposal_find_by_id(pid)
+    # check if this is a new entry
+    ml = existing_proposal.measurement_period_list
+    # to avoid problems with Dates: convert Dates back to strings
+    new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
+    if len(new_entries) == 0:
+        return
+    patch = {"MeasurementPeriodList": new_entries}
+    log.info(f"Modified proposal, patch object: {patch}")
+    # the following call appends to the existing array
+    swagger_client.ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
+
+
+def create_policy(policy):
+    log.info(f"Create new policy for pgroup {policy}")
+    swagger_client.PolicyApi().policy_create(data=policy)
+
+
+def create_proposal(proposal, measurement_periods):
+    proposal["MeasurementPeriodList"] = measurement_periods
+    log.info(f"Create new proposal {proposal}")
+    swagger_client.ProposalApi().proposal_create(data=proposal)
 
 
 def compose_new_measurement_periods(measurement_periods, pid, ml):
