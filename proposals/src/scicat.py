@@ -108,7 +108,7 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
 class SciCatMeasurementsFromDuo(SciCatFromDuo):
 
-    local = pytz.timezone("Europe/Amsterdam")
+    _local = pytz.timezone("Europe/Amsterdam")
     _duo_facility_datetime_format = defaultdict(
         lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
     )
@@ -126,30 +126,24 @@ class SciCatMeasurementsFromDuo(SciCatFromDuo):
         schedule,
     ):
         row = self.duo_proposal
-        mp = {}
-        mp["id"] = uuid.uuid4().hex
-        mp["instrument"] = f'/PSI/{self.accelerator.upper()}/{row["beamline"].upper()}'
+        return {
+            "id": uuid.uuid4().hex,
+            "instrument": f'/PSI/{self.accelerator.upper()}/{row["beamline"].upper()}',
+            "start": self._datetime_to_utc(schedule["start"]),
+            "end": self._datetime_to_utc(schedule["end"]),
+            "comment": "",
+        }
+
+    def _datetime_to_utc(self, schedule_date):
         # convert date to format according 5.6 internet date/time format in RFC 3339"
         # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
-        start_naive = datetime.datetime.strptime(
-            schedule["start"], self.duo_facility_datetime_format
+        date_naive = datetime.datetime.strptime(
+            schedule_date, self.duo_facility_datetime_format
         )
-        local_start = self.local.localize(start_naive, is_dst=True)
+        local_date = self._local.localize(date_naive, is_dst=True)
         # no point to use local here, because this information get lost when data is stored
-        utc_start = local_start.astimezone(pytz.utc)
-        mp["start"] = utc_start.isoformat("T")
-        # do not convert to string here for better comparison with existing entries
-        # mp['start'] = utc_start
-
-        end_naive = datetime.datetime.strptime(
-            schedule["end"], self.duo_facility_datetime_format
-        )
-        local_end = self.local.localize(end_naive, is_dst=True)
-        utc_end = local_end.astimezone(pytz.utc)
-        mp["end"] = utc_end.isoformat("T")
-        # mp['end']=utc_end
-        mp["comment"] = ""
-        return mp
+        utc_date = local_date.astimezone(pytz.utc)
+        return utc_date.isoformat("T")
 
     def compose_measurement_periods(self):
         row = self.duo_proposal

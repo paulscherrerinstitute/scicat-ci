@@ -254,3 +254,16 @@ class TestSciCatMeasurementsFromDuo:
                 "comment": "",
             },
         ]
+
+    @pytest.mark.parametrize(
+        "duo_facility, test_date",
+        [
+            ["sinq", "01/01/2023"],
+            ["smus", "01/01/2023"],
+            ["sls", "01/01/2023 00:00:00"],
+        ],
+    )
+    def test__datetime_to_utc(self, duo_facility, test_date):
+        self.scicat_measurements.duo_facility = duo_facility
+        utc_date = self.scicat_measurements._datetime_to_utc(test_date)
+        assert utc_date == "2022-12-31T23:00:00+00:00"
