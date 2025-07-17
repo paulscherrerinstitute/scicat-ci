@@ -20,9 +20,7 @@ class SciCatAuth:
         self._set_scicat_token()
 
     def _get_scicat_token(self):
-        credentials = {}
-        credentials["username"] = self.username
-        credentials["password"] = self.password
+        credentials = {"username": self.username, "password": self.password}
         try:
             response = UserApi().user_login(credentials)
             access_token = response["id"]
@@ -70,47 +68,42 @@ class SciCatProposalFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
     def compose_proposal(self):
         row = self.duo_proposal
-        proposal = {}
-        proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
-        proposal["pi_email"] = self.principal_investigator
-        proposal["pi_firstname"] = row["pi_firstname"]
-        proposal["pi_lastname"] = row["pi_lastname"]
-        proposal["email"] = row["email"]
-        if row["email"] == "":
+        if not row["email"]:
             log.warning(f"Empty email: {row}")
-
-        proposal["firstname"] = row["firstname"]
-        proposal["lastname"] = row["lastname"]
-        proposal["title"] = row["title"]
-        proposal["abstract"] = row["abstract"]
-        proposal["ownerGroup"] = self.owner_group
-        proposal["accessGroups"] = self.access_groups
-        return proposal
+        return {
+            "proposalId": f'20.500.11935/{row["proposal"]}',
+            "pi_email": self.principal_investigator,
+            "pi_firstname": row["pi_firstname"],
+            "pi_lastname": row["pi_lastname"],
+            "email": row["email"],
+            "firstname": row["firstname"],
+            "lastname": row["lastname"],
+            "title": row["title"],
+            "abstract": row["abstract"],
+            "ownerGroup": self.owner_group,
+            "accessGroups": self.access_groups,
+        }
 
 
 class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
     def compose_policy(self):
-        row = self.duo_proposal
-        policy = {}
-        policy["manager"] = [self.principal_investigator]
-        policy["tapeRedundancy"] = "low"
-        policy["autoArchive"] = False
-        policy["autoArchiveDelay"] = 0
-        policy["archiveEmailNotification"] = True
-        policy["archiveEmailsToBeNotified"] = []
-        policy["retrieveEmailNotification"] = True
-        policy["retrieveEmailsToBeNotified"] = []
-        policy["embargoPeriod"] = 3
-        policy["ownerGroup"] = self.owner_group
-        # TODO for SINQ (? still correct ?)
-        # policy['ownerGroup'] = 'p'+row['proposal']
-        # special mapping for MX needed
-        bl = row["beamline"].lower()
-        if bl.startswith("px"):
-            bl = "mx"
-        policy["accessGroups"] = self.access_groups
-        return policy
+        return {
+            "manager": [self.principal_investigator],
+            "tapeRedundancy": "low",
+            "autoArchive": False,
+            "autoArchiveDelay": 0,
+            "archiveEmailNotification": True,
+            "archiveEmailsToBeNotified": [],
+            "retrieveEmailNotification": True,
+            "retrieveEmailsToBeNotified": [],
+            "embargoPeriod": 3,
+            "ownerGroup": self.owner_group,
+            # TODO for SINQ (? still correct ?)
+            # policy['ownerGroup'] = 'p'+row['proposal']
+            # special mapping for MX needed
+            "accessGroups": self.access_groups,
+        }
 
 
 class SciCatMeasurementsFromDuo(SciCatFromDuo):
