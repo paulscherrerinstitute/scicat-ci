@@ -68,27 +68,6 @@ class SciCatCreatorFromDuoMixin:
         return [f"{self.accelerator}{bl}"]
 
 
-class SciCatProposalFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
-
-    def compose(self):
-        row = self.duo_proposal
-        if not row["email"]:
-            log.warning(f"Empty email: {row}")
-        return {
-            "proposalId": f'20.500.11935/{row["proposal"]}',
-            "pi_email": self.principal_investigator,
-            "pi_firstname": row["pi_firstname"],
-            "pi_lastname": row["pi_lastname"],
-            "email": row["email"],
-            "firstname": row["firstname"],
-            "lastname": row["lastname"],
-            "title": row["title"],
-            "abstract": row["abstract"],
-            "ownerGroup": self.owner_group,
-            "accessGroups": self.access_groups,
-        }
-
-
 class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
     def compose(self):
@@ -110,16 +89,12 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
         }
 
 
-class SciCatMeasurementsFromDuo(SciCatFromDuo):
+class SciCatMeasurementsFromDuoMixin:
 
     _local = pytz.timezone("Europe/Amsterdam")
     _duo_facility_datetime_format = defaultdict(
         lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
     )
-
-    def __init__(self, duo_facility, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.duo_facility = duo_facility
 
     @property
     def duo_facility_datetime_format(self):
@@ -149,7 +124,8 @@ class SciCatMeasurementsFromDuo(SciCatFromDuo):
         utc_date = local_date.astimezone(pytz.utc)
         return utc_date.isoformat("T")
 
-    def compose(self):
+    @property
+    def meausement_period_list(self):
         row = self.duo_proposal
         measurement_periods = []
         schedules = row["schedule"]
@@ -157,3 +133,31 @@ class SciCatMeasurementsFromDuo(SciCatFromDuo):
             mp = self.compose_measurement_period(schedule)
             measurement_periods.append(mp)
         return measurement_periods
+
+
+class SciCatProposalFromDuo(
+    SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
+):
+
+    def __init__(self, duo_proposal, accelerator, duo_facility):
+        super().__init__(duo_proposal, accelerator)
+        self.duo_facility = duo_facility
+
+    def compose(self):
+        row = self.duo_proposal
+        if not row["email"]:
+            log.warning(f"Empty email: {row}")
+        return {
+            "proposalId": f'20.500.11935/{row["proposal"]}',
+            "pi_email": self.principal_investigator,
+            "pi_firstname": row["pi_firstname"],
+            "pi_lastname": row["pi_lastname"],
+            "email": row["email"],
+            "firstname": row["firstname"],
+            "lastname": row["lastname"],
+            "title": row["title"],
+            "abstract": row["abstract"],
+            "ownerGroup": self.owner_group,
+            "accessGroups": self.access_groups,
+            "MeasurementPeriodList": self.meausement_period_list,
+        }
