@@ -3,16 +3,18 @@
 """
 import datetime
 import os
-import uuid
-from collections import defaultdict
 
-import pytz
 import swagger_client
 from dotenv import load_dotenv
-from swagger_client.configuration import Configuration
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
+from scicat import (
+    SciCatAuth,
+    SciCatMeasurementsFromDuo,
+    SciCatPolicyFromDuo,
+    SciCatProposalFromDuo,
+)
 from utils import log
 
 load_dotenv()
@@ -35,11 +37,13 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    policy = compose_policy(row, accelerator)
+    policy = SciCatPolicyFromDuo(row, accelerator).compose()
 
-    proposal = compose_proposal(row, accelerator)
+    proposal = SciCatProposalFromDuo(row, accelerator).compose()
 
-    measurement_periods = compose_measurement_periods(row, accelerator)
+    measurement_periods = SciCatMeasurementsFromDuo(
+        DUO_FACILITY, row, accelerator
+    ).compose()
 
     create_or_update_proposal(policy, proposal, measurement_periods)
 
@@ -100,135 +104,12 @@ def create_or_update_proposal(policy, proposal, measurement_periods):
         log.error(e)
 
 
-def compose_measurement_periods(row, accelerator):
-    measurement_periods = []
-    schedules = row["schedule"]
-    for schedule in schedules:
-        mp = compose_measurement_period(row, accelerator, schedule)
-        measurement_periods.append(mp)
-    return measurement_periods
-
-
-def compose_measurement_period(
-    row,
-    accelerator,
-    schedule,
-    duo_facility=DUO_FACILITY,
-):
-    local = pytz.timezone("Europe/Amsterdam")
-    duo_facility_datetime_format = defaultdict(
-        lambda: "%d/%m/%Y %H:%M:%S", {"sinq": "%d/%m/%Y", "smus": "%d/%m/%Y"}
-    )
-    mp = {}
-    mp["id"] = uuid.uuid4().hex
-    mp["instrument"] = f'/PSI/{accelerator.upper()}/{row["beamline"].upper()}'
-    # convert date to format according 5.6 internet date/time format in RFC 3339"
-    # i.e. from "20/12/2013 07:00:00" to "2013-12-20T07:00:00+01:00"
-    start_naive = datetime.datetime.strptime(
-        schedule["start"], duo_facility_datetime_format[duo_facility]
-    )
-    local_start = local.localize(start_naive, is_dst=True)
-    # no point to use local here, because this information get lost when data is stored
-    utc_start = local_start.astimezone(pytz.utc)
-    mp["start"] = utc_start.isoformat("T")
-    # do not convert to string here for better comparison with existing entries
-    # mp['start'] = utc_start
-
-    end_naive = datetime.datetime.strptime(
-        schedule["end"], duo_facility_datetime_format[duo_facility]
-    )
-    local_end = local.localize(end_naive, is_dst=True)
-    utc_end = local_end.astimezone(pytz.utc)
-    mp["end"] = utc_end.isoformat("T")
-    # mp['end']=utc_end
-    mp["comment"] = ""
-    return mp
-
-
-def compose_proposal(row, accelerator):
-    proposal = {}
-    proposal["proposalId"] = f'20.500.11935/{row["proposal"]}'
-    proposal["pi_email"] = compose_principal_investigator(row)
-    proposal["pi_firstname"] = row["pi_firstname"]
-    proposal["pi_lastname"] = row["pi_lastname"]
-    proposal["email"] = row["email"]
-    if row["email"] == "":
-        log.warning(f"Empty email: {row}")
-
-    proposal["firstname"] = row["firstname"]
-    proposal["lastname"] = row["lastname"]
-    proposal["title"] = row["title"]
-    proposal["abstract"] = row["abstract"]
-    proposal["ownerGroup"] = compose_owner_group(row)
-    proposal["accessGroups"] = compose_access_groups(row, accelerator)
-    return proposal
-
-
-def compose_policy(row, accelerator):
-    policy = {}
-    policy["manager"] = [compose_principal_investigator(row)]
-    policy["tapeRedundancy"] = "low"
-    policy["autoArchive"] = False
-    policy["autoArchiveDelay"] = 0
-    policy["archiveEmailNotification"] = True
-    policy["archiveEmailsToBeNotified"] = []
-    policy["retrieveEmailNotification"] = True
-    policy["retrieveEmailsToBeNotified"] = []
-    policy["embargoPeriod"] = 3
-    policy["ownerGroup"] = compose_owner_group(row)
-    # TODO for SINQ (? still correct ?)
-    # policy['ownerGroup'] = 'p'+row['proposal']
-    # special mapping for MX needed
-    policy["accessGroups"] = compose_access_groups(row, accelerator)
-    return policy
-
-
-def compose_owner_group(row):
-    return row["pgroup"] or f'p{row["proposal"]}'
-
-
-def compose_access_groups(row, accelerator):
-    bl = row["beamline"].lower()
-    if bl.startswith("px"):
-        bl = "mx"
-    return [f"{accelerator}{bl}"]
-
-
-def compose_principal_investigator(row):
-    return row["pi_email"] or row["email"]
-
-
-def _get_scicat_token(scicat_username, scicat_password) -> str:
-    credentials = {}
-    credentials["username"] = scicat_username
-    credentials["password"] = scicat_password
-    try:
-        response = swagger_client.UserApi().user_login(credentials)
-        access_token = response["id"]
-        return access_token
-    except Exception as e:
-        log.error("Login to data catalog did not succeed")
-        raise e
-
-
-def _set_scicat_token(
-    scicat_username=SCICAT_USERNAME,
-    scicat_password=SCICAT_PASSWORD,
-    scicat_endpoint=SCICAT_ENDPOINT,
-):
-    Configuration().host = scicat_endpoint
-
-    # set token for auth header - scicat
-    access_token = _get_scicat_token(scicat_username, scicat_password)
-    Configuration().api_client.default_headers["Authorization"] = access_token
-
-
 def main() -> None:
     year = DUO_YEAR or datetime.datetime.now().year
     log.info(f"Fetching proposals for accelerator {DUO_FACILITY} and year {year}")
     log.info(f"Connecting to scicat on {SCICAT_ENDPOINT}")
 
-    _set_scicat_token()
+    SciCatAuth(SCICAT_USERNAME, SCICAT_PASSWORD, SCICAT_ENDPOINT).authenticate()
 
     # read proposal data from DUO
 
