@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
 import pytz
-from swagger_client import Configuration, UserApi
+from swagger_client import Configuration, PolicyApi, UserApi
 
 from utils import log
 
@@ -87,6 +87,11 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
             # special mapping for MX needed
             "accessGroups": self.access_groups,
         }
+
+    def create_policy(self):
+        policy = self.compose()
+        log.info(f"Create new policy for pgroup {policy}")
+        PolicyApi().policy_create(data=policy)
 
 
 class SciCatMeasurementsFromDuoMixin:
