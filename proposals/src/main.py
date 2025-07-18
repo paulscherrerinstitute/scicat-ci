@@ -32,14 +32,16 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    policy = SciCatPolicyFromDuo(row, accelerator).compose()
+    policy = SciCatPolicyFromDuo(row, accelerator)
 
-    proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY).compose()
+    proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY)
 
     create_or_update_proposal(policy, proposal)
 
 
-def create_or_update_proposal(policy, proposal):
+def create_or_update_proposal(policy_instance, proposal_instance):
+    policy = policy_instance.compose()
+    proposal = proposal_instance.compose()
     try:
         try:
             # check for existence of Proposal data and merge schedules into it

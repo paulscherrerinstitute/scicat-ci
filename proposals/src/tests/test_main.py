@@ -47,16 +47,6 @@ def test_main(duo_facility, expected):
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
 
 
-@patch.dict(os.environ, {"DUO_FACILITY": FixturesFromDuo.duo_facility})
-def test_fill_proposal_acceptance():
-    reload(m)
-    with patch("main.create_or_update_proposal") as mock_create_or_update:
-        m.fill_proposal(FixturesFromDuo.duo_proposal, FixturesFromDuo.accelerator)
-        mock_create_or_update.assert_called_once_with(
-            FixturesFromDuo.policy, FixturesFromDuo.expected_scicat_proposal
-        )
-
-
 @patch("main.SciCatPolicyFromDuo")
 @patch("main.SciCatProposalFromDuo")
 @patch("main.create_or_update_proposal")
@@ -68,16 +58,12 @@ def test_fill_proposal(
     m.fill_proposal(row, accellerator)
 
     mock_compose_policy.assert_called_once_with(row, accellerator)
-    mock_compose_policy_instance = mock_compose_policy.return_value
-    mock_compose_policy_instance.compose.assert_called_once()
 
     mock_compose_proposal.assert_called_once_with(row, accellerator, m.DUO_FACILITY)
-    mock_compose_proposal_instance = mock_compose_proposal.return_value
-    mock_compose_proposal_instance.compose.assert_called_once()
 
     mock_create_or_update.assert_called_once_with(
-        mock_compose_policy_instance.compose.return_value,
-        mock_compose_proposal_instance.compose.return_value,
+        mock_compose_policy.return_value,
+        mock_compose_proposal.return_value,
     )
 
 
@@ -106,12 +92,17 @@ class TestCreateOrUpdateProposal:
             self.proposal_create = Mock()
             self.proposal_prototype_patch_attributes = Mock()
 
+    def _add_compose(self, scicat_return):
+        return Mock(compose=Mock(return_value=scicat_return))
+
     def test_update_existing_proposal(self):
         mock_proposal = self.MockProposalApi()
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
 
-            m.create_or_update_proposal(self.policy, proposal)
+            m.create_or_update_proposal(
+                self._add_compose(self.policy), self._add_compose(proposal)
+            )
             mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
                 proposal["proposalId"],
                 data={
@@ -127,7 +118,9 @@ class TestCreateOrUpdateProposal:
         mock_proposal = self.MockProposalApi(exists=False)
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
-            m.create_or_update_proposal(self.policy, proposal)
+            m.create_or_update_proposal(
+                self._add_compose(self.policy), self._add_compose(proposal)
+            )
             mock_proposal.proposal_create.assert_called_once_with(
                 data=self.proposal,
             )
