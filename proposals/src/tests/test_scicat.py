@@ -4,7 +4,7 @@ import pytest
 
 import scicat
 
-from .fixtures.mocked_data import FixturesFromDuo
+from .fixtures.mocked_data import FixturesFromDuo, FixturesFromSciCatAPI
 
 
 class TestSciCatAuth:
@@ -219,3 +219,9 @@ class TestSciCatMeasurementsFromDuoMixin:
         self.scicat_measurements.duo_facility = duo_facility
         utc_date = self.scicat_measurements._datetime_to_utc(test_date)
         assert utc_date == "2022-12-31T23:00:00+00:00"
+
+    def test_keep_new_measurements(self):
+        new_measures = self.scicat_measurements.keep_new_measurements(
+            FixturesFromSciCatAPI.measurement_periods,
+        )
+        assert new_measures == FixturesFromSciCatAPI.expeted_measurement_periods
