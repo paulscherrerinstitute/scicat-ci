@@ -144,6 +144,8 @@ class TestDuoSciCatOrchestrator:
                 >= {
                     "duo_endpoint": "test_duo_endpoint",
                     "duo_secret": "test_duo_secret",
+                    "duo_year": "2023",
+                    "duo_facility": duo_facility,
                 }.items()
             )
             assert orchestrator_instance.duo_facility == duo_facility
