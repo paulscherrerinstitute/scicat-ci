@@ -130,10 +130,10 @@ class TestSciCatPolicyFromDuo:
         policy = self.scicat_policy.compose()
         assert policy == FixturesFromDuo.policy
 
-    @patch("scicat.PolicyApi.policy_create")
+    @patch("scicat.PolicyApi.policy_create", autospec=True)
     def test_create(self, mock_policy_create):
         self.scicat_policy.create()
-        mock_policy_create.assert_called_once_with(data=FixturesFromDuo.policy)
+        mock_policy_create.assert_called_once_with(ANY, data=FixturesFromDuo.policy)
 
 
 class TestSciCatProposalFromDuo:
@@ -150,24 +150,26 @@ class TestSciCatProposalFromDuo:
         proposal = self.scicat_proposal.compose()
         assert proposal == FixturesFromDuo.expected_scicat_proposal
 
-    @patch("scicat.ProposalApi.proposal_create")
+    @patch("scicat.ProposalApi.proposal_create", autospec=True)
     def test_create_proposal(self, mock_proposal_create):
         self.scicat_proposal.create()
         mock_proposal_create.assert_called_once_with(
-            data=FixturesFromDuo.expected_scicat_proposal
+            ANY, data=FixturesFromDuo.expected_scicat_proposal
         )
 
-    @patch("scicat.ProposalApi.proposal_prototype_patch_attributes")
+    @patch("scicat.ProposalApi.proposal_prototype_patch_attributes", autospec=True)
     @patch(
         "scicat.ProposalApi.proposal_find_by_id",
         return_value=Mock(
             measurement_period_list=FixturesFromSciCatAPI.measurement_periods
         ),
+        autospec=True,
     )
     def test__update(self, mock_proposal_find, mock_proposal_patch):
         self.scicat_proposal._update()
-        mock_proposal_find.assert_called_once_with(self.proposalId)
+        mock_proposal_find.assert_called_once_with(ANY, self.proposalId)
         mock_proposal_patch.assert_called_once_with(
+            ANY,
             self.proposalId,
             data={
                 "MeasurementPeriodList": FixturesFromSciCatAPI.expeted_measurement_periods,
@@ -187,7 +189,9 @@ class TestSciCatProposalFromDuo:
         ],
     )
     def test_update(self, result, expected):
-        with patch("scicat.SciCatProposalFromDuo._update", **result) as mock_update:
+        with patch(
+            "scicat.SciCatProposalFromDuo._update", **result, autospec=True
+        ) as mock_update:
             if "side_effect" in result:
                 with pytest.raises(expected):
                     self.scicat_proposal.update()

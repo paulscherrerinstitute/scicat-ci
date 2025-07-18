@@ -54,7 +54,7 @@ class TestDuoSciCatOrchestrator:
 
     def test_update__upsert_policy_and_proposal(self):
         mock_proposal = self.MockProposalApi()
-        with patch("scicat.ProposalApi", return_value=mock_proposal):
+        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
             self.orchestrator._upsert_policy_and_proposal(
                 self.policy_instance, self.proposal_instance
             )
@@ -71,7 +71,7 @@ class TestDuoSciCatOrchestrator:
     )
     def test_create__upsert_policy_and_proposal(self, mock_policy_create):
         mock_proposal = self.MockProposalApi(exists=False)
-        with patch("scicat.ProposalApi", return_value=mock_proposal):
+        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
             self.orchestrator._upsert_policy_and_proposal(
                 self.policy_instance, self.proposal_instance
             )
@@ -161,9 +161,14 @@ class TestDuoSciCatOrchestrator:
         return_value=iter([("proposal", "facility")]),
         autospec=True,
     )
-    @patch("orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal_from_duo")
-    @patch("orchestrator.SciCatAuth.authenticate")
+    @patch(
+        "orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal_from_duo",
+        autospec=True,
+    )
+    @patch("orchestrator.SciCatAuth.authenticate", autospec=True)
     def test_orchestrate(self, mock_scicat_auth, mock_duo_proposal, _):
         self.orchestrator.orchestrate()
         mock_scicat_auth.assert_called_once()
-        mock_duo_proposal.assert_called_once_with("proposal", "facility")
+        mock_duo_proposal.assert_called_once_with(
+            self.orchestrator, "proposal", "facility"
+        )
