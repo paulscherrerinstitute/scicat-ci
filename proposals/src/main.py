@@ -11,7 +11,6 @@ from swagger_client.rest import ApiException
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
 from scicat import (
     SciCatAuth,
-    SciCatMeasurementsFromDuo,
     SciCatPolicyFromDuo,
     SciCatProposalFromDuo,
 )
@@ -39,11 +38,9 @@ def fill_proposal(row, accelerator):
 
     policy = SciCatPolicyFromDuo(row, accelerator).compose()
 
-    proposal = SciCatProposalFromDuo(row, accelerator).compose()
+    proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY).compose()
 
-    measurement_periods = SciCatMeasurementsFromDuo(
-        DUO_FACILITY, row, accelerator
-    ).compose()
+    measurement_periods = proposal["MeasurementPeriodList"]
 
     create_or_update_proposal(policy, proposal, measurement_periods)
 

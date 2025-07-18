@@ -111,16 +111,17 @@ def test_fill_proposal_acceptance():
     with patch("main.create_or_update_proposal") as mock_create_or_update:
         m.fill_proposal(row, accelerator)
         mock_create_or_update.assert_called_once_with(
-            expected_policy, expected_proposal, expected_measurement
+            expected_policy,
+            {**expected_proposal, "MeasurementPeriodList": expected_measurement},
+            expected_measurement,
         )
 
 
 @patch("main.SciCatPolicyFromDuo")
 @patch("main.SciCatProposalFromDuo")
-@patch("main.SciCatMeasurementsFromDuo")
 @patch("main.create_or_update_proposal")
 def test_fill_proposal(
-    mock_create_or_update, mock_compose_mp, mock_compose_proposal, mock_compose_policy
+    mock_create_or_update, mock_compose_proposal, mock_compose_policy
 ):
     row = {"proposal": "123"}
     accellerator = "SLS"
@@ -130,18 +131,14 @@ def test_fill_proposal(
     mock_compose_policy_instance = mock_compose_policy.return_value
     mock_compose_policy_instance.compose.assert_called_once()
 
-    mock_compose_proposal.assert_called_once_with(row, accellerator)
+    mock_compose_proposal.assert_called_once_with(row, accellerator, m.DUO_FACILITY)
     mock_compose_proposal_instance = mock_compose_proposal.return_value
     mock_compose_proposal_instance.compose.assert_called_once()
-
-    mock_compose_mp.assert_called_once_with(m.DUO_FACILITY, row, accellerator)
-    mock_compose_mp_instance = mock_compose_mp.return_value
-    mock_compose_mp_instance.compose.assert_called_once()
 
     mock_create_or_update.assert_called_once_with(
         mock_compose_policy_instance.compose.return_value,
         mock_compose_proposal_instance.compose.return_value,
-        mock_compose_mp_instance.compose.return_value,
+        ANY,
     )
 
 
