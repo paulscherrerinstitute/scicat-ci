@@ -46,6 +46,10 @@ class SciCatFromDuo(metaclass=ABCMeta):
     def compose(self):
         raise NotImplementedError
 
+    @abstractmethod
+    def create(self):
+        raise NotImplementedError
+
 
 class SciCatCreatorFromDuoMixin:
 
@@ -88,7 +92,7 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
             "accessGroups": self.access_groups,
         }
 
-    def create_policy(self):
+    def create(self):
         policy = self.compose()
         log.info(f"Create new policy for pgroup {policy}")
         PolicyApi().policy_create(data=policy)
@@ -183,12 +187,12 @@ class SciCatProposalFromDuo(
             "MeasurementPeriodList": self.meausement_period_list,
         }
 
-    def create_proposal(self):
+    def create(self):
         proposal = self.compose()
         log.info(f"Create new proposal {proposal}")
         ProposalApi().proposal_create(data=proposal)
 
-    def update_proposal(self):
+    def update(self):
         proposal = self.compose()
         pid = proposal["proposalId"]
         existing_proposal = ProposalApi().proposal_find_by_id(pid)
