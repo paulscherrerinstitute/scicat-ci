@@ -23,11 +23,11 @@ class DuoSciCatOrchestrator(Orchestrator):
         # duo config variables
         DUO_YEAR = os.environ["DUO_YEAR"]
         self.year = DUO_YEAR or datetime.now().year
-        DUO_FACILITY = os.environ["DUO_FACILITY"]
-        self.duo_facility = DUO_FACILITY
 
         self.scicat_instance = SciCatAuth.from_env()
-        self.duo_instance = ProposalsFactory.from_env().from_env()
+        duo_instance = ProposalsFactory.from_env().from_env()
+        self.duo_facility = duo_instance.duo_facility
+        self.duo_instance = duo_instance
 
     @staticmethod
     def _upsert_policy_and_proposal(policy, proposal):
@@ -55,7 +55,5 @@ class DuoSciCatOrchestrator(Orchestrator):
         )
         log.info(f"Connecting to scicat on {self.scicat_instance.url}")
         self.scicat_instance.authenticate()
-        for proposal, facility in self.duo_instance.proposals(
-            self.duo_facility, self.year
-        ):
+        for proposal, facility in self.duo_instance.proposals(self.year):
             self._upsert_policy_and_proposal_from_duo(proposal, facility)

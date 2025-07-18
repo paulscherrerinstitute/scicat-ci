@@ -10,6 +10,7 @@ import proposals as pr
 DUO_ENDPOINT = "an_endpoint"
 DUO_SECRET = "a_secret"
 CALENDAR_INFOS = "CalendarInfos"
+DUO_FACILITY = "sls"
 
 
 class TestProposals:
@@ -21,7 +22,7 @@ class TestProposals:
         ],
     )
     def test__type(self, proposals_class, expected):
-        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
+        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         proposals_type = proposals._type
         assert proposals_type == expected
 
@@ -33,7 +34,7 @@ class TestProposals:
         ],
     )
     def test_url(self, proposals_class, expected):
-        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
+        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         proposals_path = proposals.proposals_path
         assert proposals_path == expected
 
@@ -46,7 +47,7 @@ class TestProposals:
     )
     @patch.multiple(pr.Proposals, __abstractmethods__=set())
     def test_request(self, request_parameter, expected):
-        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
+        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(pr, "ur") as mock_request:
             if expected[1] == 2:
                 mock_request.urlopen.side_effect = (URLError(""), "")
@@ -64,7 +65,7 @@ class TestProposals:
     )
     @patch.multiple(pr.Proposals, __abstractmethods__=set())
     def test_response(self, mock_request):
-        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
+        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         proposals_response = proposals.response()
         mock_request.assert_called_once()
         assert proposals_response == {"a": {"b": 1, "c": 2}}
@@ -74,6 +75,7 @@ class TestProposals:
         {
             "DUO_ENDPOINT": DUO_ENDPOINT,
             "DUO_SECRET": DUO_SECRET,
+            "DUO_FACILITY": DUO_FACILITY,
         },
     )
     @patch.multiple(pr.Proposals, __abstractmethods__=set())
@@ -82,20 +84,20 @@ class TestProposals:
         assert proposal_instance.__dict__ == {
             "duo_endpoint": DUO_ENDPOINT,
             "duo_secret": DUO_SECRET,
+            "duo_facility": DUO_FACILITY,
         }
 
 
 class TestProposalsFromFacility:
     @patch.object(pr.Proposals, "response", return_value=[{"a": {"b": 1, "c": 2}}])
     def test_proposals(self, mock_response):
-        parameter = "a_parameter"
         year = 2020
-        proposals = pr.ProposalsFromFacility(DUO_ENDPOINT, DUO_SECRET)
-        proposals_call = proposals.proposals(parameter, year)
+        proposals = pr.ProposalsFromFacility(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
+        proposals_call = proposals.proposals(year)
         mock_response.assert_called_with(
-            f"{CALENDAR_INFOS}/proposals/{parameter}?year={year}"
+            f"{CALENDAR_INFOS}/proposals/{DUO_FACILITY}?year={year}"
         )
-        assert list(proposals_call) == [({"a": {"b": 1, "c": 2}}, parameter)]
+        assert list(proposals_call) == [({"a": {"b": 1, "c": 2}}, DUO_FACILITY)]
 
 
 class TestProposalsFromPgroups:
@@ -120,7 +122,7 @@ class TestProposalsFromPgroups:
         ),
     )
     def test_xname_name_map(self, mock_response):
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET)
+        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         xname_name_map = proposals.xname_name_map
         mock_response.assert_called_with("CalendarInfos/facilities")
         assert xname_name_map == {
@@ -187,7 +189,7 @@ class TestProposalsFromPgroups:
     )
     def test__pgroup_no_proposal_formatter(self, p_group, expected):
         p_group_from_list = "a_pgroup"
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET)
+        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(
             pr.Proposals, "response", return_value=p_group
         ) as mock_response:
@@ -206,7 +208,7 @@ class TestProposalsFromPgroups:
     @patch.object(pr.ProposalsFromPgroups, "_pgroup_no_proposal_formatter")
     def test_proposals(self, mock_formatter):
         p_groups = [{"g": "a_pgroup"}, {"g": "a_pgroup1"}]
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET)
+        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(
             pr.ProposalsFromPgroups, "_pgroups_with_no_proposal", return_value=p_groups
         ):

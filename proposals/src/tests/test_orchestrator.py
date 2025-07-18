@@ -157,6 +157,7 @@ class TestDuoSciCatOrchestrator:
     @patch(
         "proposals.ProposalsFromFacility.proposals",
         return_value=iter([("proposal", "facility")]),
+        autospec=True,
     )
     @patch("orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal_from_duo")
     @patch("orchestrator.SciCatAuth.authenticate")
