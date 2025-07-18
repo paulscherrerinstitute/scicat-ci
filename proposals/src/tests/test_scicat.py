@@ -1,3 +1,4 @@
+import os
 from unittest.mock import ANY, Mock, patch
 
 import pytest
@@ -44,6 +45,22 @@ class TestSciCatAuth:
     def test_authenticate(self, mock_set_token):
         self.scicat_auth.authenticate()
         mock_set_token.assert_called_once()
+
+    @patch.dict(
+        os.environ,
+        {
+            "SCICAT_ENDPOINT": "http://scicat",
+            "SCICAT_USERNAME": "test_user",
+            "SCICAT_PASSWORD": "test_password",
+        },
+    )
+    def test_from_env(self):
+        scicat_instance = scicat.SciCatAuth.from_env()
+        assert scicat_instance.__dict__ == {
+            "password": "test_password",
+            "username": "test_user",
+            "url": "http://scicat",
+        }
 
 
 class TestSciCatFromDuo:
