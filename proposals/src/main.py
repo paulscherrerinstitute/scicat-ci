@@ -4,7 +4,6 @@
 import datetime
 import os
 
-import swagger_client
 from dotenv import load_dotenv
 from swagger_client.rest import ApiException
 
@@ -32,9 +31,9 @@ PROPOSALS = {"pgroups": ProposalsFromPgroups}.get(DUO_FACILITY, ProposalsFromFac
 def fill_proposal(row, accelerator):
     log.info(f"============= Input proposal: {row['proposal']}")
 
-    policy = SciCatPolicyFromDuo(row, accelerator).compose()
+    policy = SciCatPolicyFromDuo(row, accelerator)
 
-    proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY).compose()
+    proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY)
 
     create_or_update_proposal(policy, proposal)
 
@@ -43,58 +42,16 @@ def create_or_update_proposal(policy, proposal):
     try:
         try:
             # check for existence of Proposal data and merge schedules into it
-            update_proposal(proposal)
+            proposal.update()
         except ApiException as e:
             if e.status != 404:
                 raise e
             # create new proposal
-            create_proposal(proposal)
-            create_policy(policy)
+            proposal.create()
+            policy.create()
 
     except ApiException as e:
         log.error(e)
-
-
-def update_proposal(proposal):
-    pid = proposal["proposalId"]
-    existing_proposal = swagger_client.ProposalApi().proposal_find_by_id(pid)
-    # check if this is a new entry
-    ml = existing_proposal.measurement_period_list
-    # to avoid problems with Dates: convert Dates back to strings
-    new_entries = compose_new_measurement_periods(
-        proposal["MeasurementPeriodList"], pid, ml
-    )
-    if len(new_entries) == 0:
-        return
-    patch = {"MeasurementPeriodList": new_entries}
-    log.info(f"Modified proposal, patch object: {patch}")
-    # the following call appends to the existing array
-    swagger_client.ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
-
-
-def create_policy(policy):
-    log.info(f"Create new policy for pgroup {policy}")
-    swagger_client.PolicyApi().policy_create(data=policy)
-
-
-def create_proposal(proposal):
-    log.info(f"Create new proposal {proposal}")
-    swagger_client.ProposalApi().proposal_create(data=proposal)
-
-
-def compose_new_measurement_periods(measurement_periods, pid, ml):
-    existing_measurements_dict = {f"{m.instrument}_{m.start}_{m.end}": m for m in ml}
-    new_entries = []
-    for new_entry in measurement_periods:
-        if (
-            f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
-            in existing_measurements_dict
-        ):
-            log.info("This entry exists already, nothing appended")
-            continue
-        log.info(f"Merge calendar entry to existing proposal data {pid}, {new_entry}")
-        new_entries.append(new_entry)
-    return new_entries
 
 
 def main() -> None:
