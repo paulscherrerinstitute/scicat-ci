@@ -49,7 +49,7 @@ def create_or_update_proposal(policy, proposal_instance):
             if e.status != 404:
                 raise e
             # create new proposal
-            create_proposal(proposal)
+            proposal_instance.create_proposal()
             policy.create_policy()
 
     except ApiException as e:
@@ -71,11 +71,6 @@ def update_proposal(proposal):
     log.info(f"Modified proposal, patch object: {patch}")
     # the following call appends to the existing array
     swagger_client.ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
-
-
-def create_proposal(proposal):
-    log.info(f"Create new proposal {proposal}")
-    swagger_client.ProposalApi().proposal_create(data=proposal)
 
 
 def compose_new_measurement_periods(measurement_periods, pid, ml):

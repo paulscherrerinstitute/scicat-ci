@@ -7,7 +7,7 @@ import pytest
 from swagger_client.rest import ApiException
 
 import main as m
-from scicat import SciCatPolicyFromDuo
+from scicat import SciCatPolicyFromDuo, SciCatProposalFromDuo
 
 from .fixtures.mocked_data import FixturesFromDuo, FixturesFromSciCatAPI
 
@@ -71,6 +71,11 @@ def test_fill_proposal(
 class TestCreateOrUpdateProposal:
 
     proposal = FixturesFromDuo.scicat_proposal
+    proposal_instance = SciCatProposalFromDuo(
+        FixturesFromDuo.duo_proposal,
+        FixturesFromDuo.accelerator,
+        FixturesFromDuo.duo_facility,
+    )
 
     policy = FixturesFromDuo.policy
     policy_instance = SciCatPolicyFromDuo(
@@ -115,18 +120,20 @@ class TestCreateOrUpdateProposal:
             )
 
     @patch(
+        "scicat.ProposalApi.proposal_create",
+        autospec=True,
+    )
+    @patch(
         "scicat.PolicyApi.policy_create",
         autospec=True,
     )
-    def test_create_new_proposal(self, mock_policy_create):
+    def test_create_new_proposal(self, mock_policy_create, mock_proposal_create):
         mock_proposal = self.MockProposalApi(exists=False)
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
-            proposal = deepcopy(self.proposal)
-            m.create_or_update_proposal(
-                self.policy_instance, self._add_compose(proposal)
-            )
-            mock_proposal.proposal_create.assert_called_once_with(
-                data=self.proposal,
+            m.create_or_update_proposal(self.policy_instance, self.proposal_instance)
+            mock_proposal_create.assert_called_once_with(
+                ANY,
+                data=FixturesFromDuo.expected_scicat_proposal,
             )
             mock_policy_create.assert_called_once_with(ANY, data=self.policy)
 
@@ -137,12 +144,6 @@ class TestCreateOrUpdateProposal:
             self.MockProposalApi.measurement_period_list,
         )
         assert new_measures == self.expeted_measurement_periods
-
-    @patch("main.swagger_client.ProposalApi.proposal_create")
-    def test_create_proposal(self, mock_proposal_create):
-        proposal = deepcopy(self.proposal)
-        m.create_proposal(proposal)
-        mock_proposal_create.assert_called_once_with(data=self.proposal)
 
     def test_update_proposal(self):
         mock_proposal = self.MockProposalApi()
