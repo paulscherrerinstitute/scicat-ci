@@ -155,7 +155,7 @@ class TestDuoSciCatOrchestrator:
             }
 
     @patch(
-        "orchestrator.ProposalsFromFacility.proposals",
+        "proposals.ProposalsFromFacility.proposals",
         return_value=iter([("proposal", "facility")]),
     )
     @patch("orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal_from_duo")
