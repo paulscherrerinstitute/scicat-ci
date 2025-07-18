@@ -140,8 +140,13 @@ class TestSciCatProposalFromDuo:
             "pgroup": "test_group",
             "beamline": "PX",
             "pi_email": "pi_email",
+            "schedule": [
+                {"start": "01/01/2023 00:00:00", "end": "02/01/2023 00:00:00"},
+                {"start": "01/01/2024 00:00:00", "end": "02/01/2024 00:00:00"},
+            ],
         },
-        "sls",
+        "test_accelerator",
+        "test_duo_facility",
     )
 
     def test_compose(self):
@@ -157,25 +162,40 @@ class TestSciCatProposalFromDuo:
             "title": "Test Proposal",
             "abstract": "This is a test proposal.",
             "ownerGroup": "test_group",
-            "accessGroups": ["slsmx"],
+            "accessGroups": ["test_acceleratormx"],
+            "MeasurementPeriodList": [
+                {
+                    "id": ANY,
+                    "instrument": "/PSI/TEST_ACCELERATOR/PX",
+                    "start": "2022-12-31T23:00:00+00:00",
+                    "end": "2023-01-01T23:00:00+00:00",
+                    "comment": "",
+                },
+                {
+                    "id": ANY,
+                    "instrument": "/PSI/TEST_ACCELERATOR/PX",
+                    "start": "2023-12-31T23:00:00+00:00",
+                    "end": "2024-01-01T23:00:00+00:00",
+                    "comment": "",
+                },
+            ],
         }
 
         assert proposal == expected
 
 
-class TestSciCatMeasurementsFromDuo:
+class TestSciCatMeasurementsFromDuoMixin:
 
-    scicat_measurements = scicat.SciCatMeasurementsFromDuo(
-        "test_duo_facility",
-        {
-            "beamline": "px",
-            "schedule": [
-                {"start": "01/01/2023", "end": "02/01/2023"},
-                {"start": "01/01/2024", "end": "02/01/2024"},
-            ],
-        },
-        "test_accelerator",
-    )
+    scicat_measurements = scicat.SciCatMeasurementsFromDuoMixin()
+    scicat_measurements.duo_facility = "test_duo_facility"
+    scicat_measurements.duo_proposal = {
+        "beamline": "px",
+        "schedule": [
+            {"start": "01/01/2023", "end": "02/01/2023"},
+            {"start": "01/01/2024", "end": "02/01/2024"},
+        ],
+    }
+    scicat_measurements.accelerator = "test_accelerator"
 
     def test_init(self):
         assert self.scicat_measurements.duo_proposal == {
@@ -240,8 +260,8 @@ class TestSciCatMeasurementsFromDuo:
             "comment": "",
         }
 
-    def test_compose(self):
-        measurement_periods = self.scicat_measurements.compose()
+    def test_meausement_period_list(self):
+        measurement_periods = self.scicat_measurements.meausement_period_list
         assert measurement_periods == [
             {
                 "id": ANY,
