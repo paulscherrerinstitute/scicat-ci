@@ -39,8 +39,7 @@ def fill_proposal(row, accelerator):
     create_or_update_proposal(policy, proposal)
 
 
-def create_or_update_proposal(policy_instance, proposal_instance):
-    policy = policy_instance.compose()
+def create_or_update_proposal(policy, proposal_instance):
     proposal = proposal_instance.compose()
     try:
         try:
@@ -51,7 +50,7 @@ def create_or_update_proposal(policy_instance, proposal_instance):
                 raise e
             # create new proposal
             create_proposal(proposal)
-            create_policy(policy)
+            policy.create_policy()
 
     except ApiException as e:
         log.error(e)
@@ -72,11 +71,6 @@ def update_proposal(proposal):
     log.info(f"Modified proposal, patch object: {patch}")
     # the following call appends to the existing array
     swagger_client.ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
-
-
-def create_policy(policy):
-    log.info(f"Create new policy for pgroup {policy}")
-    swagger_client.PolicyApi().policy_create(data=policy)
 
 
 def create_proposal(proposal):
