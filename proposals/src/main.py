@@ -42,13 +42,13 @@ def create_or_update_proposal(policy, proposal):
     try:
         try:
             # check for existence of Proposal data and merge schedules into it
-            proposal.update_proposal()
+            proposal.update()
         except ApiException as e:
             if e.status != 404:
                 raise e
             # create new proposal
-            proposal.create_proposal()
-            policy.create_policy()
+            proposal.create()
+            policy.create()
 
     except ApiException as e:
         log.error(e)

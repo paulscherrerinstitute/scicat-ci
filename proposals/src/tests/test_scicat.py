@@ -51,6 +51,9 @@ class TestSciCatFromDuo:
         def compose(self):
             pass
 
+        def create(self):
+            pass
+
     scicat_from_duo = DummySciCatFromDuo(
         {"proposal": "test_proposal"}, "test_accelerator"
     )
@@ -110,8 +113,8 @@ class TestSciCatPolicyFromDuo:
         assert policy == FixturesFromDuo.policy
 
     @patch("scicat.PolicyApi.policy_create")
-    def test_create_policy(self, mock_policy_create):
-        self.scicat_policy.create_policy()
+    def test_create(self, mock_policy_create):
+        self.scicat_policy.create()
         mock_policy_create.assert_called_once_with(data=FixturesFromDuo.policy)
 
 
@@ -131,7 +134,7 @@ class TestSciCatProposalFromDuo:
 
     @patch("scicat.ProposalApi.proposal_create")
     def test_create_proposal(self, mock_proposal_create):
-        self.scicat_proposal.create_proposal()
+        self.scicat_proposal.create()
         mock_proposal_create.assert_called_once_with(
             data=FixturesFromDuo.expected_scicat_proposal
         )
@@ -143,8 +146,8 @@ class TestSciCatProposalFromDuo:
             measurement_period_list=FixturesFromSciCatAPI.measurement_periods
         ),
     )
-    def test_update_proposal(self, mock_proposal_find, mock_proposal_patch):
-        self.scicat_proposal.update_proposal()
+    def test_update(self, mock_proposal_find, mock_proposal_patch):
+        self.scicat_proposal.update()
         mock_proposal_find.assert_called_once_with(self.proposalId)
         mock_proposal_patch.assert_called_once_with(
             self.proposalId,
