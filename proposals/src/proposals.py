@@ -11,14 +11,17 @@ from utils import retry
 
 
 class Proposals(metaclass=abc.ABCMeta):
-    def __init__(self, duo_endpoint, duo_secret):
+    def __init__(self, duo_endpoint, duo_secret, duo_facility):
         self.duo_endpoint = duo_endpoint
         self.duo_secret = duo_secret
+        self.duo_facility = duo_facility
 
     @classmethod
     def from_env(cls):
         load_dotenv()
-        return cls(environ["DUO_ENDPOINT"], environ["DUO_SECRET"])
+        return cls(
+            environ["DUO_ENDPOINT"], environ["DUO_SECRET"], environ["DUO_FACILITY"]
+        )
 
     @abc.abstractmethod
     def proposals(self, *args, **kwargs):
@@ -50,7 +53,8 @@ class Proposals(metaclass=abc.ABCMeta):
 class ProposalsFromFacility(Proposals):
     _type = "proposals"
 
-    def proposals(self, facility, year):
+    def proposals(self, year):
+        facility = self.duo_facility
         return product(
             self.response(f"{self.proposals_path}/{facility}?year={year}"), [facility]
         )
@@ -59,8 +63,8 @@ class ProposalsFromFacility(Proposals):
 class ProposalsFromPgroups(Proposals):
     _type = "pgroup"
 
-    def __init__(self, duo_endpoint, duo_secret):
-        super().__init__(duo_endpoint, duo_secret)
+    def __init__(self, duo_endpoint, duo_secret, duo_facility):
+        super().__init__(duo_endpoint, duo_secret, duo_facility)
         self._xname_name_map = {}
 
     def _pgroups_with_no_proposal(self):
