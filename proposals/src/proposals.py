@@ -1,5 +1,6 @@
 import abc
 from collections import defaultdict
+from datetime import datetime
 from itertools import product
 from json import loads
 from os import environ
@@ -11,20 +12,26 @@ from utils import retry
 
 
 class Proposals(metaclass=abc.ABCMeta):
-    def __init__(self, duo_endpoint, duo_secret, duo_facility):
+    def __init__(
+        self, duo_endpoint, duo_secret, duo_facility, duo_year=datetime.now().year
+    ):
         self.duo_endpoint = duo_endpoint
         self.duo_secret = duo_secret
         self.duo_facility = duo_facility
+        self.duo_year = duo_year
 
     @classmethod
     def from_env(cls):
         load_dotenv()
         return cls(
-            environ["DUO_ENDPOINT"], environ["DUO_SECRET"], environ["DUO_FACILITY"]
+            environ["DUO_ENDPOINT"],
+            environ["DUO_SECRET"],
+            environ["DUO_FACILITY"],
+            environ.get("DUO_YEAR", datetime.now().year),
         )
 
     @abc.abstractmethod
-    def proposals(self, *args, **kwargs):
+    def proposals(self):
         raise NotImplementedError
 
     @property
@@ -53,18 +60,19 @@ class Proposals(metaclass=abc.ABCMeta):
 class ProposalsFromFacility(Proposals):
     _type = "proposals"
 
-    def proposals(self, year):
+    def proposals(self):
         facility = self.duo_facility
         return product(
-            self.response(f"{self.proposals_path}/{facility}?year={year}"), [facility]
+            self.response(f"{self.proposals_path}/{facility}?year={self.duo_year}"),
+            [facility],
         )
 
 
 class ProposalsFromPgroups(Proposals):
     _type = "pgroup"
 
-    def __init__(self, duo_endpoint, duo_secret, duo_facility):
-        super().__init__(duo_endpoint, duo_secret, duo_facility)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._xname_name_map = {}
 
     def _pgroups_with_no_proposal(self):
@@ -107,7 +115,7 @@ class ProposalsFromPgroups(Proposals):
         }
         return proposal, facility
 
-    def proposals(self, *args, **kwargs):
+    def proposals(self):
         for p_group in self._pgroups_with_no_proposal():
             try:
                 yield self._pgroup_no_proposal_formatter(p_group["g"])

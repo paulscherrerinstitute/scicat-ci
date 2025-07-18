@@ -11,6 +11,7 @@ DUO_ENDPOINT = "an_endpoint"
 DUO_SECRET = "a_secret"
 CALENDAR_INFOS = "CalendarInfos"
 DUO_FACILITY = "sls"
+DUO_YEAR = "2020"
 
 
 class TestProposals:
@@ -76,6 +77,7 @@ class TestProposals:
             "DUO_ENDPOINT": DUO_ENDPOINT,
             "DUO_SECRET": DUO_SECRET,
             "DUO_FACILITY": DUO_FACILITY,
+            "DUO_YEAR": DUO_YEAR,
         },
     )
     @patch.multiple(pr.Proposals, __abstractmethods__=set())
@@ -85,17 +87,19 @@ class TestProposals:
             "duo_endpoint": DUO_ENDPOINT,
             "duo_secret": DUO_SECRET,
             "duo_facility": DUO_FACILITY,
+            "duo_year": DUO_YEAR,
         }
 
 
 class TestProposalsFromFacility:
     @patch.object(pr.Proposals, "response", return_value=[{"a": {"b": 1, "c": 2}}])
     def test_proposals(self, mock_response):
-        year = 2020
-        proposals = pr.ProposalsFromFacility(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
-        proposals_call = proposals.proposals(year)
+        proposals = pr.ProposalsFromFacility(
+            DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY, DUO_YEAR
+        )
+        proposals_call = proposals.proposals()
         mock_response.assert_called_with(
-            f"{CALENDAR_INFOS}/proposals/{DUO_FACILITY}?year={year}"
+            f"{CALENDAR_INFOS}/proposals/{DUO_FACILITY}?year={DUO_YEAR}"
         )
         assert list(proposals_call) == [({"a": {"b": 1, "c": 2}}, DUO_FACILITY)]
 
