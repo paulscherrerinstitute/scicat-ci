@@ -1,7 +1,10 @@
 import abc
 from itertools import product
 from json import loads
+from os import environ
 from urllib import request as ur
+
+from dotenv import load_dotenv
 
 from utils import retry
 
@@ -10,6 +13,11 @@ class Proposals(metaclass=abc.ABCMeta):
     def __init__(self, duo_endpoint, duo_secret):
         self.duo_endpoint = duo_endpoint
         self.duo_secret = duo_secret
+
+    @classmethod
+    def from_env(cls):
+        load_dotenv()
+        return cls(environ["DUO_ENDPOINT"], environ["DUO_SECRET"])
 
     @abc.abstractmethod
     def proposals(self, *args, **kwargs):
