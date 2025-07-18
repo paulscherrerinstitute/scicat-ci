@@ -214,3 +214,28 @@ class TestProposalsFromPgroups:
             assert isinstance(proposals_call, GeneratorType)
             for p_group, _ in zip(p_groups, proposals_call):
                 mock_formatter.assert_called_with(p_group["g"])
+
+
+class TestProposalsFactory:
+
+    @pytest.mark.parametrize(
+        "duo_facility, expected_class",
+        [
+            ("pgroups", pr.ProposalsFromPgroups),
+            ("unknown", pr.ProposalsFromFacility),
+            ("", pr.ProposalsFromFacility),
+        ],
+    )
+    def test_new(self, duo_facility, expected_class):
+        assert pr.ProposalsFactory(duo_facility) is expected_class
+
+    @pytest.mark.parametrize(
+        "duo_facility, expected_class",
+        [
+            ("pgroups", pr.ProposalsFromPgroups),
+            ("unknown", pr.ProposalsFromFacility),
+        ],
+    )
+    def test_from_env(self, duo_facility, expected_class):
+        with patch.dict("os.environ", {"DUO_FACILITY": duo_facility}):
+            assert pr.ProposalsFactory.from_env() is expected_class
