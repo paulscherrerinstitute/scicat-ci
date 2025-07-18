@@ -4,6 +4,8 @@ import pytest
 
 import scicat
 
+from .fixtures.mocked_data import FixturesFromDuo
+
 
 class TestSciCatAuth:
 
@@ -99,89 +101,26 @@ class TestSciCatCreatorFromDuoMixin:
 
 class TestSciCatPolicyFromDuo:
 
-    static_properties = {
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-    }
-
     scicat_policy = scicat.SciCatPolicyFromDuo(
-        {"pgroup": "abc", "proposal": "123", "beamline": "PX", "pi_email": "pi_email"},
-        "sls",
+        FixturesFromDuo.duo_proposal, FixturesFromDuo.accelerator
     )
 
     def test_compose(self):
         policy = self.scicat_policy.compose()
-        expected = {
-            "manager": ["pi_email"],
-            "ownerGroup": "abc",
-            "accessGroups": ["slsmx"],
-        }
-        assert policy == {**self.static_properties, **expected}
+        assert policy == FixturesFromDuo.policy
 
 
 class TestSciCatProposalFromDuo:
 
     scicat_proposal = scicat.SciCatProposalFromDuo(
-        {
-            "proposal": "123",
-            "pi_firstname": "John",
-            "pi_lastname": "Doe",
-            "email": "",
-            "firstname": "Jane",
-            "lastname": "Smith",
-            "title": "Test Proposal",
-            "abstract": "This is a test proposal.",
-            "pgroup": "test_group",
-            "beamline": "PX",
-            "pi_email": "pi_email",
-            "schedule": [
-                {"start": "01/01/2023 00:00:00", "end": "02/01/2023 00:00:00"},
-                {"start": "01/01/2024 00:00:00", "end": "02/01/2024 00:00:00"},
-            ],
-        },
-        "test_accelerator",
-        "test_duo_facility",
+        FixturesFromDuo.duo_proposal,
+        FixturesFromDuo.accelerator,
+        FixturesFromDuo.duo_facility,
     )
 
     def test_compose(self):
         proposal = self.scicat_proposal.compose()
-        expected = {
-            "proposalId": "20.500.11935/123",
-            "pi_email": "pi_email",
-            "pi_firstname": "John",
-            "pi_lastname": "Doe",
-            "email": "",
-            "firstname": "Jane",
-            "lastname": "Smith",
-            "title": "Test Proposal",
-            "abstract": "This is a test proposal.",
-            "ownerGroup": "test_group",
-            "accessGroups": ["test_acceleratormx"],
-            "MeasurementPeriodList": [
-                {
-                    "id": ANY,
-                    "instrument": "/PSI/TEST_ACCELERATOR/PX",
-                    "start": "2022-12-31T23:00:00+00:00",
-                    "end": "2023-01-01T23:00:00+00:00",
-                    "comment": "",
-                },
-                {
-                    "id": ANY,
-                    "instrument": "/PSI/TEST_ACCELERATOR/PX",
-                    "start": "2023-12-31T23:00:00+00:00",
-                    "end": "2024-01-01T23:00:00+00:00",
-                    "comment": "",
-                },
-            ],
-        }
-
-        assert proposal == expected
+        assert proposal == FixturesFromDuo.expected_scicat_proposal
 
 
 class TestSciCatMeasurementsFromDuoMixin:
@@ -261,23 +200,12 @@ class TestSciCatMeasurementsFromDuoMixin:
         }
 
     def test_meausement_period_list(self):
+        self.scicat_measurements.accelerator = FixturesFromDuo.accelerator
         measurement_periods = self.scicat_measurements.meausement_period_list
-        assert measurement_periods == [
-            {
-                "id": ANY,
-                "instrument": "/PSI/TEST_ACCELERATOR/PX",
-                "start": "2022-12-31T23:00:00+00:00",
-                "end": "2023-01-01T23:00:00+00:00",
-                "comment": "",
-            },
-            {
-                "id": ANY,
-                "instrument": "/PSI/TEST_ACCELERATOR/PX",
-                "start": "2023-12-31T23:00:00+00:00",
-                "end": "2024-01-01T23:00:00+00:00",
-                "comment": "",
-            },
-        ]
+        assert (
+            measurement_periods
+            == FixturesFromDuo.expected_scicat_proposal["MeasurementPeriodList"]
+        )
 
     @pytest.mark.parametrize(
         "duo_facility, test_date",
