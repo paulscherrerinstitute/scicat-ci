@@ -8,6 +8,8 @@ from swagger_client.rest import ApiException
 
 import main as m
 
+from .fixtures.mocked_data import FixturesFromDuo, FixturesFromSciCatAPI
+
 
 @pytest.mark.parametrize(
     "duo_facility, expected",
@@ -45,74 +47,13 @@ def test_main(duo_facility, expected):
             mock_fill_proposal.assert_called_once_with("proposal", "facility")
 
 
+@patch.dict(os.environ, {"DUO_FACILITY": FixturesFromDuo.duo_facility})
 def test_fill_proposal_acceptance():
     reload(m)
-    row = {
-        "proposal": "123",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "pgroup": "test_group",
-        "beamline": "PX",
-        "pi_email": "pi_email",
-        "schedule": [
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "01/01/2024", "end": "02/01/2024"},
-        ],
-    }
-
-    accelerator = "sls"
-    expected_proposal = {
-        "proposalId": "20.500.11935/123",
-        "pi_email": "pi_email",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "ownerGroup": "test_group",
-        "accessGroups": ["slsmx"],
-    }
-    expected_policy = {
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-        "manager": ["pi_email"],
-        "ownerGroup": "test_group",
-        "accessGroups": ["slsmx"],
-    }
-    expected_measurement = [
-        {
-            "id": ANY,
-            "instrument": "/PSI/SLS/PX",
-            "start": "2022-12-31T23:00:00+00:00",
-            "end": "2023-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-        {
-            "id": ANY,
-            "instrument": "/PSI/SLS/PX",
-            "start": "2023-12-31T23:00:00+00:00",
-            "end": "2024-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-    ]
     with patch("main.create_or_update_proposal") as mock_create_or_update:
-        m.fill_proposal(row, accelerator)
+        m.fill_proposal(FixturesFromDuo.duo_proposal, FixturesFromDuo.accelerator)
         mock_create_or_update.assert_called_once_with(
-            expected_policy,
-            {**expected_proposal, "MeasurementPeriodList": expected_measurement},
+            FixturesFromDuo.policy, FixturesFromDuo.expected_scicat_proposal
         )
 
 
@@ -123,7 +64,7 @@ def test_fill_proposal(
     mock_create_or_update, mock_compose_proposal, mock_compose_policy
 ):
     row = {"proposal": "123"}
-    accellerator = "SLS"
+    accellerator = FixturesFromDuo.accelerator
     m.fill_proposal(row, accellerator)
 
     mock_compose_policy.assert_called_once_with(row, accellerator)
@@ -142,80 +83,15 @@ def test_fill_proposal(
 
 class TestCreateOrUpdateProposal:
 
-    measurement_periods = [
-        {
-            "id": "to_include_new_from_duo",
-            "instrument": "/PSI/SLS/PX",
-            "start": "2024-12-31T23:00:00+00:00",
-            "end": "2025-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-        {
-            "id": "to_exclude_on_update_because_789_scicat",
-            "instrument": "/PSI/SLS/PX",
-            "start": "2023-12-31T23:00:00+00:00",
-            "end": "2024-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-    ]
+    proposal = FixturesFromDuo.scicat_proposal
 
-    proposal = {
-        "proposalId": "20.500.11935/123",
-        "pi_email": "pi_email",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "ownerGroup": "test_group",
-        "accessGroups": ["test_access"],
-        "MeasurementPeriodList": measurement_periods,
-    }
+    policy = FixturesFromDuo.policy
 
-    policy = {
-        "manager": ["pi_email"],
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-        "ownerGroup": "abc",
-        "accessGroups": ["SLSmx"],
-    }
-
-    expeted_measurement_periods = [
-        {
-            "id": "to_include_new_from_duo",
-            "instrument": "/PSI/SLS/PX",
-            "start": "2024-12-31T23:00:00+00:00",
-            "end": "2025-01-01T23:00:00+00:00",
-            "comment": "",
-        },
-    ]
+    expeted_measurement_periods = FixturesFromSciCatAPI.expeted_measurement_periods
 
     class MockProposalApi:
 
-        measurement_period_list = [
-            Mock(
-                id=789,
-                instrument="/PSI/SLS/PX",
-                start="2023-12-31T23:00:00+00:00",
-                end="2024-01-01T23:00:00+00:00",
-                comment="",
-            ),
-            Mock(
-                id=000,
-                instrument="/PSI/SLS/PX",
-                start="2021-12-31T23:00:00+00:00",
-                end="2022-01-01T23:00:00+00:00",
-                comment="",
-            ),
-        ]
+        measurement_period_list = FixturesFromSciCatAPI.measurement_periods
 
         def __init__(self, exists=True):
             find_by_id_result = [
@@ -259,7 +135,7 @@ class TestCreateOrUpdateProposal:
 
     def test_compose_new_measurement_periods(self):
         new_measures = m.compose_new_measurement_periods(
-            self.measurement_periods,
+            self.proposal["MeasurementPeriodList"],
             "p123",
             self.MockProposalApi.measurement_period_list,
         )
