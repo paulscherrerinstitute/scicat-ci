@@ -1,4 +1,5 @@
 import abc
+from collections import defaultdict
 from itertools import product
 from json import loads
 from os import environ
@@ -112,3 +113,19 @@ class ProposalsFromPgroups(Proposals):
 
 class MissingOwnerError(Exception):
     pass
+
+
+class ProposalsFactory:
+
+    _env_to_proposal_class = defaultdict(
+        lambda: ProposalsFromFacility, {"pgroups": ProposalsFromPgroups}
+    )
+
+    def __new__(cls, duo_facility):
+        return cls._env_to_proposal_class[duo_facility]
+
+    @classmethod
+    def from_env(cls):
+        load_dotenv()
+        duo_facility = environ["DUO_FACILITY"]
+        return cls(duo_facility)
