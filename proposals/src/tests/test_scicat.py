@@ -109,6 +109,11 @@ class TestSciCatPolicyFromDuo:
         policy = self.scicat_policy.compose()
         assert policy == FixturesFromDuo.policy
 
+    @patch("scicat.PolicyApi.policy_create")
+    def test_create_policy(self, mock_policy_create):
+        self.scicat_policy.create_policy()
+        mock_policy_create.assert_called_once_with(data=FixturesFromDuo.policy)
+
 
 class TestSciCatProposalFromDuo:
 
