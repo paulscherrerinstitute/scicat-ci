@@ -4,6 +4,7 @@ from importlib import reload
 from unittest.mock import ANY, Mock, patch
 
 import pytest
+from swagger_client.rest import ApiException
 
 import main as m
 
@@ -221,12 +222,15 @@ class TestCreateOrUpdateProposal:
         ]
 
         def __init__(self, exists=True):
-            self.proposal_exists_get_proposalsid_exists = Mock(
-                return_value=Mock(exists=exists)
-            )
-            self.proposal_find_by_id = Mock(
-                return_value=Mock(measurement_period_list=self.measurement_period_list)
-            )
+            find_by_id_result = [
+                {"side_effect": ApiException(status=404)},
+                {
+                    "return_value": Mock(
+                        measurement_period_list=self.measurement_period_list
+                    )
+                },
+            ]
+            self.proposal_find_by_id = Mock(**find_by_id_result[exists])
             self.proposal_create = Mock()
             self.proposal_prototype_patch_attributes = Mock()
 
