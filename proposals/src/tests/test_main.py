@@ -7,6 +7,7 @@ import pytest
 from swagger_client.rest import ApiException
 
 import main as m
+from scicat import SciCatPolicyFromDuo
 
 from .fixtures.mocked_data import FixturesFromDuo, FixturesFromSciCatAPI
 
@@ -72,6 +73,9 @@ class TestCreateOrUpdateProposal:
     proposal = FixturesFromDuo.scicat_proposal
 
     policy = FixturesFromDuo.policy
+    policy_instance = SciCatPolicyFromDuo(
+        FixturesFromDuo.duo_proposal, FixturesFromDuo.accelerator
+    )
 
     expeted_measurement_periods = FixturesFromSciCatAPI.expeted_measurement_periods
 
@@ -111,7 +115,7 @@ class TestCreateOrUpdateProposal:
             )
 
     @patch(
-        "main.swagger_client.PolicyApi.policy_create",
+        "scicat.PolicyApi.policy_create",
         autospec=True,
     )
     def test_create_new_proposal(self, mock_policy_create):
@@ -119,7 +123,7 @@ class TestCreateOrUpdateProposal:
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
             m.create_or_update_proposal(
-                self._add_compose(self.policy), self._add_compose(proposal)
+                self.policy_instance, self._add_compose(proposal)
             )
             mock_proposal.proposal_create.assert_called_once_with(
                 data=self.proposal,
@@ -133,12 +137,6 @@ class TestCreateOrUpdateProposal:
             self.MockProposalApi.measurement_period_list,
         )
         assert new_measures == self.expeted_measurement_periods
-
-    @patch("main.swagger_client.PolicyApi.policy_create")
-    def test_create_policy(self, mock_policy_create):
-        policy = {"policy": "policy"}
-        m.create_policy(policy)
-        mock_policy_create.assert_called_once_with(data=policy)
 
     @patch("main.swagger_client.ProposalApi.proposal_create")
     def test_create_proposal(self, mock_proposal_create):
