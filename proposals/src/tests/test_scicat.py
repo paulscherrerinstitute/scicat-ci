@@ -125,28 +125,17 @@ class TestSciCatProposalFromDuo:
 
 class TestSciCatMeasurementsFromDuoMixin:
 
-    scicat_measurements = scicat.SciCatMeasurementsFromDuoMixin()
-    scicat_measurements.duo_facility = "test_duo_facility"
-    scicat_measurements.duo_proposal = {
-        "beamline": "px",
-        "schedule": [
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "01/01/2024", "end": "02/01/2024"},
-        ],
-    }
-    scicat_measurements.accelerator = "test_accelerator"
+    def setup_method(self):
+        scicat_measurements = scicat.SciCatMeasurementsFromDuoMixin()
+        scicat_measurements.duo_facility = FixturesFromDuo.duo_facility
+        scicat_measurements.duo_proposal = FixturesFromDuo.duo_proposal
+        scicat_measurements.accelerator = FixturesFromDuo.accelerator
+        self.scicat_measurements = scicat_measurements
 
     def test_init(self):
-        assert self.scicat_measurements.duo_proposal == {
-            "beamline": "px",
-            "schedule": [
-                {"start": "01/01/2023", "end": "02/01/2023"},
-                {"start": "01/01/2024", "end": "02/01/2024"},
-            ],
-        }
-
-        assert self.scicat_measurements.accelerator == "test_accelerator"
-        assert self.scicat_measurements.duo_facility == "test_duo_facility"
+        assert self.scicat_measurements.duo_proposal == FixturesFromDuo.duo_proposal
+        assert self.scicat_measurements.accelerator == FixturesFromDuo.accelerator
+        assert self.scicat_measurements.duo_facility == FixturesFromDuo.duo_facility
 
     @pytest.mark.parametrize(
         "duo_facility, expected",
@@ -194,13 +183,12 @@ class TestSciCatMeasurementsFromDuoMixin:
         mp = self.scicat_measurements.compose_measurement_period(schedule)
         assert mp == {
             "id": ANY,
-            "instrument": "/PSI/TEST_ACCELERATOR/PX",
+            "instrument": "/PSI/SLS/PX",
             **expected,
             "comment": "",
         }
 
     def test_meausement_period_list(self):
-        self.scicat_measurements.accelerator = FixturesFromDuo.accelerator
         measurement_periods = self.scicat_measurements.meausement_period_list
         assert (
             measurement_periods
