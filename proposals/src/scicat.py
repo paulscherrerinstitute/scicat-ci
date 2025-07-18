@@ -187,3 +187,18 @@ class SciCatProposalFromDuo(
         proposal = self.compose()
         log.info(f"Create new proposal {proposal}")
         ProposalApi().proposal_create(data=proposal)
+
+    def update_proposal(self):
+        proposal = self.compose()
+        pid = proposal["proposalId"]
+        existing_proposal = ProposalApi().proposal_find_by_id(pid)
+        # check if this is a new entry
+        existing_measurements = existing_proposal.measurement_period_list
+        # to avoid problems with Dates: convert Dates back to strings
+        new_entries = self.keep_new_measurements(existing_measurements)
+        if len(new_entries) == 0:
+            return
+        patch = {"MeasurementPeriodList": new_entries}
+        log.info(f"Modified proposal, patch object: {patch}")
+        # the following call appends to the existing array
+        ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
