@@ -9,11 +9,7 @@ from dotenv import load_dotenv
 from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
-from scicat import (
-    SciCatAuth,
-    SciCatPolicyFromDuo,
-    SciCatProposalFromDuo,
-)
+from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
 from utils import log
 
 load_dotenv()
@@ -40,34 +36,34 @@ def fill_proposal(row, accelerator):
 
     proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY).compose()
 
-    measurement_periods = proposal["MeasurementPeriodList"]
-
-    create_or_update_proposal(policy, proposal, measurement_periods)
+    create_or_update_proposal(policy, proposal)
 
 
-def create_or_update_proposal(policy, proposal, measurement_periods):
+def create_or_update_proposal(policy, proposal):
     try:
         try:
             # check for existence of Proposal data and merge schedules into it
-            update_proposal(proposal, measurement_periods)
+            update_proposal(proposal)
         except ApiException as e:
             if e.status != 404:
                 raise e
             # create new proposal
-            create_proposal(proposal, measurement_periods)
+            create_proposal(proposal)
             create_policy(policy)
 
     except ApiException as e:
         log.error(e)
 
 
-def update_proposal(proposal, measurement_periods):
+def update_proposal(proposal):
     pid = proposal["proposalId"]
     existing_proposal = swagger_client.ProposalApi().proposal_find_by_id(pid)
     # check if this is a new entry
     ml = existing_proposal.measurement_period_list
     # to avoid problems with Dates: convert Dates back to strings
-    new_entries = compose_new_measurement_periods(measurement_periods, pid, ml)
+    new_entries = compose_new_measurement_periods(
+        proposal["MeasurementPeriodList"], pid, ml
+    )
     if len(new_entries) == 0:
         return
     patch = {"MeasurementPeriodList": new_entries}
@@ -81,8 +77,7 @@ def create_policy(policy):
     swagger_client.PolicyApi().policy_create(data=policy)
 
 
-def create_proposal(proposal, measurement_periods):
-    proposal["MeasurementPeriodList"] = measurement_periods
+def create_proposal(proposal):
     log.info(f"Create new proposal {proposal}")
     swagger_client.ProposalApi().proposal_create(data=proposal)
 

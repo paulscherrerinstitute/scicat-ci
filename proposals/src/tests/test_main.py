@@ -113,7 +113,6 @@ def test_fill_proposal_acceptance():
         mock_create_or_update.assert_called_once_with(
             expected_policy,
             {**expected_proposal, "MeasurementPeriodList": expected_measurement},
-            expected_measurement,
         )
 
 
@@ -138,39 +137,10 @@ def test_fill_proposal(
     mock_create_or_update.assert_called_once_with(
         mock_compose_policy_instance.compose.return_value,
         mock_compose_proposal_instance.compose.return_value,
-        ANY,
     )
 
 
 class TestCreateOrUpdateProposal:
-
-    proposal = {
-        "proposalId": "20.500.11935/123",
-        "pi_email": "pi_email",
-        "pi_firstname": "John",
-        "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
-        "title": "Test Proposal",
-        "abstract": "This is a test proposal.",
-        "ownerGroup": "test_group",
-        "accessGroups": ["test_access"],
-    }
-
-    policy = {
-        "manager": ["pi_email"],
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-        "ownerGroup": "abc",
-        "accessGroups": ["SLSmx"],
-    }
 
     measurement_periods = [
         {
@@ -188,6 +158,35 @@ class TestCreateOrUpdateProposal:
             "comment": "",
         },
     ]
+
+    proposal = {
+        "proposalId": "20.500.11935/123",
+        "pi_email": "pi_email",
+        "pi_firstname": "John",
+        "pi_lastname": "Doe",
+        "email": "",
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "title": "Test Proposal",
+        "abstract": "This is a test proposal.",
+        "ownerGroup": "test_group",
+        "accessGroups": ["test_access"],
+        "MeasurementPeriodList": measurement_periods,
+    }
+
+    policy = {
+        "manager": ["pi_email"],
+        "tapeRedundancy": "low",
+        "autoArchive": False,
+        "autoArchiveDelay": 0,
+        "archiveEmailNotification": True,
+        "archiveEmailsToBeNotified": [],
+        "retrieveEmailNotification": True,
+        "retrieveEmailsToBeNotified": [],
+        "embargoPeriod": 3,
+        "ownerGroup": "abc",
+        "accessGroups": ["SLSmx"],
+    }
 
     expeted_measurement_periods = [
         {
@@ -236,7 +235,7 @@ class TestCreateOrUpdateProposal:
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
 
-            m.create_or_update_proposal(self.policy, proposal, self.measurement_periods)
+            m.create_or_update_proposal(self.policy, proposal)
             mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
                 proposal["proposalId"],
                 data={
@@ -252,12 +251,9 @@ class TestCreateOrUpdateProposal:
         mock_proposal = self.MockProposalApi(exists=False)
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
-            m.create_or_update_proposal(self.policy, proposal, self.measurement_periods)
+            m.create_or_update_proposal(self.policy, proposal)
             mock_proposal.proposal_create.assert_called_once_with(
-                data={
-                    **self.proposal,
-                    "MeasurementPeriodList": self.measurement_periods,
-                }
+                data=self.proposal,
             )
             mock_policy_create.assert_called_once_with(ANY, data=self.policy)
 
@@ -278,16 +274,14 @@ class TestCreateOrUpdateProposal:
     @patch("main.swagger_client.ProposalApi.proposal_create")
     def test_create_proposal(self, mock_proposal_create):
         proposal = deepcopy(self.proposal)
-        m.create_proposal(proposal, self.measurement_periods)
-        mock_proposal_create.assert_called_once_with(
-            data={**proposal, "MeasurementPeriodList": self.measurement_periods}
-        )
+        m.create_proposal(proposal)
+        mock_proposal_create.assert_called_once_with(data=self.proposal)
 
     def test_update_proposal(self):
         mock_proposal = self.MockProposalApi()
         with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
             proposal = deepcopy(self.proposal)
-            m.update_proposal(self.proposal, self.measurement_periods)
+            m.update_proposal(self.proposal)
             mock_proposal.proposal_find_by_id.assert_called_once_with(
                 proposal["proposalId"]
             )
