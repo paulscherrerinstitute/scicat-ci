@@ -191,35 +191,44 @@ class TestCreateOrUpdateProposal:
         },
     ]
 
+    expeted_measurement_periods = [
+        {
+            "id": "to_include_new_from_duo",
+            "instrument": "/PSI/SLS/PX",
+            "start": "2024-12-31T23:00:00+00:00",
+            "end": "2025-01-01T23:00:00+00:00",
+            "comment": "",
+        },
+    ]
+
     class MockProposalApi:
+
+        measurement_period_list = [
+            Mock(
+                id=789,
+                instrument="/PSI/SLS/PX",
+                start="2023-12-31T23:00:00+00:00",
+                end="2024-01-01T23:00:00+00:00",
+                comment="",
+            ),
+            Mock(
+                id=000,
+                instrument="/PSI/SLS/PX",
+                start="2021-12-31T23:00:00+00:00",
+                end="2022-01-01T23:00:00+00:00",
+                comment="",
+            ),
+        ]
 
         def __init__(self, exists=True):
             self.proposal_exists_get_proposalsid_exists = Mock(
                 return_value=Mock(exists=exists)
             )
-            self.proposal_find_by_id = Mock(side_effect=self._proposal_find_by_id)
+            self.proposal_find_by_id = Mock(
+                return_value=Mock(measurement_period_list=self.measurement_period_list)
+            )
             self.proposal_create = Mock()
             self.proposal_prototype_patch_attributes = Mock()
-
-        def _proposal_find_by_id(self, proposal_id):
-            return Mock(
-                measurement_period_list=[
-                    Mock(
-                        id=789,
-                        instrument="/PSI/SLS/PX",
-                        start="2023-12-31T23:00:00+00:00",
-                        end="2024-01-01T23:00:00+00:00",
-                        comment="",
-                    ),
-                    Mock(
-                        id=000,
-                        instrument="/PSI/SLS/PX",
-                        start="2021-12-31T23:00:00+00:00",
-                        end="2022-01-01T23:00:00+00:00",
-                        comment="",
-                    ),
-                ]
-            )
 
     def test_update_existing_proposal(self):
         mock_proposal = self.MockProposalApi()
@@ -227,19 +236,10 @@ class TestCreateOrUpdateProposal:
             proposal = deepcopy(self.proposal)
 
             m.create_or_update_proposal(self.policy, proposal, self.measurement_periods)
-            expeted_measurement_periods = [
-                {
-                    "id": "to_include_new_from_duo",
-                    "instrument": "/PSI/SLS/PX",
-                    "start": "2024-12-31T23:00:00+00:00",
-                    "end": "2025-01-01T23:00:00+00:00",
-                    "comment": "",
-                },
-            ]
             mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
                 proposal["proposalId"],
                 data={
-                    "MeasurementPeriodList": expeted_measurement_periods,
+                    "MeasurementPeriodList": self.expeted_measurement_periods,
                 },
             )
 
@@ -259,3 +259,11 @@ class TestCreateOrUpdateProposal:
                 }
             )
             mock_policy_create.assert_called_once_with(ANY, data=self.policy)
+
+    def test_compose_new_measurement_periods(self):
+        new_measures = m.compose_new_measurement_periods(
+            self.measurement_periods,
+            "p123",
+            self.MockProposalApi.measurement_period_list,
+        )
+        assert new_measures == self.expeted_measurement_periods
