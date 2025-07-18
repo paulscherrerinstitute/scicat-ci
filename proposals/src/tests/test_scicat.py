@@ -1,4 +1,4 @@
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 
@@ -117,11 +117,13 @@ class TestSciCatPolicyFromDuo:
 
 class TestSciCatProposalFromDuo:
 
-    scicat_proposal = scicat.SciCatProposalFromDuo(
-        FixturesFromDuo.duo_proposal,
-        FixturesFromDuo.accelerator,
-        FixturesFromDuo.duo_facility,
-    )
+    def setup_method(self):
+        self.scicat_proposal = scicat.SciCatProposalFromDuo(
+            FixturesFromDuo.duo_proposal,
+            FixturesFromDuo.accelerator,
+            FixturesFromDuo.duo_facility,
+        )
+        self.proposalId = FixturesFromDuo.scicat_proposal["proposalId"]
 
     def test_compose(self):
         proposal = self.scicat_proposal.compose()
@@ -132,6 +134,23 @@ class TestSciCatProposalFromDuo:
         self.scicat_proposal.create_proposal()
         mock_proposal_create.assert_called_once_with(
             data=FixturesFromDuo.expected_scicat_proposal
+        )
+
+    @patch("scicat.ProposalApi.proposal_prototype_patch_attributes")
+    @patch(
+        "scicat.ProposalApi.proposal_find_by_id",
+        return_value=Mock(
+            measurement_period_list=FixturesFromSciCatAPI.measurement_periods
+        ),
+    )
+    def test_update_proposal(self, mock_proposal_find, mock_proposal_patch):
+        self.scicat_proposal.update_proposal()
+        mock_proposal_find.assert_called_once_with(self.proposalId)
+        mock_proposal_patch.assert_called_once_with(
+            self.proposalId,
+            data={
+                "MeasurementPeriodList": FixturesFromSciCatAPI.expeted_measurement_periods,
+            },
         )
 
 
