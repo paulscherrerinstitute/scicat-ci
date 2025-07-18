@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from importlib import reload
 from unittest.mock import ANY, Mock, patch
 
@@ -70,7 +69,7 @@ def test_fill_proposal(
 
 class TestCreateOrUpdateProposal:
 
-    proposal = FixturesFromDuo.scicat_proposal
+    proposal_id = FixturesFromDuo.scicat_proposal["proposalId"]
     proposal_instance = SciCatProposalFromDuo(
         FixturesFromDuo.duo_proposal,
         FixturesFromDuo.accelerator,
@@ -101,61 +100,26 @@ class TestCreateOrUpdateProposal:
             self.proposal_create = Mock()
             self.proposal_prototype_patch_attributes = Mock()
 
-    def _add_compose(self, scicat_return):
-        return Mock(compose=Mock(return_value=scicat_return))
-
     def test_update_existing_proposal(self):
         mock_proposal = self.MockProposalApi()
-        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
-            proposal = deepcopy(self.proposal)
-
-            m.create_or_update_proposal(
-                self._add_compose(self.policy), self._add_compose(proposal)
-            )
+        with patch("scicat.ProposalApi", return_value=mock_proposal):
+            m.create_or_update_proposal(self.policy_instance, self.proposal_instance)
             mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
-                proposal["proposalId"],
+                self.proposal_id,
                 data={
                     "MeasurementPeriodList": self.expeted_measurement_periods,
                 },
             )
 
-    @patch(
-        "scicat.ProposalApi.proposal_create",
-        autospec=True,
-    )
     @patch(
         "scicat.PolicyApi.policy_create",
         autospec=True,
     )
-    def test_create_new_proposal(self, mock_policy_create, mock_proposal_create):
+    def test_create_new_proposal(self, mock_policy_create):
         mock_proposal = self.MockProposalApi(exists=False)
-        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
+        with patch("scicat.ProposalApi", return_value=mock_proposal):
             m.create_or_update_proposal(self.policy_instance, self.proposal_instance)
-            mock_proposal_create.assert_called_once_with(
-                ANY,
+            mock_proposal.proposal_create.assert_called_once_with(
                 data=FixturesFromDuo.expected_scicat_proposal,
             )
             mock_policy_create.assert_called_once_with(ANY, data=self.policy)
-
-    def test_compose_new_measurement_periods(self):
-        new_measures = m.compose_new_measurement_periods(
-            self.proposal["MeasurementPeriodList"],
-            "p123",
-            self.MockProposalApi.measurement_period_list,
-        )
-        assert new_measures == self.expeted_measurement_periods
-
-    def test_update_proposal(self):
-        mock_proposal = self.MockProposalApi()
-        with patch("main.swagger_client.ProposalApi", return_value=mock_proposal):
-            proposal = deepcopy(self.proposal)
-            m.update_proposal(self.proposal)
-            mock_proposal.proposal_find_by_id.assert_called_once_with(
-                proposal["proposalId"]
-            )
-            mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
-                proposal["proposalId"],
-                data={
-                    "MeasurementPeriodList": self.expeted_measurement_periods,
-                },
-            )
