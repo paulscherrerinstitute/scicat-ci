@@ -1,6 +1,7 @@
 from unittest.mock import ANY, Mock, patch
 
 import pytest
+from swagger_client.rest import ApiException
 
 import scicat
 
@@ -146,8 +147,8 @@ class TestSciCatProposalFromDuo:
             measurement_period_list=FixturesFromSciCatAPI.measurement_periods
         ),
     )
-    def test_update(self, mock_proposal_find, mock_proposal_patch):
-        self.scicat_proposal.update()
+    def test__update(self, mock_proposal_find, mock_proposal_patch):
+        self.scicat_proposal._update()
         mock_proposal_find.assert_called_once_with(self.proposalId)
         mock_proposal_patch.assert_called_once_with(
             self.proposalId,
@@ -155,6 +156,27 @@ class TestSciCatProposalFromDuo:
                 "MeasurementPeriodList": FixturesFromSciCatAPI.expeted_measurement_periods,
             },
         )
+
+    @pytest.mark.parametrize(
+        "result, expected",
+        [
+            [{"return_value": ""}, ""],
+            [
+                {"side_effect": ApiException(status=404)},
+                scicat.SciCatProposalFromDuo.ProposalNotFoundException,
+            ],
+            [{"side_effect": ApiException(status=500)}, ApiException],
+            [{"side_effect": KeyError}, KeyError],
+        ],
+    )
+    def test_update(self, result, expected):
+        with patch("scicat.SciCatProposalFromDuo._update", **result) as mock_update:
+            if "side_effect" in result:
+                with pytest.raises(expected):
+                    self.scicat_proposal.update()
+            else:
+                self.scicat_proposal.update()
+            mock_update.assert_called_once()
 
 
 class TestSciCatMeasurementsFromDuoMixin:

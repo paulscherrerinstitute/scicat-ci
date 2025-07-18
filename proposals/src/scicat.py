@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import pytz
 from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
+from swagger_client.rest import ApiException
 
 from utils import log
 
@@ -164,6 +165,9 @@ class SciCatProposalFromDuo(
     SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
 ):
 
+    class ProposalNotFoundException(Exception):
+        pass
+
     def __init__(self, duo_proposal, accelerator, duo_facility):
         super().__init__(duo_proposal, accelerator)
         self.duo_facility = duo_facility
@@ -192,7 +196,7 @@ class SciCatProposalFromDuo(
         log.info(f"Create new proposal {proposal}")
         ProposalApi().proposal_create(data=proposal)
 
-    def update(self):
+    def _update(self):
         proposal = self.compose()
         pid = proposal["proposalId"]
         existing_proposal = ProposalApi().proposal_find_by_id(pid)
@@ -206,3 +210,11 @@ class SciCatProposalFromDuo(
         log.info(f"Modified proposal, patch object: {patch}")
         # the following call appends to the existing array
         ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
+
+    def update(self):
+        try:
+            self._update()
+        except ApiException as e:
+            if e.status == 404:
+                raise self.ProposalNotFoundException
+            raise e

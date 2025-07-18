@@ -5,7 +5,6 @@ import datetime
 import os
 
 from dotenv import load_dotenv
-from swagger_client.rest import ApiException
 
 from proposals import ProposalsFromFacility, ProposalsFromPgroups
 from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
@@ -35,23 +34,21 @@ def fill_proposal(row, accelerator):
 
     proposal = SciCatProposalFromDuo(row, accelerator, DUO_FACILITY)
 
-    create_or_update_proposal(policy, proposal)
+    try:
+        create_or_update_proposal(policy, proposal)
+    except Exception as e:
+        log.error(e)
 
 
 def create_or_update_proposal(policy, proposal):
     try:
-        try:
-            # check for existence of Proposal data and merge schedules into it
-            proposal.update()
-        except ApiException as e:
-            if e.status != 404:
-                raise e
-            # create new proposal
-            proposal.create()
-            policy.create()
-
-    except ApiException as e:
+        # check for existence of Proposal data and merge schedules into it
+        proposal.update()
+    except SciCatProposalFromDuo.ProposalNotFoundException as e:
         log.error(e)
+        # create new proposal
+        proposal.create()
+        policy.create()
 
 
 def main() -> None:
