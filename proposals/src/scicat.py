@@ -139,6 +139,22 @@ class SciCatMeasurementsFromDuoMixin:
             measurement_periods.append(mp)
         return measurement_periods
 
+    def keep_new_measurements(self, measurements):
+        existing_measurements_dict = {
+            f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
+        }
+        new_entries = []
+        for new_entry in self.meausement_period_list:
+            if (
+                f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
+                in existing_measurements_dict
+            ):
+                log.info("This entry exists already, nothing appended")
+                continue
+            log.info(f"Merge calendar entry to existing proposal data {new_entry}")
+            new_entries.append(new_entry)
+        return new_entries
+
 
 class SciCatProposalFromDuo(
     SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
