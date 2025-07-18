@@ -127,6 +127,13 @@ class TestSciCatProposalFromDuo:
         proposal = self.scicat_proposal.compose()
         assert proposal == FixturesFromDuo.expected_scicat_proposal
 
+    @patch("scicat.ProposalApi.proposal_create")
+    def test_create_proposal(self, mock_proposal_create):
+        self.scicat_proposal.create_proposal()
+        mock_proposal_create.assert_called_once_with(
+            data=FixturesFromDuo.expected_scicat_proposal
+        )
+
 
 class TestSciCatMeasurementsFromDuoMixin:
 

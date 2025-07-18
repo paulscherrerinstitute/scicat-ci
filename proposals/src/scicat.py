@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
 import pytz
-from swagger_client import Configuration, PolicyApi, UserApi
+from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
 
 from utils import log
 
@@ -166,3 +166,8 @@ class SciCatProposalFromDuo(
             "accessGroups": self.access_groups,
             "MeasurementPeriodList": self.meausement_period_list,
         }
+
+    def create_proposal(self):
+        proposal = self.compose()
+        log.info(f"Create new proposal {proposal}")
+        ProposalApi().proposal_create(data=proposal)
