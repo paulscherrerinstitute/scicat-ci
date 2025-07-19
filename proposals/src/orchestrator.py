@@ -1,8 +1,4 @@
-import os
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
-
-from dotenv import load_dotenv
 
 from proposals import ProposalsFactory
 from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
@@ -19,7 +15,6 @@ class Orchestrator(metaclass=ABCMeta):
 class DuoSciCatOrchestrator(Orchestrator):
 
     def __init__(self):
-
         self.scicat_instance = SciCatAuth.from_env()
         duo_instance = ProposalsFactory.from_env().from_env()
         self.duo_facility = duo_instance.duo_facility
