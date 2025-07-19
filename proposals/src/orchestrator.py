@@ -27,7 +27,7 @@ class DuoSciCatOrchestrator(Orchestrator):
             # check for existence of Proposal data and merge schedules into it
             proposal.update()
         except SciCatProposalFromDuo.ProposalNotFoundException as e:
-            log.error(e)
+            log.warning(e)
             # create new proposal
             proposal.create()
             policy.create()
@@ -42,6 +42,7 @@ class DuoSciCatOrchestrator(Orchestrator):
             log.error(e)
 
     def orchestrate(self):
+        log.info("==== DUO sync started ====")
         log.info(
             f"Fetching proposals for accelerator {self.duo_facility} and year {self.year}"
         )
