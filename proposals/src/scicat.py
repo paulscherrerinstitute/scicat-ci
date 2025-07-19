@@ -22,6 +22,7 @@ class SciCatAuth:
     @classmethod
     def from_env(cls):
         load_dotenv()
+        log.info("Loading scicat env vars")
         return cls(
             environ["SCICAT_USERNAME"],
             environ["SCICAT_PASSWORD"],
@@ -46,6 +47,7 @@ class SciCatAuth:
     ):
         Configuration().host = self.url
         access_token = self._get_scicat_token()
+        log.info("SciCat authentication successuful, setting access_token")
         Configuration().api_client.default_headers["Authorization"] = access_token
 
 
@@ -87,7 +89,8 @@ class SciCatCreatorFromDuoMixin:
 class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
 
     def compose(self):
-        return {
+        log.info("Composing SciCat policy from duo proposal")
+        policy = {
             "manager": [self.principal_investigator],
             "tapeRedundancy": "low",
             "autoArchive": False,
@@ -103,11 +106,14 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
             # special mapping for MX needed
             "accessGroups": self.access_groups,
         }
+        log.info("SciCat policy composed")
+        return policy
 
     def create(self):
         policy = self.compose()
         log.info(f"Create new policy for pgroup {policy}")
         PolicyApi().policy_create(data=policy)
+        log.info("Policy created")
 
 
 class SciCatMeasurementsFromDuoMixin:
@@ -147,15 +153,18 @@ class SciCatMeasurementsFromDuoMixin:
 
     @property
     def meausement_period_list(self):
+        log.info("Extracting measurement periods from proposal")
         row = self.duo_proposal
         measurement_periods = []
         schedules = row["schedule"]
         for schedule in schedules:
             mp = self.compose_measurement_period(schedule)
             measurement_periods.append(mp)
+        log.info("Measurement periods from proposal extracted")
         return measurement_periods
 
     def keep_new_measurements(self, measurements):
+        log.info("Excluding already existing proposals")
         existing_measurements_dict = {
             f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
         }
@@ -169,6 +178,7 @@ class SciCatMeasurementsFromDuoMixin:
                 continue
             log.info(f"Merge calendar entry to existing proposal data {new_entry}")
             new_entries.append(new_entry)
+        log.info("Existing proposals excluded")
         return new_entries
 
 
@@ -184,10 +194,11 @@ class SciCatProposalFromDuo(
         self.duo_facility = duo_facility
 
     def compose(self):
+        log.info("Composing SciCat proposal from duo proposal")
         row = self.duo_proposal
         if not row["email"]:
             log.warning(f"Empty email: {row}")
-        return {
+        proposal = {
             "proposalId": f'20.500.11935/{row["proposal"]}',
             "pi_email": self.principal_investigator,
             "pi_firstname": row["pi_firstname"],
@@ -201,15 +212,19 @@ class SciCatProposalFromDuo(
             "accessGroups": self.access_groups,
             "MeasurementPeriodList": self.meausement_period_list,
         }
+        log.info("SciCat proposal composed")
+        return proposal
 
     def create(self):
         proposal = self.compose()
-        log.info(f"Create new proposal {proposal}")
+        log.info(f"Creating new proposal {proposal}")
         ProposalApi().proposal_create(data=proposal)
+        log.info("Proposal created")
 
     def _update(self):
         proposal = self.compose()
         pid = proposal["proposalId"]
+        log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalApi().proposal_find_by_id(pid)
         # check if this is a new entry
         existing_measurements = existing_proposal.measurement_period_list
@@ -218,14 +233,16 @@ class SciCatProposalFromDuo(
         if len(new_entries) == 0:
             return
         patch = {"MeasurementPeriodList": new_entries}
-        log.info(f"Modified proposal, patch object: {patch}")
+        log.info(f"Modifying proposal, patch object: {patch}")
         # the following call appends to the existing array
         ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
+        log.info("Proposal modified")
 
     def update(self):
         try:
             self._update()
         except ApiException as e:
             if e.status == 404:
+                log.info("Proposal does not exist in SciCat")
                 raise self.ProposalNotFoundException
             raise e

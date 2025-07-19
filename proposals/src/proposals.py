@@ -8,7 +8,7 @@ from urllib import request as ur
 
 from dotenv import load_dotenv
 
-from utils import retry
+from utils import log, retry
 
 
 class Proposals(metaclass=abc.ABCMeta):
@@ -23,6 +23,7 @@ class Proposals(metaclass=abc.ABCMeta):
     @classmethod
     def from_env(cls):
         load_dotenv()
+        log.info(f"Creating {cls.__name__} from env")
         return cls(
             environ["DUO_ENDPOINT"],
             environ["DUO_SECRET"],
@@ -62,6 +63,9 @@ class ProposalsFromFacility(Proposals):
 
     def proposals(self):
         facility = self.duo_facility
+        log.info(
+            f"Fetching duo proposals for {self.__class__.__name__}: {facility}, {self.duo_year}"
+        )
         return product(
             self.response(f"{self.proposals_path}/{facility}?year={self.duo_year}"),
             [facility],
@@ -76,6 +80,7 @@ class ProposalsFromPgroups(Proposals):
         self._xname_name_map = {}
 
     def _pgroups_with_no_proposal(self):
+        log.info("Fetching pgroups with no proposals")
         return self.response(
             "PGroupAttributes/listProposalAssignments?withoutproposal=true"
         )
@@ -91,10 +96,12 @@ class ProposalsFromPgroups(Proposals):
         return _xname_name_map
 
     def _pgroup_no_proposal_formatter(self, p_group):
+        log.info(f"Processing {p_group} with no proposal")
         p_group = self.response(f"{self.proposals_path}/{p_group}")["group"]
         try:
             p_group["owner"]
         except KeyError as e:
+            log.warning("Missing owner")
             raise MissingOwnerError from e
         beamline, facility = self.xname_name_map[p_group["xname"]]
         proposal = {
@@ -113,6 +120,7 @@ class ProposalsFromPgroups(Proposals):
                 {"start": "01/01/1960 01:00:00", "end": "31/12/2100 01:00:00"}
             ],
         }
+        log.info("Pgroup with no proposal composed")
         return proposal, facility
 
     def proposals(self):
@@ -134,7 +142,10 @@ class ProposalsFactory:
     )
 
     def __new__(cls, duo_facility):
-        return cls._env_to_proposal_class[duo_facility]
+        log.info(f"Selecting proposal class with {duo_facility}")
+        proposal_class = cls._env_to_proposal_class[duo_facility]
+        log.info(f"Proposal class {proposal_class} selected")
+        return proposal_class
 
     @classmethod
     def from_env(cls):
