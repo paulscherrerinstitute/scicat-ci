@@ -9,8 +9,13 @@ def retry(func):
     def wrap(*args, **kwargs):
         for n in range(5):
             try:
+                log.info(f"HTTP call attempt {n}")
                 res = func(*args, **kwargs)
-            except URLError:
+            except URLError as e:
+                log.warning(e)
+                if n == 4:
+                    log.error(f"HTTP last call attempt failed")
+                    return
                 sleep(n * 10 or n)
             else:
                 return res
