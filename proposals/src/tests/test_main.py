@@ -3,7 +3,7 @@ from unittest.mock import patch
 import main
 
 
-@patch("main.DuoSciCatOrchestrator")
+@patch("main.DuoSciCatOrchestrator", autospec=True)
 def test_main(mock_orchestrator):
     mock_instance = mock_orchestrator.return_value
     main.main()

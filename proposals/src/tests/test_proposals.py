@@ -49,7 +49,7 @@ class TestProposals:
     @patch.multiple(pr.Proposals, __abstractmethods__=set())
     def test_request(self, request_parameter, expected):
         proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
-        with patch.object(pr, "ur") as mock_request:
+        with patch.object(pr, "ur", autospec=True) as mock_request:
             if expected[1] == 2:
                 mock_request.urlopen.side_effect = (URLError(""), "")
             proposals.request(request_parameter)
@@ -92,14 +92,16 @@ class TestProposals:
 
 
 class TestProposalsFromFacility:
-    @patch.object(pr.Proposals, "response", return_value=[{"a": {"b": 1, "c": 2}}])
+    @patch.object(
+        pr.Proposals, "response", return_value=[{"a": {"b": 1, "c": 2}}], autospec=True
+    )
     def test_proposals(self, mock_response):
         proposals = pr.ProposalsFromFacility(
             DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY, DUO_YEAR
         )
         proposals_call = proposals.proposals()
         mock_response.assert_called_with(
-            f"{CALENDAR_INFOS}/proposals/{DUO_FACILITY}?year={DUO_YEAR}"
+            proposals, f"{CALENDAR_INFOS}/proposals/{DUO_FACILITY}?year={DUO_YEAR}"
         )
         assert list(proposals_call) == [({"a": {"b": 1, "c": 2}}, DUO_FACILITY)]
 
@@ -124,11 +126,12 @@ class TestProposalsFromPgroups:
                 ],
             },
         ),
+        autospec=True,
     )
     def test_xname_name_map(self, mock_response):
         proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         xname_name_map = proposals.xname_name_map
-        mock_response.assert_called_with("CalendarInfos/facilities")
+        mock_response.assert_called_with(proposals, "CalendarInfos/facilities")
         assert xname_name_map == {
             "a_xname": ("a_beamline", "a_name"),
             "a_xname1": ("a_beamline1", "a_name"),
@@ -209,17 +212,22 @@ class TestProposalsFromPgroups:
                 f"{CALENDAR_INFOS}/pgroup/{p_group_from_list}"
             )
 
-    @patch.object(pr.ProposalsFromPgroups, "_pgroup_no_proposal_formatter")
+    @patch.object(
+        pr.ProposalsFromPgroups, "_pgroup_no_proposal_formatter", autospec=True
+    )
     def test_proposals(self, mock_formatter):
         p_groups = [{"g": "a_pgroup"}, {"g": "a_pgroup1"}]
         proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(
-            pr.ProposalsFromPgroups, "_pgroups_with_no_proposal", return_value=p_groups
+            pr.ProposalsFromPgroups,
+            "_pgroups_with_no_proposal",
+            return_value=p_groups,
+            autospec=True,
         ):
             proposals_call = proposals.proposals()
             assert isinstance(proposals_call, GeneratorType)
             for p_group, _ in zip(p_groups, proposals_call):
-                mock_formatter.assert_called_with(p_group["g"])
+                mock_formatter.assert_called_with(proposals, p_group["g"])
 
 
 class TestProposalsFactory:
