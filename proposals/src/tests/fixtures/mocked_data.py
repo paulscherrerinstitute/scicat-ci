@@ -8,9 +8,9 @@ class FixturesCommon:
         "pi_email": "pi_email",
         "pi_firstname": "John",
         "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
+        "email": "john@doe",
+        "firstname": "John",
+        "lastname": "Doe",
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
         "ownerGroup": "test_group",
@@ -18,20 +18,28 @@ class FixturesCommon:
     }
 
     @staticmethod
-    def measurement_period_list(ids=[ANY, ANY]):
+    def measurement_period_list(ids=[ANY, ANY], measurements=None):
+        _measurements = measurements or [
+            {
+                "start": "2022-12-31T23:00:00+00:00",
+                "end": "2023-01-01T23:00:00+00:00",
+            },
+            {
+                "start": "2023-12-31T23:00:00+00:00",
+                "end": "2024-01-01T23:00:00+00:00",
+            },
+        ]
         return [
             {
                 "id": ids[0],
                 "instrument": "/PSI/SLS/PX",
-                "start": "2022-12-31T23:00:00+00:00",
-                "end": "2023-01-01T23:00:00+00:00",
+                **_measurements[0],
                 "comment": "",
             },
             {
                 "id": ids[1],
                 "instrument": "/PSI/SLS/PX",
-                "start": "2023-12-31T23:00:00+00:00",
-                "end": "2024-01-01T23:00:00+00:00",
+                **_measurements[1],
                 "comment": "",
             },
         ]
@@ -60,9 +68,9 @@ class FixturesFromDuo(FixturesCommon):
         "proposal": "123",
         "pi_firstname": "John",
         "pi_lastname": "Doe",
-        "email": "",
-        "firstname": "Jane",
-        "lastname": "Smith",
+        "email": "john@doe",
+        "firstname": "John",
+        "lastname": "Doe",
         "title": "Test Proposal",
         "abstract": "This is a test proposal.",
         "pgroup": "test_group",
@@ -89,7 +97,7 @@ class FixturesFromDuo(FixturesCommon):
 
 class FixturesFromSciCatAPI(FixturesCommon):
 
-    expeted_measurement_periods = [
+    expected_measurement_periods = [
         FixturesCommon.measurement_period_list([ANY, None])[0]
     ]
 
@@ -105,3 +113,66 @@ class FixturesFromSciCatAPI(FixturesCommon):
             }
         ),
     ]
+
+
+class FixturesProposalsFromFacility(FixturesFromDuo, FixturesFromSciCatAPI):
+    pass
+
+
+class FixturesProposalsFromPgroups(FixturesCommon):
+
+    duo_facility = "pgroups"
+
+    calendar_infos_facilities = [
+        {
+            "name": FixturesFromDuo.duo_facility,
+            "beamlines": [
+                {
+                    "name": "PX",
+                    "xname": "xbeam1",
+                },
+            ],
+        },
+    ]
+
+    _pgroups_with_no_proposal = [
+        {"g": "123", "p": []},
+    ]
+
+    _pgroup_no_proposal_formatter = {
+        "group": {
+            "name": "123",
+            "xname": "xbeam1",
+            "comments": "",
+            "owner": {
+                "firstname": "John",
+                "lastname": "Doe",
+                "email": "john@doe",
+            },
+        },
+    }
+
+    expected_measurement_periods = [
+        {
+            "id": ANY,
+            "instrument": "/PSI/SLS/PX",
+            "comment": "",
+            "start": "1960-01-01T00:00:00+00:00",
+            "end": "2100-12-31T00:00:00+00:00",
+        },
+    ]
+
+    expected_scicat_proposal = {
+        **FixturesCommon.scicat_proposal,
+        "title": "",
+        "pi_email": "john@doe",
+        "abstract": "",
+        "ownerGroup": "123",
+        "MeasurementPeriodList": expected_measurement_periods,
+    }
+
+    policy = {
+        **FixturesCommon.policy,
+        "manager": ["john@doe"],
+        "ownerGroup": "123",
+    }
