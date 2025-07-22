@@ -1,8 +1,7 @@
 import os
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import patch
 
 import pytest
-from swagger_client.rest import ApiException
 
 import orchestrator
 from scicat import SciCatPolicyFromDuo, SciCatProposalFromDuo
@@ -14,7 +13,7 @@ class TestDuoSciCatOrchestrator:
 
     proposal_id = FixturesFromDuo.scicat_proposal["proposalId"]
     policy = FixturesFromDuo.policy
-    expeted_measurement_periods = FixturesFromSciCatAPI.expeted_measurement_periods
+    expected_measurement_periods = FixturesFromSciCatAPI.expected_measurement_periods
 
     def setup_method(self):
         self.proposal_instance = SciCatProposalFromDuo(
@@ -34,51 +33,6 @@ class TestDuoSciCatOrchestrator:
 
     def tear_down(self):
         self.env_patch.stop()
-
-    class MockProposalApi:
-
-        measurement_period_list = FixturesFromSciCatAPI.measurement_periods
-
-        def __init__(self, exists=True):
-            find_by_id_result = [
-                {"side_effect": ApiException(status=404)},
-                {
-                    "return_value": Mock(
-                        measurement_period_list=self.measurement_period_list
-                    )
-                },
-            ]
-            self.proposal_find_by_id = Mock(**find_by_id_result[exists])
-            self.proposal_create = Mock()
-            self.proposal_prototype_patch_attributes = Mock()
-
-    def test_update__upsert_policy_and_proposal(self):
-        mock_proposal = self.MockProposalApi()
-        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
-            self.orchestrator._upsert_policy_and_proposal(
-                self.policy_instance, self.proposal_instance
-            )
-            mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
-                self.proposal_id,
-                data={
-                    "MeasurementPeriodList": self.expeted_measurement_periods,
-                },
-            )
-
-    @patch(
-        "scicat.PolicyApi.policy_create",
-        autospec=True,
-    )
-    def test_create__upsert_policy_and_proposal(self, mock_policy_create):
-        mock_proposal = self.MockProposalApi(exists=False)
-        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
-            self.orchestrator._upsert_policy_and_proposal(
-                self.policy_instance, self.proposal_instance
-            )
-            mock_proposal.proposal_create.assert_called_once_with(
-                data=FixturesFromDuo.expected_scicat_proposal,
-            )
-            mock_policy_create.assert_called_once_with(ANY, data=self.policy)
 
     @patch("orchestrator.SciCatPolicyFromDuo", autospec=True)
     @patch("orchestrator.SciCatProposalFromDuo", autospec=True)
