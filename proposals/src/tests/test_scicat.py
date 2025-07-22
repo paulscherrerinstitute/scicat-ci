@@ -172,7 +172,7 @@ class TestSciCatProposalFromDuo:
             ANY,
             self.proposalId,
             data={
-                "MeasurementPeriodList": FixturesFromSciCatAPI.expeted_measurement_periods,
+                "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods,
             },
         )
 
@@ -289,4 +289,4 @@ class TestSciCatMeasurementsFromDuoMixin:
         new_measures = self.scicat_measurements.keep_new_measurements(
             FixturesFromSciCatAPI.measurement_periods,
         )
-        assert new_measures == FixturesFromSciCatAPI.expeted_measurement_periods
+        assert new_measures == FixturesFromSciCatAPI.expected_measurement_periods
