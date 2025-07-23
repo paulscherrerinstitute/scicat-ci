@@ -84,11 +84,9 @@ class TestSciCatFromDuo:
 class TestSciCatCreatorFromDuoMixin:
 
     class DummySciCatFromDuo(scicat.SciCatCreatorFromDuoMixin):
-        def compose(self):
-            pass
-
-        def create(self):
-            pass
+        def __init__(self, duo_proposal: dict, accelerator: str):
+            self.accelerator = accelerator
+            self.duo_proposal = duo_proposal
 
 
     scicat_creator = DummySciCatFromDuo(
@@ -213,12 +211,10 @@ class TestSciCatProposalFromDuo:
 class TestSciCatMeasurementsFromDuoMixin:
 
     class DummySciCatFromDuo(scicat.SciCatMeasurementsFromDuoMixin):
-        def compose(self):
-            pass
-
-        def create(self):
-            pass
-
+        def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
+            self.duo_proposal = duo_proposal
+            self.accelerator = accelerator
+            self.duo_facility = duo_facility
 
     def setup_method(self):
         scicat_measurements = self.DummySciCatFromDuo(

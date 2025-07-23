@@ -60,8 +60,19 @@ class SciCatAuth:
         log.info("SciCat authentication successuful, setting access_token")
         Configuration().api_client.default_headers["Authorization"] = access_token
 
+class ProposalAndAccelerator(metaclass=ABCMeta):
+    @abstractmethod
+    def __init__(self, duo_proposal: dict, accelerator: str):
+        self.accelerator = accelerator
+        self.duo_proposal = duo_proposal
 
-class SciCatFromDuo(metaclass=ABCMeta):
+class ProposalAcceleratorAndFacility(ProposalAndAccelerator):
+    @abstractmethod
+    def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
+        super().__init__(duo_proposal, accelerator)
+        self.duo_facility = duo_facility
+
+class SciCatFromDuo(ProposalAndAccelerator):
     """
     Abstract base class for creating SciCat entries from DUO proposals.
 
@@ -71,8 +82,7 @@ class SciCatFromDuo(metaclass=ABCMeta):
     """
 
     def __init__(self, duo_proposal: dict, accelerator: str):
-        self.accelerator = accelerator
-        self.duo_proposal = duo_proposal
+        super().__init__(duo_proposal, accelerator)
 
     @abstractmethod
     def compose(self):
@@ -85,7 +95,7 @@ class SciCatFromDuo(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class SciCatCreatorFromDuoMixin(SciCatFromDuo):
+class SciCatCreatorFromDuoMixin(ProposalAndAccelerator):
     """Mixin for shared DUO to SciCat property mappings."""
 
     @property
@@ -143,12 +153,8 @@ class SciCatPolicyFromDuo(SciCatCreatorFromDuoMixin, SciCatFromDuo):
         log.info("Policy created")
 
 
-class SciCatMeasurementsFromDuoMixin(SciCatFromDuo):
+class SciCatMeasurementsFromDuoMixin(ProposalAcceleratorAndFacility):
     """Mixin for converting DUO proposal schedules to SciCat measurement periods."""
-
-    def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
-        super().__init__(duo_proposal, accelerator)
-        self.duo_facility = duo_facility
 
     _local = pytz.timezone("Europe/Amsterdam")
     _duo_facility_datetime_format = defaultdict(
