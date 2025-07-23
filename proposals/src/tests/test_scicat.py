@@ -83,7 +83,17 @@ class TestSciCatFromDuo:
 
 class TestSciCatCreatorFromDuoMixin:
 
-    scicat_creator = scicat.SciCatCreatorFromDuoMixin()
+    class DummySciCatFromDuo(scicat.SciCatCreatorFromDuoMixin):
+        def compose(self):
+            pass
+
+        def create(self):
+            pass
+
+
+    scicat_creator = DummySciCatFromDuo(
+        {"proposal": "test_proposal"}, "test_accelerator"
+    )
 
     @pytest.mark.parametrize(
         "duo_proposal, expected",
@@ -202,11 +212,18 @@ class TestSciCatProposalFromDuo:
 
 class TestSciCatMeasurementsFromDuoMixin:
 
+    class DummySciCatFromDuo(scicat.SciCatMeasurementsFromDuoMixin):
+        def compose(self):
+            pass
+
+        def create(self):
+            pass
+
+
     def setup_method(self):
-        scicat_measurements = scicat.SciCatMeasurementsFromDuoMixin()
-        scicat_measurements.duo_facility = FixturesFromDuo.duo_facility
-        scicat_measurements.duo_proposal = FixturesFromDuo.duo_proposal
-        scicat_measurements.accelerator = FixturesFromDuo.accelerator
+        scicat_measurements = self.DummySciCatFromDuo(
+            FixturesFromDuo.duo_proposal, FixturesFromDuo.accelerator, FixturesFromDuo.duo_facility
+        )
         self.scicat_measurements = scicat_measurements
 
     def test_init(self):

@@ -187,23 +187,23 @@ class ProposalsFromPgroups(Proposals):
             MissingOwnerError: If no owner info is available.
         """
         log.info(f"Processing {p_group} with no proposal")
-        p_group = self.response(f"{self.proposals_path}/{p_group}")["group"]
+        p_group_response = self.response(f"{self.proposals_path}/{p_group}")["group"]
         try:
-            p_group["owner"]
+            p_group_response["owner"]
         except KeyError as e:
             log.warning("Missing owner")
             raise MissingOwnerError from e
-        beamline, facility = self.xname_name_map[p_group["xname"]]
+        beamline, facility = self.xname_name_map[p_group_response["xname"]]
         proposal = {
-            "proposal": p_group["name"],
-            "email": p_group["owner"]["email"],
+            "proposal": p_group_response["name"],
+            "email": p_group_response["owner"]["email"],
             "pi_email": "",
-            "pgroup": p_group["name"],
+            "pgroup": p_group_response["name"],
             "beamline": beamline,
-            "pi_firstname": p_group["owner"]["firstname"],
-            "pi_lastname": p_group["owner"]["lastname"],
-            "firstname": p_group["owner"]["firstname"],
-            "lastname": p_group["owner"]["lastname"],
+            "pi_firstname": p_group_response["owner"]["firstname"],
+            "pi_lastname": p_group_response["owner"]["lastname"],
+            "firstname": p_group_response["owner"]["firstname"],
+            "lastname": p_group_response["owner"]["lastname"],
             "title": "",
             "abstract": "",
             "schedule": [
@@ -244,7 +244,7 @@ class ProposalsFactory:
         lambda: ProposalsFromFacility, {"pgroups": ProposalsFromPgroups}
     )
 
-    def __new__(cls, duo_facility: str) -> Type[Proposals]:
+    def __new__(cls, duo_facility: str) -> "ProposalsFactory":
         """
         Selects a proposal class implementation based on the DUO facility.
 
@@ -260,7 +260,7 @@ class ProposalsFactory:
         return proposal_class
 
     @classmethod
-    def from_env(cls) -> Type[Proposals]:
+    def from_env(cls) -> type[Proposals]:
         """
         Reads environment variables and returns the appropriate Proposals subclass.
 

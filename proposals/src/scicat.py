@@ -85,7 +85,7 @@ class SciCatFromDuo(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class SciCatCreatorFromDuoMixin:
+class SciCatCreatorFromDuoMixin(SciCatFromDuo):
     """Mixin for shared DUO to SciCat property mappings."""
 
     @property
@@ -110,7 +110,7 @@ class SciCatCreatorFromDuoMixin:
         return [f"{self.accelerator}{bl}"]
 
 
-class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
+class SciCatPolicyFromDuo(SciCatCreatorFromDuoMixin, SciCatFromDuo):
     """Handles the creation of SciCat policy entries from DUO proposals."""
 
     def compose(self) -> dict:
@@ -143,8 +143,12 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
         log.info("Policy created")
 
 
-class SciCatMeasurementsFromDuoMixin:
+class SciCatMeasurementsFromDuoMixin(SciCatFromDuo):
     """Mixin for converting DUO proposal schedules to SciCat measurement periods."""
+
+    def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
+        super().__init__(duo_proposal, accelerator)
+        self.duo_facility = duo_facility
 
     _local = pytz.timezone("Europe/Amsterdam")
     _duo_facility_datetime_format = defaultdict(
@@ -231,7 +235,7 @@ class SciCatMeasurementsFromDuoMixin:
 
 
 class SciCatProposalFromDuo(
-    SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
+    SciCatMeasurementsFromDuoMixin, SciCatCreatorFromDuoMixin,  SciCatFromDuo
 ):
     """
     Handles creation and update of SciCat proposals from DUO proposals.
@@ -248,8 +252,7 @@ class SciCatProposalFromDuo(
         pass
 
     def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
-        super().__init__(duo_proposal, accelerator)
-        self.duo_facility = duo_facility
+        super().__init__(duo_proposal, accelerator, duo_facility)
 
     def compose(self) -> dict:
         """Composes the SciCat proposal dictionary from DUO data."""
