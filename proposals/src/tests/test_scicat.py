@@ -303,3 +303,15 @@ class TestSciCatMeasurementsFromDuoMixin:
             FixturesFromSciCatAPI.measurement_periods,
         )
         assert new_measures == FixturesFromSciCatAPI.expected_measurement_periods
+
+    def test__proposal_obj_to_dict(self):
+        proposal_dict = self.scicat_measurements._proposal_obj_to_dict(
+            FixturesFromSciCatAPI.measurement_periods[0]
+        )
+        assert proposal_dict == FixturesFromSciCatAPI.existing_measurment_periods[0]
+
+    def test__keep_new_measurements(self):
+        new_measures = self.scicat_measurements._keep_new_measurements(
+            FixturesFromSciCatAPI.measurement_periods,
+        )
+        assert new_measures == [FixturesFromSciCatAPI.new_measurment_period]
