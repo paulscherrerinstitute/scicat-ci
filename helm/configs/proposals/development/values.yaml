@@ -1,4 +1,13 @@
-secrets: 
+scicatEndpoint: http://backend-next.scicat-development
 
-ciRepository: busybox
-ciTag: latest
+duo_facilities:
+ - name: pgroups
+   schedule: 0 2 * * 3
+ - name: sls
+   schedule: 30 2 * * 3
+ - name: swissfel
+   schedule: 0 3 * * 3
+ - name: smus
+   schedule: 30 3 * * 3
+ - name: sinq
+   schedule: 0 4 * * 3
