@@ -9,7 +9,7 @@ image:
 service:
   type: ClusterIP
   externalPort: 80
-  internalPort: 80
+  internalPort: 8080
 
 ingress:
   enabled: true
