@@ -2,7 +2,7 @@ import os
 from unittest.mock import ANY, Mock, patch
 
 import pytest
-from swagger_client.rest import ApiException
+from scicat_sdk_py.exceptions import NotFoundException
 
 import orchestrator
 
@@ -33,16 +33,16 @@ class TestDuoSciCatOrchestratorFromFacility:
 
         def __init__(self, exists=True):
             find_by_id_result = [
-                {"side_effect": ApiException(status=404)},
+                {"side_effect": NotFoundException},
                 {
                     "return_value": Mock(
                         measurement_period_list=self.measurement_period_list
                     )
                 },
             ]
-            self.proposal_find_by_id = Mock(**find_by_id_result[exists])
-            self.proposal_create = Mock()
-            self.proposal_prototype_patch_attributes = Mock()
+            self.proposals_controller_find_by_id_v3 = Mock(**find_by_id_result[exists])
+            self.proposals_controller_create_v3 = Mock()
+            self.proposals_controller_update_v3 = Mock()
 
     @pytest.fixture
     def patch_proposal_response(self):
@@ -65,27 +65,25 @@ class TestDuoSciCatOrchestratorFromFacility:
         self.orchestrator = orchestrator.DuoSciCatOrchestrator()
 
     @patch(
-        "scicat.PolicyApi.policy_create",
+        "scicat.PoliciesApi.policies_controller_create_v3",
         autospec=True,
     )
     def test_create_proposals_from_duo_to_scicat(self, mock_policy_create):
         mock_proposal = self.MockProposalApi(exists=False)
-        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
+        with patch("scicat.ProposalsApi", return_value=mock_proposal, autospec=True):
             self.orchestrator.orchestrate()
-            mock_proposal.proposal_create.assert_called_once_with(
-                data=self.fixture_class.expected_scicat_proposal,
+            mock_proposal.proposals_controller_create_v3.assert_called_once_with(
+                self.fixture_class.expected_scicat_proposal,
             )
-            mock_policy_create.assert_called_once_with(
-                ANY, data=self.fixture_class.policy
-            )
+            mock_policy_create.assert_called_once_with(ANY, self.fixture_class.policy)
 
     def test_update_proposals_from_duo_to_scicat(self):
         mock_proposal = self.MockProposalApi()
-        with patch("scicat.ProposalApi", return_value=mock_proposal, autospec=True):
+        with patch("scicat.ProposalsApi", return_value=mock_proposal, autospec=True):
             self.orchestrator.orchestrate()
-            mock_proposal.proposal_prototype_patch_attributes.assert_called_once_with(
+            mock_proposal.proposals_controller_update_v3.assert_called_once_with(
                 self.fixture_class.scicat_proposal["proposalId"],
-                data={
+                {
                     "MeasurementPeriodList": self.fixture_class.expected_measurement_periods,
                 },
             )
