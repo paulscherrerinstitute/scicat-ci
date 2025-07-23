@@ -3,6 +3,7 @@ import uuid
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from os import environ
+from typing import Any
 
 import pytz
 from dotenv import load_dotenv
@@ -203,7 +204,7 @@ class SciCatMeasurementsFromDuoMixin:
         log.info("Measurement periods from proposal extracted")
         return measurement_periods
 
-    def keep_new_measurements(self, measurements: list) -> list[dict]:
+    def _keep_new_measurements(self, measurements: list) -> list[dict]:
         """Filters out measurement periods already present in SciCat.
 
         Args:
@@ -213,14 +214,14 @@ class SciCatMeasurementsFromDuoMixin:
             list[dict]: New measurement periods not in existing ones.
         """
         log.info("Excluding already existing proposals")
-        existing_measurements_dict = {
-            f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
+        existing_measurements_set = {
+            f"{m.instrument}_{m.start}_{m.end}" for m in measurements
         }
         new_entries = []
         for new_entry in self.meausement_period_list:
             if (
                 f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
-                in existing_measurements_dict
+                in existing_measurements_set
             ):
                 log.info("This entry exists already, nothing appended")
                 continue
@@ -228,6 +229,37 @@ class SciCatMeasurementsFromDuoMixin:
             new_entries.append(new_entry)
         log.info("Existing proposals excluded")
         return new_entries
+
+    @staticmethod
+    def _proposal_obj_to_dict(proposal_obj: Any) -> dict:
+        """Converts a proposal object to a dictionary representation.
+
+        Args:
+            proposal_obj (Any): A SciCat proposal or measurement object.
+
+        Returns:
+            dict: A dictionary with keys 'id', 'instrument', 'start', 'end', and 'comment'.
+        """
+        return {
+            "id": proposal_obj.id,
+            "instrument": proposal_obj.instrument,
+            "start": proposal_obj.start,
+            "end": proposal_obj.end,
+            "comment": proposal_obj.comment,
+        }
+
+    def keep_new_measurements(self, measurements: list) -> list[dict]:
+        """Combines newly fetched measurement periods with existing ones.
+
+        Args:
+            measurements (list): Existing SciCat measurement period objects.
+
+        Returns:
+            list[dict]: Combined list of new and existing measurement periods in dict format.
+        """
+        new_measurements = self._keep_new_measurements(measurements)
+        exiting_measurements = list(map(self._proposal_obj_to_dict, measurements))
+        return new_measurements + exiting_measurements
 
 
 class SciCatProposalFromDuo(
