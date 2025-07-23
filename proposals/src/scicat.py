@@ -8,8 +8,8 @@ from typing import Any
 
 import pytz
 from dotenv import load_dotenv
-from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
-from swagger_client.rest import ApiException
+from scicat_sdk_py import AuthApi, Configuration, PoliciesApi, ProposalsApi
+from scicat_sdk_py.exceptions import NotFoundException
 
 from utils import log
 
@@ -48,19 +48,19 @@ class SciCatAuth:
         """Retrieves the authentication token from SciCat."""
         credentials = {"username": self.username, "password": self.password}
         try:
-            response = UserApi().user_login(credentials)
-            access_token = response["id"]
-            return access_token
+            response = AuthApi().auth_controller_login_v3(credentials)
+            return response.access_token
         except Exception as e:
             log.error("Login to data catalog did not succeed")
             raise e
 
     def _set_scicat_token(self):
         """Sets the SciCat token in the Swagger client configuration."""
-        Configuration().host = self.url
+        scicat_config = Configuration(host=self.url)
+        Configuration.set_default(scicat_config)
         access_token = self._get_scicat_token()
         log.info("SciCat authentication successuful, setting access_token")
-        Configuration().api_client.default_headers["Authorization"] = access_token
+        Configuration.get_default().access_token = access_token
 
 
 class SciCatFromDuo(metaclass=ABCMeta):
@@ -141,7 +141,7 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
         """Creates the SciCat policy using the composed policy dictionary."""
         policy = self.compose()
         log.info(f"Create new policy for pgroup {policy}")
-        PolicyApi().policy_create(data=policy)
+        PoliciesApi().policies_controller_create_v3(policy)
         log.info("Policy created")
 
 
@@ -312,7 +312,7 @@ class SciCatProposalFromDuo(
         """Creates a new SciCat proposal."""
         proposal = self.compose()
         log.info(f"Creating new proposal {proposal}")
-        ProposalApi().proposal_create(data=proposal)
+        ProposalsApi().proposals_controller_create_v3(proposal)
         log.info("Proposal created")
 
     def _update(self):
@@ -320,22 +320,19 @@ class SciCatProposalFromDuo(
         proposal = self.compose()
         pid = proposal["proposalId"]
         log.info(f"Checking if proposal {pid} exists in SciCat")
-        existing_proposal = ProposalApi().proposal_find_by_id(pid)
+        existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
         existing_measurements = existing_proposal.measurement_period_list
         new_entries = self.keep_new_measurements(existing_measurements)
         if len(new_entries) == 0:
             return
         patch = {"MeasurementPeriodList": new_entries}
         log.info(f"Modifying proposal, patch object: {patch}")
-        ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
+        ProposalsApi().proposals_controller_update_v3(pid, patch)
         log.info("Proposal modified")
 
     def update(self):
         """Public method to update a proposal; raises if not found."""
         try:
             self._update()
-        except ApiException as e:
-            if e.status == 404:
-                log.info("Proposal does not exist in SciCat")
-                raise self.ProposalNotFoundException
-            raise e
+        except NotFoundException as e:
+            raise self.ProposalNotFoundException
