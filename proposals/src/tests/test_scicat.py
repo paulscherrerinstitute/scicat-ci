@@ -85,8 +85,7 @@ class TestSciCatCreatorFromDuoMixin:
 
     class DummySciCatFromDuo(scicat.SciCatCreatorFromDuoMixin):
         def __init__(self, duo_proposal: dict, accelerator: str):
-            self.accelerator = accelerator
-            self.duo_proposal = duo_proposal
+            super().__init__(duo_proposal, accelerator)
 
 
     scicat_creator = DummySciCatFromDuo(
@@ -212,9 +211,7 @@ class TestSciCatMeasurementsFromDuoMixin:
 
     class DummySciCatFromDuo(scicat.SciCatMeasurementsFromDuoMixin):
         def __init__(self, duo_proposal: dict, accelerator: str, duo_facility: str):
-            self.duo_proposal = duo_proposal
-            self.accelerator = accelerator
-            self.duo_facility = duo_facility
+            super().__init__(duo_proposal, accelerator, duo_facility)
 
     def setup_method(self):
         scicat_measurements = self.DummySciCatFromDuo(
