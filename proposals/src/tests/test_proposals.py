@@ -1,3 +1,4 @@
+import os
 from types import GeneratorType
 from unittest.mock import mock_open, patch
 from urllib.error import URLError
@@ -11,64 +12,77 @@ DUO_SECRET = "a_secret"
 CALENDAR_INFOS = "CalendarInfos"
 
 
-@pytest.mark.parametrize(
-    "proposals_class, expected",
-    [
-        [pr.ProposalsFromFacility, "proposals"],
-        [pr.ProposalsFromPgroups, "pgroup"],
-    ],
-)
-def test__type(proposals_class, expected):
-    proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
-    proposals_type = proposals._type
-    assert proposals_type == expected
+class TestProposals:
+    @pytest.mark.parametrize(
+        "proposals_class, expected",
+        [
+            [pr.ProposalsFromFacility, "proposals"],
+            [pr.ProposalsFromPgroups, "pgroup"],
+        ],
+    )
+    def test__type(self, proposals_class, expected):
+        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
+        proposals_type = proposals._type
+        assert proposals_type == expected
 
+    @pytest.mark.parametrize(
+        "proposals_class, expected",
+        [
+            [pr.ProposalsFromFacility, f"{CALENDAR_INFOS}/proposals"],
+            [pr.ProposalsFromPgroups, f"{CALENDAR_INFOS}/pgroup"],
+        ],
+    )
+    def test_url(self, proposals_class, expected):
+        proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
+        proposals_path = proposals.proposals_path
+        assert proposals_path == expected
 
-@pytest.mark.parametrize(
-    "proposals_class, expected",
-    [
-        [pr.ProposalsFromFacility, f"{CALENDAR_INFOS}/proposals"],
-        [pr.ProposalsFromPgroups, f"{CALENDAR_INFOS}/pgroup"],
-    ],
-)
-def test_url(proposals_class, expected):
-    proposals = proposals_class(DUO_ENDPOINT, DUO_SECRET)
-    proposals_path = proposals.proposals_path
-    assert proposals_path == expected
+    @pytest.mark.parametrize(
+        "request_parameter, expected",
+        [
+            ["a_parameter", [f"{DUO_ENDPOINT}/a_parameter", 1]],
+            ["", [f"{DUO_ENDPOINT}/", 2]],
+        ],
+    )
+    @patch.multiple(pr.Proposals, __abstractmethods__=set())
+    def test_request(self, request_parameter, expected):
+        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
+        with patch.object(pr, "ur") as mock_request:
+            if expected[1] == 2:
+                mock_request.urlopen.side_effect = (URLError(""), "")
+            proposals.request(request_parameter)
+            mock_request.Request.assert_called_with(
+                expected[0], headers={"Cookie": f"SECRET={DUO_SECRET}"}
+            )
+            assert mock_request.urlopen.call_count == expected[1]
 
+    @patch.object(
+        pr.Proposals,
+        "request",
+        new_callable=mock_open,
+        read_data='{"a": {"b":1, "c":2}}'.encode(),
+    )
+    @patch.multiple(pr.Proposals, __abstractmethods__=set())
+    def test_response(self, mock_request):
+        proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
+        proposals_response = proposals.response()
+        mock_request.assert_called_once()
+        assert proposals_response == {"a": {"b": 1, "c": 2}}
 
-@pytest.mark.parametrize(
-    "request_parameter, expected",
-    [
-        ["a_parameter", [f"{DUO_ENDPOINT}/a_parameter", 1]],
-        ["", [f"{DUO_ENDPOINT}/", 2]],
-    ],
-)
-@patch.multiple(pr.Proposals, __abstractmethods__=set())
-def test_request(request_parameter, expected):
-    proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
-    with patch.object(pr, "ur") as mock_request:
-        if expected[1] == 2:
-            mock_request.urlopen.side_effect = (URLError(""), "")
-        proposals.request(request_parameter)
-        mock_request.Request.assert_called_with(
-            expected[0], headers={"Cookie": f"SECRET={DUO_SECRET}"}
-        )
-        assert mock_request.urlopen.call_count == expected[1]
-
-
-@patch.object(
-    pr.Proposals,
-    "request",
-    new_callable=mock_open,
-    read_data='{"a": {"b":1, "c":2}}'.encode(),
-)
-@patch.multiple(pr.Proposals, __abstractmethods__=set())
-def test_response(mock_request):
-    proposals = pr.Proposals(DUO_ENDPOINT, DUO_SECRET)
-    proposals_response = proposals.response()
-    mock_request.assert_called_once()
-    assert proposals_response == {"a": {"b": 1, "c": 2}}
+    @patch.dict(
+        os.environ,
+        {
+            "DUO_ENDPOINT": DUO_ENDPOINT,
+            "DUO_SECRET": DUO_SECRET,
+        },
+    )
+    @patch.multiple(pr.Proposals, __abstractmethods__=set())
+    def test_from_env(self):
+        proposal_instance = pr.Proposals.from_env()
+        assert proposal_instance.__dict__ == {
+            "duo_endpoint": DUO_ENDPOINT,
+            "duo_secret": DUO_SECRET,
+        }
 
 
 class TestProposalsFromFacility:
@@ -200,3 +214,28 @@ class TestProposalsFromPgroups:
             assert isinstance(proposals_call, GeneratorType)
             for p_group, _ in zip(p_groups, proposals_call):
                 mock_formatter.assert_called_with(p_group["g"])
+
+
+class TestProposalsFactory:
+
+    @pytest.mark.parametrize(
+        "duo_facility, expected_class",
+        [
+            ("pgroups", pr.ProposalsFromPgroups),
+            ("unknown", pr.ProposalsFromFacility),
+            ("", pr.ProposalsFromFacility),
+        ],
+    )
+    def test_new(self, duo_facility, expected_class):
+        assert pr.ProposalsFactory(duo_facility) is expected_class
+
+    @pytest.mark.parametrize(
+        "duo_facility, expected_class",
+        [
+            ("pgroups", pr.ProposalsFromPgroups),
+            ("unknown", pr.ProposalsFromFacility),
+        ],
+    )
+    def test_from_env(self, duo_facility, expected_class):
+        with patch.dict("os.environ", {"DUO_FACILITY": duo_facility}):
+            assert pr.ProposalsFactory.from_env() is expected_class
