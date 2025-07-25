@@ -9,71 +9,43 @@ import main as m
 
 
 @pytest.mark.parametrize(
-    "row, expected",
+    "duo_facility, expected",
     [
-        [{"pgroup": "g1", "proposal": 123}, "g1"],
-        [{"pgroup": "", "proposal": 123}, "p123"],
+        ["sls", "ProposalsFromFacility"],
+        ["pgroups", "ProposalsFromPgroups"],
     ],
 )
-def test_compose_owner_group(row, expected):
-    owner_group = m.compose_owner_group(row)
-    assert owner_group == expected
+def test_main(duo_facility, expected):
+    with patch.dict(
+        os.environ,
+        {
+            "DUO_FACILITY": duo_facility,
+            "DUO_YEAR": "2023",
+            "SCICAT_ENDPOINT": "http://scicat",
+            "SCICAT_USERNAME": "test_user",
+            "SCICAT_PASSWORD": "test_password",
+        },
+    ):
+        reload(m)
+        assert m.PROPOSALS.__class__.__name__ == expected
+        with patch(
+            f"main.{expected}.proposals",
+            return_value=iter([("proposal", "facility")]),
+        ) as mock_proposals, patch("main.SciCatAuth") as mock_scicat_auth, patch(
+            "main.fill_proposal"
+        ) as mock_fill_proposal:
+            m.main()
+            mock_instance = mock_scicat_auth.return_value
+            mock_scicat_auth.assert_called_once_with(
+                "test_user", "test_password", "http://scicat"
+            )
+            mock_instance.authenticate.assert_called_once()
+            mock_proposals.assert_called_once_with(duo_facility, "2023")
+            mock_fill_proposal.assert_called_once_with("proposal", "facility")
 
 
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [{"beamline": "px"}, ["slsmx"]],
-        [{"beamline": "lx"}, ["slslx"]],
-    ],
-)
-def test_compose_access_groups(row, expected):
-    access_groups = m.compose_access_groups(row, "sls")
-    assert access_groups == expected
-
-
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [{"pi_email": "pi", "email": "email"}, "pi"],
-        [{"pi_email": "", "email": "email"}, "email"],
-    ],
-)
-def test_compose_principal_investigator(row, expected):
-    pi = m.compose_principal_investigator(row)
-    assert pi == expected
-
-
-@pytest.mark.parametrize(
-    "row, expected",
-    [
-        [
-            {"pgroup": "abc", "proposal": "123", "beamline": "PX"},
-            {"ownerGroup": "abc", "accessGroups": ["SLSmx"]},
-        ],
-        [
-            {"pgroup": "", "proposal": "123", "beamline": "kl"},
-            {"ownerGroup": "p123", "accessGroups": ["SLSkl"]},
-        ],
-    ],
-)
-def test_compose_policy(row, expected):
-    policy = m.compose_policy({**row, "pi_email": "pi_email"}, "SLS")
-    static_properties = {
-        "manager": ["pi_email"],
-        "tapeRedundancy": "low",
-        "autoArchive": False,
-        "autoArchiveDelay": 0,
-        "archiveEmailNotification": True,
-        "archiveEmailsToBeNotified": [],
-        "retrieveEmailNotification": True,
-        "retrieveEmailsToBeNotified": [],
-        "embargoPeriod": 3,
-    }
-    assert policy == {**static_properties, **expected}
-
-
-def test_compose_proposal():
+def test_fill_proposal_acceptance():
+    reload(m)
     row = {
         "proposal": "123",
         "pi_firstname": "John",
@@ -85,9 +57,15 @@ def test_compose_proposal():
         "abstract": "This is a test proposal.",
         "pgroup": "test_group",
         "beamline": "PX",
+        "pi_email": "pi_email",
+        "schedule": [
+            {"start": "01/01/2023", "end": "02/01/2023"},
+            {"start": "01/01/2024", "end": "02/01/2024"},
+        ],
     }
-    proposal = m.compose_proposal({**row, "pi_email": "pi_email"}, "sls")
-    assert proposal == {
+
+    accelerator = "sls"
+    expected_proposal = {
         "proposalId": "20.500.11935/123",
         "pi_email": "pi_email",
         "pi_firstname": "John",
@@ -100,51 +78,20 @@ def test_compose_proposal():
         "ownerGroup": "test_group",
         "accessGroups": ["slsmx"],
     }
-
-
-@pytest.mark.parametrize(
-    "duo_facility, schedule, expected",
-    [
-        [
-            "sls",
-            {"start": "01/01/2023 01:00:00", "end": "02/01/2023 01:00:00"},
-            {"start": "2023-01-01T00:00:00+00:00", "end": "2023-01-02T00:00:00+00:00"},
-        ],
-        [
-            "sinq",
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "2022-12-31T23:00:00+00:00", "end": "2023-01-01T23:00:00+00:00"},
-        ],
-        [
-            "smus",
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "2022-12-31T23:00:00+00:00", "end": "2023-01-01T23:00:00+00:00"},
-        ],
-    ],
-)
-def test_compose_measurement_period(duo_facility, schedule, expected):
-
-    with patch.dict(os.environ, {"DUO_FACILITY": duo_facility}):
-        reload(m)
-        row = {
-            "beamline": "PX",
-        }
-        accelerator = "SLS"
-        mp = m.compose_measurement_period(row, accelerator, schedule)
-        assert mp == {"id": ANY, "instrument": "/PSI/SLS/PX", **expected, "comment": ""}
-
-
-def test_compose_measurement_periods():
-    accelerator = "SLS"
-    row = {
-        "beamline": "PX",
-        "schedule": [
-            {"start": "01/01/2023", "end": "02/01/2023"},
-            {"start": "01/01/2024", "end": "02/01/2024"},
-        ],
+    expected_policy = {
+        "tapeRedundancy": "low",
+        "autoArchive": False,
+        "autoArchiveDelay": 0,
+        "archiveEmailNotification": True,
+        "archiveEmailsToBeNotified": [],
+        "retrieveEmailNotification": True,
+        "retrieveEmailsToBeNotified": [],
+        "embargoPeriod": 3,
+        "manager": ["pi_email"],
+        "ownerGroup": "test_group",
+        "accessGroups": ["slsmx"],
     }
-    measurement_periods = m.compose_measurement_periods(row, accelerator)
-    assert measurement_periods == [
+    expected_measurement = [
         {
             "id": ANY,
             "instrument": "/PSI/SLS/PX",
@@ -160,62 +107,16 @@ def test_compose_measurement_periods():
             "comment": "",
         },
     ]
+    with patch("main.create_or_update_proposal") as mock_create_or_update:
+        m.fill_proposal(row, accelerator)
+        mock_create_or_update.assert_called_once_with(
+            expected_policy, expected_proposal, expected_measurement
+        )
 
 
-@patch(
-    "main.swagger_client.UserApi.user_login",
-    return_value={"id": "test_token"},
-    autospec=True,
-)
-def test__get_scicat_token(mock_user_login):
-    access_token = m._get_scicat_token("test_user", "test_password")
-    assert access_token == "test_token"
-    mock_user_login.assert_called_once_with(
-        ANY, {"username": "test_user", "password": "test_password"}
-    )
-
-
-@patch("main._get_scicat_token", return_value="test_token", autospec=True)
-def test__set_scicat_token(_):
-    m._set_scicat_token("test_user", "test_password", "http://scicat")
-    assert m.Configuration().host == "http://scicat"
-    assert m.Configuration().api_client.default_headers["Authorization"] == "test_token"
-
-
-@pytest.mark.parametrize(
-    "duo_facility, expected",
-    [
-        ["sls", "ProposalsFromFacility"],
-        ["pgroups", "ProposalsFromPgroups"],
-    ],
-)
-def test_main(duo_facility, expected):
-    with patch.dict(
-        os.environ,
-        {
-            "DUO_FACILITY": duo_facility,
-            "DUO_YEAR": "2023",
-        },
-    ):
-        reload(m)
-        assert m.PROPOSALS.__class__.__name__ == expected
-        with patch(
-            f"main.{expected}.proposals",
-            return_value=iter([("proposal", "facility")]),
-        ) as mock_proposals, patch(
-            "main._set_scicat_token"
-        ) as mock_set_scicat_token, patch(
-            "main.fill_proposal"
-        ) as mock_fill_proposal:
-            m.main()
-            mock_set_scicat_token.assert_called_once()
-            mock_proposals.assert_called_once_with(duo_facility, "2023")
-            mock_fill_proposal.assert_called_once_with("proposal", "facility")
-
-
-@patch("main.compose_policy")
-@patch("main.compose_proposal")
-@patch("main.compose_measurement_periods")
+@patch("main.SciCatPolicyFromDuo")
+@patch("main.SciCatProposalFromDuo")
+@patch("main.SciCatMeasurementsFromDuo")
 @patch("main.create_or_update_proposal")
 def test_fill_proposal(
     mock_create_or_update, mock_compose_mp, mock_compose_proposal, mock_compose_policy
@@ -223,13 +124,23 @@ def test_fill_proposal(
     row = {"proposal": "123"}
     accellerator = "SLS"
     m.fill_proposal(row, accellerator)
+
     mock_compose_policy.assert_called_once_with(row, accellerator)
+    mock_compose_policy_instance = mock_compose_policy.return_value
+    mock_compose_policy_instance.compose.assert_called_once()
+
     mock_compose_proposal.assert_called_once_with(row, accellerator)
-    mock_compose_mp.assert_called_once_with(row, accellerator)
+    mock_compose_proposal_instance = mock_compose_proposal.return_value
+    mock_compose_proposal_instance.compose.assert_called_once()
+
+    mock_compose_mp.assert_called_once_with(m.DUO_FACILITY, row, accellerator)
+    mock_compose_mp_instance = mock_compose_mp.return_value
+    mock_compose_mp_instance.compose.assert_called_once()
+
     mock_create_or_update.assert_called_once_with(
-        mock_compose_policy.return_value,
-        mock_compose_proposal.return_value,
-        mock_compose_mp.return_value,
+        mock_compose_policy_instance.compose.return_value,
+        mock_compose_proposal_instance.compose.return_value,
+        mock_compose_mp_instance.compose.return_value,
     )
 
 
