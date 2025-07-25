@@ -90,7 +90,7 @@ class FixturesFromDuo(FixturesCommon):
 class FixturesFromSciCatAPI(FixturesCommon):
 
     expeted_measurement_periods = [
-        FixturesCommon.measurement_period_list(["to_include_new_from_duo", None])[0]
+        FixturesCommon.measurement_period_list([ANY, None])[0]
     ]
 
     measurement_periods = [

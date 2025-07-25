@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
 import pytz
-from swagger_client import Configuration, UserApi
+from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
 
 from utils import log
 
@@ -44,6 +44,10 @@ class SciCatFromDuo(metaclass=ABCMeta):
 
     @abstractmethod
     def compose(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def create(self):
         raise NotImplementedError
 
 
@@ -87,6 +91,11 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
             # special mapping for MX needed
             "accessGroups": self.access_groups,
         }
+
+    def create(self):
+        policy = self.compose()
+        log.info(f"Create new policy for pgroup {policy}")
+        PolicyApi().policy_create(data=policy)
 
 
 class SciCatMeasurementsFromDuoMixin:
@@ -134,6 +143,22 @@ class SciCatMeasurementsFromDuoMixin:
             measurement_periods.append(mp)
         return measurement_periods
 
+    def keep_new_measurements(self, measurements):
+        existing_measurements_dict = {
+            f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
+        }
+        new_entries = []
+        for new_entry in self.meausement_period_list:
+            if (
+                f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
+                in existing_measurements_dict
+            ):
+                log.info("This entry exists already, nothing appended")
+                continue
+            log.info(f"Merge calendar entry to existing proposal data {new_entry}")
+            new_entries.append(new_entry)
+        return new_entries
+
 
 class SciCatProposalFromDuo(
     SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
@@ -161,3 +186,23 @@ class SciCatProposalFromDuo(
             "accessGroups": self.access_groups,
             "MeasurementPeriodList": self.meausement_period_list,
         }
+
+    def create(self):
+        proposal = self.compose()
+        log.info(f"Create new proposal {proposal}")
+        ProposalApi().proposal_create(data=proposal)
+
+    def update(self):
+        proposal = self.compose()
+        pid = proposal["proposalId"]
+        existing_proposal = ProposalApi().proposal_find_by_id(pid)
+        # check if this is a new entry
+        existing_measurements = existing_proposal.measurement_period_list
+        # to avoid problems with Dates: convert Dates back to strings
+        new_entries = self.keep_new_measurements(existing_measurements)
+        if len(new_entries) == 0:
+            return
+        patch = {"MeasurementPeriodList": new_entries}
+        log.info(f"Modified proposal, patch object: {patch}")
+        # the following call appends to the existing array
+        ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)

@@ -1,10 +1,10 @@
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 
 import scicat
 
-from .fixtures.mocked_data import FixturesFromDuo
+from .fixtures.mocked_data import FixturesFromDuo, FixturesFromSciCatAPI
 
 
 class TestSciCatAuth:
@@ -49,6 +49,9 @@ class TestSciCatFromDuo:
 
     class DummySciCatFromDuo(scicat.SciCatFromDuo):
         def compose(self):
+            pass
+
+        def create(self):
             pass
 
     scicat_from_duo = DummySciCatFromDuo(
@@ -109,18 +112,49 @@ class TestSciCatPolicyFromDuo:
         policy = self.scicat_policy.compose()
         assert policy == FixturesFromDuo.policy
 
+    @patch("scicat.PolicyApi.policy_create")
+    def test_create(self, mock_policy_create):
+        self.scicat_policy.create()
+        mock_policy_create.assert_called_once_with(data=FixturesFromDuo.policy)
+
 
 class TestSciCatProposalFromDuo:
 
-    scicat_proposal = scicat.SciCatProposalFromDuo(
-        FixturesFromDuo.duo_proposal,
-        FixturesFromDuo.accelerator,
-        FixturesFromDuo.duo_facility,
-    )
+    def setup_method(self):
+        self.scicat_proposal = scicat.SciCatProposalFromDuo(
+            FixturesFromDuo.duo_proposal,
+            FixturesFromDuo.accelerator,
+            FixturesFromDuo.duo_facility,
+        )
+        self.proposalId = FixturesFromDuo.scicat_proposal["proposalId"]
 
     def test_compose(self):
         proposal = self.scicat_proposal.compose()
         assert proposal == FixturesFromDuo.expected_scicat_proposal
+
+    @patch("scicat.ProposalApi.proposal_create")
+    def test_create_proposal(self, mock_proposal_create):
+        self.scicat_proposal.create()
+        mock_proposal_create.assert_called_once_with(
+            data=FixturesFromDuo.expected_scicat_proposal
+        )
+
+    @patch("scicat.ProposalApi.proposal_prototype_patch_attributes")
+    @patch(
+        "scicat.ProposalApi.proposal_find_by_id",
+        return_value=Mock(
+            measurement_period_list=FixturesFromSciCatAPI.measurement_periods
+        ),
+    )
+    def test_update(self, mock_proposal_find, mock_proposal_patch):
+        self.scicat_proposal.update()
+        mock_proposal_find.assert_called_once_with(self.proposalId)
+        mock_proposal_patch.assert_called_once_with(
+            self.proposalId,
+            data={
+                "MeasurementPeriodList": FixturesFromSciCatAPI.expeted_measurement_periods,
+            },
+        )
 
 
 class TestSciCatMeasurementsFromDuoMixin:
@@ -207,3 +241,9 @@ class TestSciCatMeasurementsFromDuoMixin:
         self.scicat_measurements.duo_facility = duo_facility
         utc_date = self.scicat_measurements._datetime_to_utc(test_date)
         assert utc_date == "2022-12-31T23:00:00+00:00"
+
+    def test_keep_new_measurements(self):
+        new_measures = self.scicat_measurements.keep_new_measurements(
+            FixturesFromSciCatAPI.measurement_periods,
+        )
+        assert new_measures == FixturesFromSciCatAPI.expeted_measurement_periods
