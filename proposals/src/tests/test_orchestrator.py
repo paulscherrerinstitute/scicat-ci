@@ -80,26 +80,42 @@ class TestDuoSciCatOrchestrator:
             )
             mock_policy_create.assert_called_once_with(ANY, data=self.policy)
 
+    @pytest.mark.parametrize(
+        "expected_exception",
+        [
+            True,
+            False,
+        ],
+    )
     @patch("orchestrator.SciCatPolicyFromDuo")
     @patch("orchestrator.SciCatProposalFromDuo")
-    @patch("orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal")
+    @patch("orchestrator.log")
     def test__upsert_policy_and_proposal_from_duo(
-        self, mock_create_or_update, mock_compose_proposal, mock_compose_policy
+        self, mock_log, mock_compose_proposal, mock_compose_policy, expected_exception
     ):
         row = {"proposal": "123"}
         accellerator = FixturesFromDuo.accelerator
-        self.orchestrator._upsert_policy_and_proposal_from_duo(row, accellerator)
+        exception = Exception("_upsert_policy_and_proposal_from_duo exception")
+        side_effect = {"side_effect": exception} if expected_exception else {}
+        with patch(
+            "orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal",
+            **side_effect
+        ) as mock_create_or_update:
+            self.orchestrator._upsert_policy_and_proposal_from_duo(row, accellerator)
 
-        mock_compose_policy.assert_called_once_with(row, accellerator)
+            mock_compose_policy.assert_called_once_with(row, accellerator)
 
-        mock_compose_proposal.assert_called_once_with(
-            row, accellerator, self.orchestrator.duo_facility
-        )
+            mock_compose_proposal.assert_called_once_with(
+                row, accellerator, self.orchestrator.duo_facility
+            )
 
-        mock_create_or_update.assert_called_once_with(
-            mock_compose_policy.return_value,
-            mock_compose_proposal.return_value,
-        )
+            mock_create_or_update.assert_called_once_with(
+                mock_compose_policy.return_value,
+                mock_compose_proposal.return_value,
+            )
+            assert mock_log.error.call_count == expected_exception
+            if expected_exception:
+                mock_log.error.assert_called_once_with(exception)
 
     @pytest.mark.parametrize(
         "duo_facility, expected",
