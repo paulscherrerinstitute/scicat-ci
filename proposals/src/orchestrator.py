@@ -55,7 +55,10 @@ class DuoSciCatOrchestrator(Orchestrator):
         log.info(f"============= Input proposal: {duo_proposal['proposal']}")
         policy = SciCatPolicyFromDuo(duo_proposal, accelerator)
         proposal = SciCatProposalFromDuo(duo_proposal, accelerator, self.duo_facility)
-        self._upsert_policy_and_proposal(policy, proposal)
+        try:
+            self._upsert_policy_and_proposal(policy, proposal)
+        except Exception as e:
+            log.error(e)
 
     def orchestrate(self):
         log.info(
