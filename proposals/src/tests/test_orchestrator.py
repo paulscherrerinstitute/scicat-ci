@@ -144,6 +144,8 @@ class TestDuoSciCatOrchestrator:
                 >= {
                     "duo_endpoint": "test_duo_endpoint",
                     "duo_secret": "test_duo_secret",
+                    "duo_year": "2023",
+                    "duo_facility": duo_facility,
                 }.items()
             )
             assert orchestrator_instance.duo_facility == duo_facility
@@ -157,6 +159,7 @@ class TestDuoSciCatOrchestrator:
     @patch(
         "proposals.ProposalsFromFacility.proposals",
         return_value=iter([("proposal", "facility")]),
+        autospec=True,
     )
     @patch("orchestrator.DuoSciCatOrchestrator._upsert_policy_and_proposal_from_duo")
     @patch("orchestrator.SciCatAuth.authenticate")
