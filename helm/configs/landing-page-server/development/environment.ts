@@ -17,7 +17,7 @@ export const environment = {
       title: "Please enter your email address where you will receive the download procedure",
       confirmMessage: "Are you sure you want to continue?"
   },
-  statusCode: "INFO",
-  statusMessage: "Dataset retrieval is fully operational again, including for datasets exceeding 5 GB.",
+  statusCode: "WARN",
+  statusMessage: "Dataset retrieval is currently down due to technical issues with Tape Library at CSCS. Visit <a href=\"https://scistatus.psi.ch/\">scistatus.psi.ch/</a> for more information.",
   contactEmail: "scicat-help@lists.psi.ch",
 };
