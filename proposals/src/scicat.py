@@ -191,7 +191,7 @@ class SciCatMeasurementsFromDuoMixin:
         return utc_date.isoformat("T")
 
     @property
-    def meausement_period_list(self):
+    def measurement_period_list(self):
         """Generates a list of measurement periods from the proposal schedule."""
         log.info("Extracting measurement periods from proposal")
         row = self.duo_proposal
@@ -217,7 +217,7 @@ class SciCatMeasurementsFromDuoMixin:
             f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
         }
         new_entries = []
-        for new_entry in self.meausement_period_list:
+        for new_entry in self.measurement_period_list:
             if (
                 f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
                 in existing_measurements_dict
@@ -269,7 +269,7 @@ class SciCatProposalFromDuo(
             "abstract": row["abstract"],
             "ownerGroup": self.owner_group,
             "accessGroups": self.access_groups,
-            "MeasurementPeriodList": self.meausement_period_list,
+            "MeasurementPeriodList": self.measurement_period_list,
         }
         log.info("SciCat proposal composed")
         return proposal

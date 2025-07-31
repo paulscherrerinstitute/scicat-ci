@@ -265,8 +265,8 @@ class TestSciCatMeasurementsFromDuoMixin:
             "comment": "",
         }
 
-    def test_meausement_period_list(self):
-        measurement_periods = self.scicat_measurements.meausement_period_list
+    def test_measurement_period_list(self):
+        measurement_periods = self.scicat_measurements.measurement_period_list
         assert (
             measurement_periods
             == FixturesFromDuo.expected_scicat_proposal["MeasurementPeriodList"]
