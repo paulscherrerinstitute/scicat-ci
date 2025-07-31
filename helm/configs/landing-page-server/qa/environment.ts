@@ -18,6 +18,6 @@ export const environment = {
       confirmMessage: "Are you sure you want to continue?"
     },
     statusCode: "WARN",
-    statusMessage: "Dataset retrieval is currently down due to technical issues with Tape Library at CSCS. Visit <a href=\"https://scistatus.psi.ch/\">scistatus.psi.ch/</a> for more information.",
+    statusMessage: "Dataset retrieval is currently down due to technical issues with Tape Library at CSCS. Visit <a href=\"https://scistatus.psi.ch/\">scistatus.psi.ch</a> for more information.",
     contactEmail: "scicat-help@lists.psi.ch",
   };
