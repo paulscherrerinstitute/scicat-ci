@@ -2,6 +2,7 @@ import datetime
 import uuid
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+from functools import cache, cached_property
 from os import environ
 
 import pytz
@@ -190,7 +191,7 @@ class SciCatMeasurementsFromDuoMixin:
         utc_date = local_date.astimezone(pytz.utc)
         return utc_date.isoformat("T")
 
-    @property
+    @cached_property
     def measurement_period_list(self):
         """Generates a list of measurement periods from the proposal schedule."""
         log.info("Extracting measurement periods from proposal")
@@ -251,6 +252,7 @@ class SciCatProposalFromDuo(
         super().__init__(duo_proposal, accelerator)
         self.duo_facility = duo_facility
 
+    @cache
     def compose(self):
         """Composes the SciCat proposal dictionary from DUO data."""
         log.info("Composing SciCat proposal from duo proposal")

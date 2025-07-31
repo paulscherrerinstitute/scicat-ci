@@ -146,9 +146,14 @@ class TestSciCatProposalFromDuo:
         )
         self.proposalId = FixturesFromDuo.scicat_proposal["proposalId"]
 
-    def test_compose(self):
+    @patch("scicat.log.info", autospec=True)
+    def test_compose(self, mock_log_info):
         proposal = self.scicat_proposal.compose()
         assert proposal == FixturesFromDuo.expected_scicat_proposal
+        call_count = mock_log_info.call_count
+        proposal1 = self.scicat_proposal.compose()
+        assert proposal1 == FixturesFromDuo.expected_scicat_proposal
+        mock_log_info.call_count == call_count
 
     @patch("scicat.ProposalApi.proposal_create", autospec=True)
     def test_create_proposal(self, mock_proposal_create):
@@ -265,12 +270,20 @@ class TestSciCatMeasurementsFromDuoMixin:
             "comment": "",
         }
 
-    def test_measurement_period_list(self):
+    @patch("scicat.log.info", autospec=True)
+    def test_measurement_period_list(self, mock_log_info):
         measurement_periods = self.scicat_measurements.measurement_period_list
         assert (
             measurement_periods
             == FixturesFromDuo.expected_scicat_proposal["MeasurementPeriodList"]
         )
+        call_count = mock_log_info.call_count
+        measurement_periods1 = self.scicat_measurements.measurement_period_list
+        assert (
+            measurement_periods1
+            == FixturesFromDuo.expected_scicat_proposal["MeasurementPeriodList"]
+        )
+        mock_log_info.call_count == call_count
 
     @pytest.mark.parametrize(
         "duo_facility, test_date",
