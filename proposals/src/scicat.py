@@ -2,6 +2,7 @@ import datetime
 import uuid
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+from functools import cache, cached_property
 from os import environ
 
 import pytz
@@ -190,8 +191,8 @@ class SciCatMeasurementsFromDuoMixin:
         utc_date = local_date.astimezone(pytz.utc)
         return utc_date.isoformat("T")
 
-    @property
-    def meausement_period_list(self):
+    @cached_property
+    def measurement_period_list(self):
         """Generates a list of measurement periods from the proposal schedule."""
         log.info("Extracting measurement periods from proposal")
         row = self.duo_proposal
@@ -217,7 +218,7 @@ class SciCatMeasurementsFromDuoMixin:
             f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
         }
         new_entries = []
-        for new_entry in self.meausement_period_list:
+        for new_entry in self.measurement_period_list:
             if (
                 f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
                 in existing_measurements_dict
@@ -251,6 +252,7 @@ class SciCatProposalFromDuo(
         super().__init__(duo_proposal, accelerator)
         self.duo_facility = duo_facility
 
+    @cache
     def compose(self):
         """Composes the SciCat proposal dictionary from DUO data."""
         log.info("Composing SciCat proposal from duo proposal")
@@ -269,7 +271,7 @@ class SciCatProposalFromDuo(
             "abstract": row["abstract"],
             "ownerGroup": self.owner_group,
             "accessGroups": self.access_groups,
-            "MeasurementPeriodList": self.meausement_period_list,
+            "MeasurementPeriodList": self.measurement_period_list,
         }
         log.info("SciCat proposal composed")
         return proposal
