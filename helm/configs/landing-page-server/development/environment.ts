@@ -6,10 +6,10 @@ export const environment = {
     directMongoAccess: true,
     doiBaseUrl: "https://doi.org/",
     facility: "psi",
-    lbBaseURL: "https://dacat-development.psi.ch",
+    lbBaseURL: "https://scicat.development.psi.ch",
     oaiProviderRoute: null,
     production: true,
-    scicatBaseUrl: "https://discovery-development.psi.ch",
+    scicatBaseUrl: "https://discovery.development.psi.ch",
     showLogoBanner: false,
     retrieveToEmail: {
       option: "URLs", 
