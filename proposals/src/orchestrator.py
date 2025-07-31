@@ -4,7 +4,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 
-from proposals import ProposalsFromFacility, ProposalsFromPgroups
+from proposals import ProposalsFactory
 from scicat import SciCatAuth, SciCatPolicyFromDuo, SciCatProposalFromDuo
 from utils import log
 
@@ -20,25 +20,14 @@ class DuoSciCatOrchestrator(Orchestrator):
 
     def __init__(self):
         load_dotenv()
-        # scicat config variables
-        SCICAT_ENDPOINT = os.environ["SCICAT_ENDPOINT"]
-        SCICAT_USERNAME = os.environ["SCICAT_USERNAME"]
-        SCICAT_PASSWORD = os.environ["SCICAT_PASSWORD"]
-
         # duo config variables
-        DUO_ENDPOINT = os.environ["DUO_ENDPOINT"]
-        DUO_SECRET = os.environ["DUO_SECRET"]
         DUO_YEAR = os.environ["DUO_YEAR"]
         self.year = DUO_YEAR or datetime.now().year
         DUO_FACILITY = os.environ["DUO_FACILITY"]
         self.duo_facility = DUO_FACILITY
 
-        self.scicat_instance = SciCatAuth(
-            SCICAT_USERNAME, SCICAT_PASSWORD, SCICAT_ENDPOINT
-        )
-        self.duo_instance = {"pgroups": ProposalsFromPgroups}.get(
-            DUO_FACILITY, ProposalsFromFacility
-        )(DUO_ENDPOINT, DUO_SECRET)
+        self.scicat_instance = SciCatAuth.from_env()
+        self.duo_instance = ProposalsFactory.from_env().from_env()
 
     @staticmethod
     def _upsert_policy_and_proposal(policy, proposal):

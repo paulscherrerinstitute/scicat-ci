@@ -1,7 +1,11 @@
 import abc
+from collections import defaultdict
 from itertools import product
 from json import loads
+from os import environ
 from urllib import request as ur
+
+from dotenv import load_dotenv
 
 from utils import retry
 
@@ -10,6 +14,11 @@ class Proposals(metaclass=abc.ABCMeta):
     def __init__(self, duo_endpoint, duo_secret):
         self.duo_endpoint = duo_endpoint
         self.duo_secret = duo_secret
+
+    @classmethod
+    def from_env(cls):
+        load_dotenv()
+        return cls(environ["DUO_ENDPOINT"], environ["DUO_SECRET"])
 
     @abc.abstractmethod
     def proposals(self, *args, **kwargs):
@@ -104,3 +113,19 @@ class ProposalsFromPgroups(Proposals):
 
 class MissingOwnerError(Exception):
     pass
+
+
+class ProposalsFactory:
+
+    _env_to_proposal_class = defaultdict(
+        lambda: ProposalsFromFacility, {"pgroups": ProposalsFromPgroups}
+    )
+
+    def __new__(cls, duo_facility):
+        return cls._env_to_proposal_class[duo_facility]
+
+    @classmethod
+    def from_env(cls):
+        load_dotenv()
+        duo_facility = environ["DUO_FACILITY"]
+        return cls(duo_facility)

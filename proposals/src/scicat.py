@@ -2,8 +2,10 @@ import datetime
 import uuid
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+from os import environ
 
 import pytz
+from dotenv import load_dotenv
 from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
 from swagger_client.rest import ApiException
 
@@ -16,6 +18,15 @@ class SciCatAuth:
         self.username = username
         self.password = password
         self.url = url
+
+    @classmethod
+    def from_env(cls):
+        load_dotenv()
+        return cls(
+            environ["SCICAT_USERNAME"],
+            environ["SCICAT_PASSWORD"],
+            environ["SCICAT_ENDPOINT"],
+        )
 
     def authenticate(self):
         self._set_scicat_token()
