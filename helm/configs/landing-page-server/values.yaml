@@ -33,6 +33,7 @@ run:
     - -c
     - >
       rm -f /usr/share/nginx/html/google43e14584df796f63.html;
+      base64 -d /usr/share/nginx/html/assets/favicon.ico.b64 > /usr/share/nginx/html/favicon.ico;
       nginx -g "daemon off;"
 
 volumes:
@@ -43,12 +44,12 @@ volumes:
 configMaps: 
   "{{ .Release.Name }}-cm":
     config.json: "{{ .Values.CONFIG }}"
-    favicon.io: "{{ .Values.FAVICON }}"
+    favicon.ico.b64: "{{ .Values.FAVICON | b64enc }}"
 
 volumeMounts:
   - name: config-volume
     mountPath: /usr/share/nginx/html/assets/config.json
     subPath: config.json
   - name: config-volume
-    mountPath: /usr/share/nginx/html/assets/favicon.ico
-    subPath: favicon.ico
+    mountPath: /usr/share/nginx/html/assets/favicon.ico.b64
+    subPath: favicon.ico.b64
