@@ -1,1 +1,3 @@
 host: oaipmh.development.psi.ch
+environment: development
+backendUrl: http://backend.scicat-development
