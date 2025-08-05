@@ -4,10 +4,10 @@
   "directMongoAccess": true,
   "doiBaseUrl": "https://doi.org/",
   "facility": "psi",
-  "lbBaseUrl": "https://dacat-development.psi.ch",
+  "lbBaseUrl": "https://scicat.development.psi.ch",
   "oaiProviderRoute": null,
   "production": true,
-  "scicatBaseUrl": "https://discovery-development.psi.ch",
+  "scicatBaseUrl": "https://discovery.development.psi.ch",
   "showLogoBanner": false,
   "retrieveToEmail": {
     "option": "URLs",
