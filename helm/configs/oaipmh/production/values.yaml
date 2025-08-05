@@ -1,1 +1,3 @@
 host: doi.psi.ch
+environment: production
+backendUrl: http://backend.scicat-production

@@ -54,6 +54,5 @@ jobs:
       submodule: oaipmh
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      JSON_SECRETS: ${{ toJSON(secrets) }}
       BASTION_USER: ${{ secrets.BASTION_USER }}
       BASTION_SSH_KEY: ${{ secrets.BASTION_SSH_KEY }}

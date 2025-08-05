@@ -9,15 +9,13 @@ image:
 service:
   type: ClusterIP
   externalPort: 80
-  internalPort: 3001
+  internalPort: 3000
 
 ingress:
   enabled: true
   annotations: 
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite "(?i)/oaipmh/oai" /scicat/oai break;
   hosts:
     - host: "{{ .Values.host }}"
       paths: 
@@ -30,18 +28,22 @@ ingress:
       - "{{ .Values.host }}"
       secretName: "scicat-oaipmh-certificate"
 
-volumes:
-  - name: secrets-volume
-    secret:
-      secretName: "{{ .Release.Name }}-s"
-
-secrets: 
-  "{{ .Release.Name }}-s":
-    type: Opaque
-    data: 
-      .env: "{{ .Values.secretsJson.OAIPMH_ENV }}"
-
-volumeMounts:
-  - name: secrets-volume
-    mountPath: /home/node/app/dist/server/.env
-    subPath: .env
+env:
+  - name: ENVIRONMENT
+    value: "{{ .Values.environment }}"
+  - name: APP_ID
+    value: oai-pmh-service
+  - name: LOG_LEVEL
+    value: info
+  - name: ADMIN_USER_EMAIL
+    value: awi-7903@psi.ch
+  - name: SCICAT_BACKEND_URL
+    value: "{{ .Values.backendUrl }}"
+  - name: SERVICE_URL
+    value: https://{{ .Values.host }}
+  - name: SCICAT_ROUTE
+    value: /oaipmh/oai
+  - name: SERVICE_NAME
+    value: oai-pmh-service
+  - name: FACILITY_NAME
+    value: PSI
