@@ -13,12 +13,5 @@ env:
         name: "{{ .Release.Name }}-s"
         key: google_verify
 
-run:
-  command: 
-    - /bin/sh
-  args: 
-    - -c
-    - >
-      rm -f /usr/share/nginx/html/google43e14584df796f63.html;
-      echo "google-site-verification: $GOOGLE_VERIFY" > /usr/share/nginx/html/$GOOGLE_VERIFY;
-      nginx -g "daemon off;"
+preRun: >-
+  echo "google-site-verification: $GOOGLE_VERIFY" > /usr/share/nginx/html/$GOOGLE_VERIFY;

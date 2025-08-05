@@ -43,10 +43,7 @@ jobs:
      - check_changed
      - set_env
     uses: ./.github/workflows/reusable.build-deploy.yml
-    with: 
-      docker_build_files: >-
-        helm/configs/landing-page-server/${{ needs.set_env.outputs.environment }}/environment.ts:landing-page-server/src/environments/environment.essprod.ts 
-        helm/configs/landing-page-server/favicon.ico:landing-page-server/src/favicon.ico
+    with:
       context: landing-page-server/.
       image_name: ${{ github.repository }}/landing-page-server
       release_name: landing-page-server
@@ -55,6 +52,9 @@ jobs:
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       submodule: landing-page-server
+      helm_set_files: >-
+        CONFIG=helm/configs/landing-page-server/${{ needs.set_env.outputs.environment }}/config.json
+        FAVICON=helm/configs/landing-page-server/favicon.ico
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
