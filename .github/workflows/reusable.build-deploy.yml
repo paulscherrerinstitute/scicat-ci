@@ -79,7 +79,7 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -133,7 +133,7 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: ${{ inputs.commit }}
 
