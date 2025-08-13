@@ -3,6 +3,7 @@ host: oaipmh.development.psi.ch
 ingresses:
   - enabled: true
     annotations:
+      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
       kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
@@ -17,6 +18,7 @@ ingresses:
   - enabled: true
     name: renku-redirect
     annotations:
+      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
       kubernetes.io/ingress.class: nginx
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/configuration-snippet: |
