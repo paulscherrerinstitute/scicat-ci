@@ -1,1 +1,30 @@
 host: oaipmh.development.psi.ch
+
+ingresses:
+  - enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: "{{ .Values.host }}"
+        paths: 
+          - path: "/"
+            pathType: Prefix
+    tls:
+      - hosts:
+        - "{{ .Values.host }}"
+        secretName: "scicat-oaipmh-certificate"
+  - enabled: true
+    name: renku-redirect
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        if ($http_accept = "application/ld+json") {
+          return 302 "https://scicat-exporter.development.psi.ch/api/v1/zenodo/$1%2F$2/export";
+        }
+    hosts:
+      - host: "{{ .Values.host }}"
+        paths:
+          - path: /detail/([^/]+)/([^/]+)
+            pathType: ImplementationSpecific
