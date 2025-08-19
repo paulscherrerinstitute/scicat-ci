@@ -1,0 +1,16 @@
+{{- with .Values.storage -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .name | default (printf "%s-pvc" $.Release.Name) }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .accessModes | default "ReadWriteOnce" }}
+  resources:
+    requests:
+      storage: {{ .size }}
+{{- end -}}
