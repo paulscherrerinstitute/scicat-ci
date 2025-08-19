@@ -1,12 +1,14 @@
 scicatUrl: "http://backend-next.scicat-development/"
 facilityCollectionIDs:
-  PSI_DEV:        b2064a13-571b-4314-a7ec-db58c7a5b423
-  PSI_QA:         33f12025-7098-4774-bb13-5134b4d0587a
-  PSI:            46d5bac8-d806-4b61-a1d9-29b5d62643da
+  PSI_DEV:        f1262bf3-3b63-4f17-9e4a-2f1bd6223c05
+  PSI_QA:         394fb902-2fcf-4ffd-ba61-98d72e29dd0e
+  PSI:            7a50c4b9-651d-4fba-a8f9-0557f1b4b7ed
   UNIBAS:         d35e9477-400d-4069-b571-d678847373f1
   UNIGE_TMP:      b01d16f8-2f6c-4472-b112-c21adb13ccb3
+  UNIGE:          d22fab58-5f80-47f1-a9a0-da36478ca41e
   UNIBE:          44e61e98-8dba-43ec-a862-c1fe82ac23d6
   UNIBE_DEBUG:    f51ae3e8-571a-408a-8f98-ed431bf10746
+  RFI_OPENEM:     b04545e2-2a89-46d0-8e79-52ab571d12bd
 globusScopes:
   - "urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/b2064a13-571b-4314-a7ec-db58c7a5b423/data_access]"
 port: 8080
