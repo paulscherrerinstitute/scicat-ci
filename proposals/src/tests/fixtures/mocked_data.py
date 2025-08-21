@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import ANY, Mock
 
 
@@ -112,7 +113,18 @@ class FixturesFromSciCatAPI(FixturesCommon):
         },
     ]
 
-    measurement_periods = list(map(lambda x: Mock(**x), existing_measurment_periods))
+    measurement_periods = list(
+        map(
+            lambda x: Mock(
+                **{
+                    **x,
+                    "start": datetime.fromisoformat(x["start"]),
+                    "end": datetime.fromisoformat(x["end"]),
+                }
+            ),
+            existing_measurment_periods,
+        )
+    )
 
     expected_measurement_periods = [
         new_measurment_period,

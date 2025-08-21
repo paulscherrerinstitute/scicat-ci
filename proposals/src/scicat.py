@@ -216,7 +216,8 @@ class SciCatMeasurementsFromDuoMixin:
         """
         log.info("Excluding already existing proposals")
         existing_measurements_set = {
-            f"{m.instrument}_{m.start}_{m.end}" for m in measurements
+            f"{m.instrument}_{m.start.isoformat("T")}_{m.end.isoformat("T")}"
+            for m in measurements
         }
         new_entries = []
         for new_entry in self.measurement_period_list:
@@ -244,8 +245,8 @@ class SciCatMeasurementsFromDuoMixin:
         return {
             "id": proposal_obj.id,
             "instrument": proposal_obj.instrument,
-            "start": proposal_obj.start,
-            "end": proposal_obj.end,
+            "start": proposal_obj.start.isoformat("T"),
+            "end": proposal_obj.end.isoformat("T"),
             "comment": proposal_obj.comment,
         }
 
