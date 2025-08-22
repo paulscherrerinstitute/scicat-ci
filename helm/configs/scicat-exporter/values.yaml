@@ -4,7 +4,7 @@ image:
   # repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
   # tag: 1.0.0-SNAPSHOT
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate@sha256
-  tag: 0269ee65f1080b43eb44781302390a4e05a4ac40c4e60c84c9c1cdd443b0b7b9
+  tag: 0d3ae846d979bbe5d989310751d6185f8f2a0819508a550716889a3b3da951d8
   pullPolicy: Always
 
 service:
