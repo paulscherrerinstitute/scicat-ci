@@ -4,11 +4,12 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from functools import cache, cached_property
 from os import environ
+from typing import Any
 
 import pytz
 from dotenv import load_dotenv
-from swagger_client import Configuration, PolicyApi, ProposalApi, UserApi
-from swagger_client.rest import ApiException
+from scicat_sdk_py import AuthApi, Configuration, PoliciesApi, ProposalsApi
+from scicat_sdk_py.exceptions import NotFoundException
 
 from utils import log
 
@@ -47,19 +48,19 @@ class SciCatAuth:
         """Retrieves the authentication token from SciCat."""
         credentials = {"username": self.username, "password": self.password}
         try:
-            response = UserApi().user_login(credentials)
-            access_token = response["id"]
-            return access_token
+            response = AuthApi().auth_controller_login_v3(credentials)
+            return response.access_token
         except Exception as e:
             log.error("Login to data catalog did not succeed")
             raise e
 
     def _set_scicat_token(self):
         """Sets the SciCat token in the Swagger client configuration."""
-        Configuration().host = self.url
+        scicat_config = Configuration(host=self.url)
+        Configuration.set_default(scicat_config)
         access_token = self._get_scicat_token()
         log.info("SciCat authentication successuful, setting access_token")
-        Configuration().api_client.default_headers["Authorization"] = access_token
+        Configuration.get_default().access_token = access_token
 
 
 class SciCatFromDuo(metaclass=ABCMeta):
@@ -140,7 +141,7 @@ class SciCatPolicyFromDuo(SciCatFromDuo, SciCatCreatorFromDuoMixin):
         """Creates the SciCat policy using the composed policy dictionary."""
         policy = self.compose()
         log.info(f"Create new policy for pgroup {policy}")
-        PolicyApi().policy_create(data=policy)
+        PoliciesApi().policies_controller_create_v3(policy)
         log.info("Policy created")
 
 
@@ -204,7 +205,7 @@ class SciCatMeasurementsFromDuoMixin:
         log.info("Measurement periods from proposal extracted")
         return measurement_periods
 
-    def keep_new_measurements(self, measurements):
+    def _keep_new_measurements(self, measurements):
         """Filters out measurement periods already present in SciCat.
 
         Args:
@@ -214,14 +215,15 @@ class SciCatMeasurementsFromDuoMixin:
             list[dict]: New measurement periods not in existing ones.
         """
         log.info("Excluding already existing proposals")
-        existing_measurements_dict = {
-            f"{m.instrument}_{m.start}_{m.end}": m for m in measurements
+        existing_measurements_set = {
+            f"{m.instrument}_{m.start.isoformat("T")}_{m.end.isoformat("T")}"
+            for m in measurements
         }
         new_entries = []
         for new_entry in self.measurement_period_list:
             if (
                 f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
-                in existing_measurements_dict
+                in existing_measurements_set
             ):
                 log.info("This entry exists already, nothing appended")
                 continue
@@ -229,6 +231,37 @@ class SciCatMeasurementsFromDuoMixin:
             new_entries.append(new_entry)
         log.info("Existing proposals excluded")
         return new_entries
+
+    @staticmethod
+    def _proposal_obj_to_dict(proposal_obj: Any) -> dict:
+        """Converts a proposal object to a dictionary representation.
+
+        Args:
+            proposal_obj (Any): A SciCat proposal or measurement object.
+
+        Returns:
+            dict: A dictionary with keys 'id', 'instrument', 'start', 'end', and 'comment'.
+        """
+        return {
+            "id": proposal_obj.id,
+            "instrument": proposal_obj.instrument,
+            "start": proposal_obj.start.isoformat("T"),
+            "end": proposal_obj.end.isoformat("T"),
+            "comment": proposal_obj.comment,
+        }
+
+    def keep_new_measurements(self, measurements: list) -> list[dict]:
+        """Combines newly fetched measurement periods with existing ones.
+
+        Args:
+            measurements (list): Existing SciCat measurement period objects.
+
+        Returns:
+            list[dict]: Combined list of new and existing measurement periods in dict format.
+        """
+        new_measurements = self._keep_new_measurements(measurements)
+        exiting_measurements = list(map(self._proposal_obj_to_dict, measurements))
+        return new_measurements + exiting_measurements
 
 
 class SciCatProposalFromDuo(
@@ -280,7 +313,7 @@ class SciCatProposalFromDuo(
         """Creates a new SciCat proposal."""
         proposal = self.compose()
         log.info(f"Creating new proposal {proposal}")
-        ProposalApi().proposal_create(data=proposal)
+        ProposalsApi().proposals_controller_create_v3(proposal)
         log.info("Proposal created")
 
     def _update(self):
@@ -288,22 +321,19 @@ class SciCatProposalFromDuo(
         proposal = self.compose()
         pid = proposal["proposalId"]
         log.info(f"Checking if proposal {pid} exists in SciCat")
-        existing_proposal = ProposalApi().proposal_find_by_id(pid)
+        existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
         existing_measurements = existing_proposal.measurement_period_list
         new_entries = self.keep_new_measurements(existing_measurements)
         if len(new_entries) == 0:
             return
         patch = {"MeasurementPeriodList": new_entries}
         log.info(f"Modifying proposal, patch object: {patch}")
-        ProposalApi().proposal_prototype_patch_attributes(pid, data=patch)
+        ProposalsApi().proposals_controller_update_v3(pid, patch)
         log.info("Proposal modified")
 
     def update(self):
         """Public method to update a proposal; raises if not found."""
         try:
             self._update()
-        except ApiException as e:
-            if e.status == 404:
-                log.info("Proposal does not exist in SciCat")
-                raise self.ProposalNotFoundException
-            raise e
+        except NotFoundException as e:
+            raise self.ProposalNotFoundException

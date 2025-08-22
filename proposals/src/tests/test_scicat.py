@@ -2,7 +2,7 @@ import os
 from unittest.mock import ANY, Mock, patch
 
 import pytest
-from swagger_client.rest import ApiException
+from scicat_sdk_py.exceptions import NotFoundException
 
 import scicat
 
@@ -19,8 +19,8 @@ class TestSciCatAuth:
         assert self.scicat_auth.url == "http://scicat"
 
     @patch(
-        "scicat.UserApi.user_login",
-        return_value={"id": "test_token"},
+        "scicat.AuthApi.auth_controller_login_v3",
+        return_value=Mock(access_token="test_token"),
         autospec=True,
     )
     def test__get_scicat_token(self, mock_user_login):
@@ -35,11 +35,8 @@ class TestSciCatAuth:
     )
     def test__set_scicat_token(self, _):
         self.scicat_auth._set_scicat_token()
-        assert scicat.Configuration().host == "http://scicat"
-        assert (
-            scicat.Configuration().api_client.default_headers["Authorization"]
-            == "test_token"
-        )
+        assert scicat.Configuration.get_default().host == "http://scicat"
+        assert scicat.Configuration.get_default().access_token == "test_token"
 
     @patch.object(scicat.SciCatAuth, "_set_scicat_token", autospec=True)
     def test_authenticate(self, mock_set_token):
@@ -130,10 +127,10 @@ class TestSciCatPolicyFromDuo:
         policy = self.scicat_policy.compose()
         assert policy == FixturesFromDuo.policy
 
-    @patch("scicat.PolicyApi.policy_create", autospec=True)
+    @patch("scicat.PoliciesApi.policies_controller_create_v3", autospec=True)
     def test_create(self, mock_policy_create):
         self.scicat_policy.create()
-        mock_policy_create.assert_called_once_with(ANY, data=FixturesFromDuo.policy)
+        mock_policy_create.assert_called_once_with(ANY, FixturesFromDuo.policy)
 
 
 class TestSciCatProposalFromDuo:
@@ -155,16 +152,16 @@ class TestSciCatProposalFromDuo:
         assert proposal1 == FixturesFromDuo.expected_scicat_proposal
         assert mock_log_info.call_count == call_count
 
-    @patch("scicat.ProposalApi.proposal_create", autospec=True)
+    @patch("scicat.ProposalsApi.proposals_controller_create_v3", autospec=True)
     def test_create_proposal(self, mock_proposal_create):
         self.scicat_proposal.create()
         mock_proposal_create.assert_called_once_with(
-            ANY, data=FixturesFromDuo.expected_scicat_proposal
+            ANY, FixturesFromDuo.expected_scicat_proposal
         )
 
-    @patch("scicat.ProposalApi.proposal_prototype_patch_attributes", autospec=True)
+    @patch("scicat.ProposalsApi.proposals_controller_update_v3", autospec=True)
     @patch(
-        "scicat.ProposalApi.proposal_find_by_id",
+        "scicat.ProposalsApi.proposals_controller_find_by_id_v3",
         return_value=Mock(
             measurement_period_list=FixturesFromSciCatAPI.measurement_periods
         ),
@@ -176,7 +173,7 @@ class TestSciCatProposalFromDuo:
         mock_proposal_patch.assert_called_once_with(
             ANY,
             self.proposalId,
-            data={
+            {
                 "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods,
             },
         )
@@ -186,10 +183,9 @@ class TestSciCatProposalFromDuo:
         [
             [{"return_value": ""}, ""],
             [
-                {"side_effect": ApiException(status=404)},
+                {"side_effect": NotFoundException},
                 scicat.SciCatProposalFromDuo.ProposalNotFoundException,
             ],
-            [{"side_effect": ApiException(status=500)}, ApiException],
             [{"side_effect": KeyError}, KeyError],
         ],
     )
@@ -303,3 +299,15 @@ class TestSciCatMeasurementsFromDuoMixin:
             FixturesFromSciCatAPI.measurement_periods,
         )
         assert new_measures == FixturesFromSciCatAPI.expected_measurement_periods
+
+    def test__proposal_obj_to_dict(self):
+        proposal_dict = self.scicat_measurements._proposal_obj_to_dict(
+            FixturesFromSciCatAPI.measurement_periods[0]
+        )
+        assert proposal_dict == FixturesFromSciCatAPI.existing_measurment_periods[0]
+
+    def test__keep_new_measurements(self):
+        new_measures = self.scicat_measurements._keep_new_measurements(
+            FixturesFromSciCatAPI.measurement_periods,
+        )
+        assert new_measures == [FixturesFromSciCatAPI.new_measurment_period]

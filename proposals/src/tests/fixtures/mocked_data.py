@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import ANY, Mock
 
 
@@ -97,21 +98,37 @@ class FixturesFromDuo(FixturesCommon):
 
 class FixturesFromSciCatAPI(FixturesCommon):
 
-    expected_measurement_periods = [
-        FixturesCommon.measurement_period_list([ANY, None])[0]
+    # this is the result from the first schedule from duo proposal.
+    # The second schedule is excluded because == existing_measurment_periods[0]
+    new_measurment_period = FixturesCommon.measurement_period_list([ANY, None])[0]
+
+    existing_measurment_periods = [
+        FixturesCommon.measurement_period_list([None, 789])[1],
+        {
+            "id": 0,
+            "instrument": "/PSI/SLS/PX",
+            "start": "2021-12-31T23:00:00+00:00",
+            "end": "2022-01-01T23:00:00+00:00",
+            "comment": "",
+        },
     ]
 
-    measurement_periods = [
-        Mock(**FixturesCommon.measurement_period_list([None, 789])[1]),
-        Mock(
-            **{
-                "id": 0,
-                "instrument": "/PSI/SLS/PX",
-                "start": "2021-12-31T23:00:00+00:00",
-                "end": "2022-01-01T23:00:00+00:00",
-                "comment": "",
-            }
-        ),
+    measurement_periods = list(
+        map(
+            lambda x: Mock(
+                **{
+                    **x,
+                    "start": datetime.fromisoformat(x["start"]),
+                    "end": datetime.fromisoformat(x["end"]),
+                }
+            ),
+            existing_measurment_periods,
+        )
+    )
+
+    expected_measurement_periods = [
+        new_measurment_period,
+        *existing_measurment_periods,
     ]
 
 
@@ -152,14 +169,17 @@ class FixturesProposalsFromPgroups(FixturesCommon):
         },
     }
 
+    _duo_measurement = {
+        "id": ANY,
+        "instrument": "/PSI/SLS/PX",
+        "comment": "",
+        "start": "1960-01-01T00:00:00+00:00",
+        "end": "2100-12-31T00:00:00+00:00",
+    }
+
     expected_measurement_periods = [
-        {
-            "id": ANY,
-            "instrument": "/PSI/SLS/PX",
-            "comment": "",
-            "start": "1960-01-01T00:00:00+00:00",
-            "end": "2100-12-31T00:00:00+00:00",
-        },
+        _duo_measurement,
+        *FixturesFromSciCatAPI.existing_measurment_periods,
     ]
 
     expected_scicat_proposal = {
@@ -168,7 +188,7 @@ class FixturesProposalsFromPgroups(FixturesCommon):
         "pi_email": "john@doe",
         "abstract": "",
         "ownerGroup": "123",
-        "MeasurementPeriodList": expected_measurement_periods,
+        "MeasurementPeriodList": [_duo_measurement],
     }
 
     policy = {
