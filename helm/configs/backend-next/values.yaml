@@ -18,11 +18,16 @@ volumes:
   - name: config-volume
     configMap:
       name: "{{ .Release.Name }}-cm"
+  - name: migrations-volume
+    configMap:
+      name: "{{ .Release.Name }}-migrations-cm"
 
 configMaps:
   "{{ .Release.Name }}-cm":
     job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
+  "{{ .Release.Name }}-migrations-cm":
+    20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -70,3 +75,6 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template-simplified.html
     subPath: job-template-simplified.html
+  - name: migrations-volume
+    mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
+    subPath: 20250819165001-rename-measurement-id.js
