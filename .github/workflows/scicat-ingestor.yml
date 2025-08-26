@@ -50,6 +50,6 @@ jobs:
         secrets:  ${{ toJSON(secrets) }}
       env:
         KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
-        RELEASE_NAME: globus-proxy
+        RELEASE_NAME: ingestor
         ENVIRONMENT: '${{ needs.set_env.outputs.environment }}'
         NAMESPACE_PREFIX: scicat-
