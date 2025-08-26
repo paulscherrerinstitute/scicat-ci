@@ -27,7 +27,7 @@ configMaps:
     job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
-    rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
+    20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -77,4 +77,4 @@ volumeMounts:
     subPath: job-template-simplified.html
   - name: migrations-volume
     mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
-    subPath: rename-measurement-id.js
+    subPath: 20250819165001-rename-measurement-id.js
