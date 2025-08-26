@@ -10,4 +10,5 @@ data:
   {{ $k }}: | 
 {{ tpl $v $ | indent 4}}
   {{- end }}
+---
 {{- end }}
