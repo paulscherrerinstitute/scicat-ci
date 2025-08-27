@@ -1,0 +1,80 @@
+Scicat:
+  # Backend URL from within the container
+  Host: http://backend-next.scicat-development/api/v3
+Transfer:
+  StorageLocation: PSI
+  Method: ExtGlobus
+  ExtGlobus:
+    TransferServiceUrl: "https://globus-proxy.development.psi.ch/globus/service"
+    # Relies on the PSI_QA:/test2/demo directory being sync'd to /data
+    SrcFacility: "PSI_QA"
+    DstFacility: "PSI_DEV"
+    CollectionRootPath: "/test2/demo"
+
+MetadataExtractors:
+  InstallationPath: ./extractors/
+  SchemasLocation: ./schemas/
+  DownloadMissingExtractors: true
+  Timeout: 10m
+  Extractors:
+  - Name: LS
+    GithubOrg: SwissOpenEM
+    GithubProject: LS_Metadata_reader
+    Version: v2.0.0
+    Executable: LS_Metadata_reader
+    # sha256sum LS_Metadata_reader_Linux_x86_64.tar.gz
+    Checksum: 826a0ff9cbb2e38854d5da12f0238d5121fe7dcfdd70eb989623f333db456e4d
+    ChecksumAlg: sha256
+    CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}' {{.AdditionalParameters}}"
+    AdditionalParameters:
+      - cs=2.7
+      - gain_flip_rotate="None"
+    # - epu="xmls/"
+    Methods:
+      - Name: Single Particle
+        Schema: oscem_schemas_spa.schema.json
+        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/spa/jsonschema/oscem_schemas_spa.schema.json
+      - Name: Cellular Tomography
+        Schema: oscem_cellular_tomo.json
+        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/cellular_tomo/jsonschema/oscem_schemas_cellular_tomo.schema.json
+      - Name: Tomography
+        Schema: oscem_tomo.json
+        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/subtomo/jsonschema/oscem_schemas_subtomo.schema.json
+      - Name: EnvironmentalTomography
+        Schema: oscem_env_tomo.json
+        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/env_tomo/jsonschema/oscem_schemas_env_tomo.schema.json
+
+WebServer:
+  Auth:
+    Disable: false
+    SessionDuration: 28800
+    Frontend:
+      # User-facing frontend URL
+      Origin: https://discovery.development.psi.ch
+      RedirectPath: "/ingestor"
+    OAuth2:
+      ClientID: "openem-ingestor-demo"
+      RedirectURL: "https://ingestor.development.psi.ch/callback"
+      Scopes:
+        - email
+    OIDC:
+      IssuerURL: "https://kc.development.psi.ch/realms/awi"
+    JWT:
+      UseJWKS: true
+      JwksURL: "https://kc.development.psi.ch/realms/awi/protocol/openid-connect/certs"
+      JwksSignatureMethods:
+        - RS256
+    RBAC:
+      AdminRole: "ingestor-admin"
+      CreateModifyTasksRole: "ingestor-write"
+      ViewTasksRole: "ingestor-read"
+  Paths:
+    CollectionLocations:
+      demo: "/data"
+  MetadataExtJobs:
+    ConcurrencyLimit: 4
+    QueueSize: 200
+  Other:
+    Port: 8080
+    LogLevel: Debug
+    SecureCookies: true

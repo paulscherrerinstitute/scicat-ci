@@ -1,4 +1,4 @@
-host: globus-proxy.development.psi.ch
+host: ingestor.development.psi.ch
 
 ingress:
   annotations:

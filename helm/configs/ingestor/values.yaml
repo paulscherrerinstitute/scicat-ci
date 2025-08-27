@@ -1,0 +1,86 @@
+image:
+  repository: ghcr.io/swissopenem/ingestor
+  pullPolicy: Always
+  tag: main
+
+run:
+  command: ["/bin/sh", "/app/docker-entrypoint.sh"]
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  probePath: /version
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+
+secrets:
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data:
+      # Scicat functional account for the final dataset PATCH to set archivable. Needs admin role.
+      INGESTOR_SERVICE_USER_NAME: "{{ .Values.INGESTOR_SERVICE_USER_NAME}}"
+      INGESTOR_SERVICE_USER_PASS: "{{ .Values.INGESTOR_SERVICE_USER_PASS}}"
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "ingestor-certificate"
+
+envFrom:
+  - secretRef:
+      name: "{{ .Release.Name }}-s"
+
+configMaps:
+  "{{ .Release.Name }}-cm":
+    openem-ingestor-config.yaml: "{{ .Values.CONFIG }}"
+    docker-entrypoint.sh: |-
+      #!/bin/sh
+
+      # Download tutorial data if needed
+      if ! [ -d /data/tutorial ]; then
+          apk update && apk add ca-certificates git && update-ca-certificates
+          echo "Downloading tutorial data"
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/SwissOpenEM/LS_Metadata_reader.git
+          cd LS_Metadata_reader
+          git sparse-checkout set tutorial
+          mkdir -p /data/
+          mv tutorial /data/
+          cd ..
+          rm -rf LS_Metadata_reader/
+      fi
+
+      exec /app/ingestor "$@"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /app/openem-ingestor-config.yaml
+    subPath: openem-ingestor-config.yaml
+  - name: config-volume
+    mountPath: /app/docker-entrypoint.sh
+    subPath: docker-entrypoint.sh
+
+probeChecks:
+  periodSeconds: 60
+  timeoutSeconds: 5
+  failureThreshold: 5
+
+securityContext:
+   runAsUser: 0
