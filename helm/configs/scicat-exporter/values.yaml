@@ -1,0 +1,30 @@
+replicatCount: 1
+
+image:
+  # repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
+  # tag: 1.0.0-SNAPSHOT
+  repository: ghcr.io/paulscherrerinstitute/scicat-rocrate@sha256
+  tag: a5d60e76feb1cd6fbaa283f161f4a76fb25c9b79dd04507c573032cb4c3fdb74
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  probePath: /api/v1/health/live
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+        - "{{ .Values.host }}"
+      secretName: "scicat-exporter-certificate"
