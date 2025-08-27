@@ -12,13 +12,6 @@ on:
       - .github/workflows/scicat-exporter.yml
       - helm/configs/scicat-exporter/values.yaml
       - helm/configs/scicat-exporter/development/**
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/scicat-exporter.yml
-      - helm/configs/scicat-exporter/values.yaml
-  release:
-    types: [published]
 
 jobs:
   set_env:
