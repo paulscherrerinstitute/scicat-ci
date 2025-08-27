@@ -42,7 +42,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
 
   hosts:
-    - host: "ingestor.development.psi.ch"
+    - host: "{{ .Values.host }}"
       paths:
         - path: "/"
           pathType: Prefix
