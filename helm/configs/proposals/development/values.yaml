@@ -1,4 +1,4 @@
-scicatEndpoint: http://backend.scicat-development/api/v3
+scicatEndpoint: http://backend-next.scicat-development
 
 duo_facilities:
  - name: pgroups
