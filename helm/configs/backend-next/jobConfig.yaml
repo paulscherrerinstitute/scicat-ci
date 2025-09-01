@@ -29,7 +29,7 @@ jobs:
         - &switchStorage
           actionType: switch
           phase: perform
-          property: datasets[].datasetlifecycle.storageLocation
+          property: datasets[*].datasetlifecycle.storageLocation
           cases:
           - match: ETHZ
             actions:
@@ -59,7 +59,8 @@ jobs:
 
     update:
       auth: archiveManager
-      actions: *archiveActions
+      actions:
+        - actionType: log
 
   - jobType: retrieve
     create:
@@ -75,7 +76,8 @@ jobs:
 
     update:
       auth: archiveManager
-      actions: *retrieveActions
+      actions:
+        - actionType: log
 
   # TODO Make public work for ETHZ
   - jobType: public
@@ -106,7 +108,8 @@ jobs:
 
     update:
       auth: 'archiveManager'
-      actions: *publicActions
+      actions:
+        - actionType: log
 
   - jobType: reset
     create:
@@ -117,17 +120,8 @@ jobs:
         - *rabbitmq
     update:
       auth: archiveManager
-      actions: *resetActions
-
-  - jobType: rabbitmq_demo
-    create:
-      auth: admin
       actions:
-        - *rabbitmq
-    update:
-      auth: "#jobOwnerUser"
-      actions: []
-
+        - actionType: log
 
   - jobType: email_demo
     create:
@@ -210,3 +204,37 @@ jobs:
       auth: "admin"
       actions: []
 
+  - jobType: switch_test
+    create:
+      auth: "#datasetAccess"
+      actions: &switchTestActions
+        - actionType: switch
+          phase: perform
+          property: datasets[*].datasetlifecycle.storageLocation
+          cases:
+          - match: ETHZ
+            actions:
+            - actionType: log
+              perform: |-
+                  (Job {{job.jobId}}) CREATE directed to ETHZ based on datasets=
+                  [{{~#each datasets ~}}
+                    {"pid": {{~{ jsonify pid }~}}
+                    ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
+                    ,"datasetlifecycle": {{~{ jsonify datasetlifecycle }~}}
+                    }{{#unless @last}},{{/unless~}}
+                  {{/each ~}}]
+
+          - # PSI default
+            actions:
+            - actionType: log
+              perform: |-
+                  (Job {{job.jobId}}) CREATE directed to PSI based on datasets=
+                  [{{~#each datasets ~}}
+                    {"pid": {{~{ jsonify pid }~}}
+                    ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
+                    ,"datasetlifecycle": {{~{ jsonify datasetlifecycle }~}}
+                    }{{#unless @last}},{{/unless~}}
+                  {{/each ~}}]
+    update:
+      auth: archiveManager
+      actions: *switchTestActions

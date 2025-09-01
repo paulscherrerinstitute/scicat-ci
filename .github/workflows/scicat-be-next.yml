@@ -32,6 +32,7 @@ jobs:
         .github/workflows/scicat-be-next.yml
         helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/**
         helm/configs/backend-next/job-template-simplified.html
+        helm/configs/backend-next/jobConfig.yaml
         helm/configs/backend-next/values.yaml
         scicat-backend-next/**
       commit: ${{ needs.set_env.outputs.commit }}
