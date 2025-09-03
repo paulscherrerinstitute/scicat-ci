@@ -292,15 +292,16 @@ class SciCatProposalFromDuo(
         row = self.duo_proposal
         if not row["email"]:
             log.warning(f"Empty email: {row}")
+        proposal_id = f'20.500.11935/{row["proposal"]}'
         proposal = {
-            "proposalId": f'20.500.11935/{row["proposal"]}',
+            "proposalId": proposal_id,
             "pi_email": self.principal_investigator,
             "pi_firstname": row["pi_firstname"],
             "pi_lastname": row["pi_lastname"],
             "email": row["email"],
             "firstname": row["firstname"],
             "lastname": row["lastname"],
-            "title": row["title"],
+            "title": row["title"] or proposal_id,
             "abstract": row["abstract"],
             "ownerGroup": self.owner_group,
             "accessGroups": self.access_groups,

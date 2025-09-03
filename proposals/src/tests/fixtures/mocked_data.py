@@ -184,7 +184,7 @@ class FixturesProposalsFromPgroups(FixturesCommon):
 
     expected_scicat_proposal = {
         **FixturesCommon.scicat_proposal,
-        "title": "",
+        "title": "20.500.11935/123",
         "pi_email": "john@doe",
         "abstract": "",
         "ownerGroup": "123",
