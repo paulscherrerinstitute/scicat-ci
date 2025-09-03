@@ -1,9 +1,10 @@
 from functools import wraps
-from logging import Logger, getLogger
+from logging import INFO, basicConfig, getLogger
 from time import sleep
 from urllib.error import URLError
 
-log: Logger = getLogger("duo_sync")
+basicConfig(level=INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+log = getLogger("duo_sync")
 
 
 def retry(func):

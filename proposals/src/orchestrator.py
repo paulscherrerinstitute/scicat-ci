@@ -70,7 +70,9 @@ class DuoSciCatOrchestrator(Orchestrator):
             duo_proposal (dict): Raw DUO proposal data.
             accelerator (str): Accelerator (e.g., SLS, SINQ).
         """
-        log.info(f"============= Input proposal: {duo_proposal['proposal']}")
+        log.info(
+            f"============= Input proposal: {duo_proposal['proposal']}============="
+        )
         policy = SciCatPolicyFromDuo(duo_proposal, accelerator)
         proposal = SciCatProposalFromDuo(duo_proposal, accelerator, self.duo_facility)
         try:
