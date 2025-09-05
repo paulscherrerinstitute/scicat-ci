@@ -10,9 +10,11 @@
     "editPublishedData": true,
     "editSampleEnabled": false,
     "facility": "PSI",
-    "siteIcon": "site-logo.png",
-    "sitetitle" : "SciCat Data Catalog",
-    "siteSciCatLogo" : "",
+    "siteHeaderLogo": "site-logo.png",
+    "siteTitle" : "SciCat Data Catalog",
+    "siteSciCatLogo" : "scicat-header-logo-full.png",
+    "siteLoginLogo" : "site-logo.png",
+    "siteLoginBackground": "site.png",
     "loginFacilityEnabled": true,
     "loginFacilityLabel": "Single Sign-On",
     "loginLdapEnabled": false,
@@ -281,6 +283,7 @@
     ],
     "mainMenu": {
         "nonAuthenticatedUser": {
+            "ingestor": false,
             "datasets": true,
             "files": false,
             "instruments": true,
