@@ -1,6 +1,6 @@
 {
     "lbBaseURL": "http://127.0.0.1:3000",
-    "accessTokenPrefix": "",
+    "accessTokenPrefix": "Bearer ",
     "archiveWorkflowEnabled": true,
     "externalAuthEndpoint": null,
     "editMetadataEnabled": false,
@@ -8,9 +8,18 @@
     "editPublishedData": true,
     "scienceSearchEnabled": true,
     "facility": "PSI",
+    "siteIcon": "site-logo.png",
+    "sitetitle" : "SciCat Data Catalog",
+    "siteSciCatLogo" : "",
+    "loginFacilityEnabled": true,
+    "loginFacilityLabel": "Single Sign-On",
+    "loginLdapEnabled": false,
+    "loginLocalEnabled": true,
+    "loginLocalLabel": "Local",
     "multipleDownloadEnabled": false,
     "shoppingCartEnabled": true,
     "shoppingCartOnHeader": true,
+    "supportEmail": "scicat-help@lists.psi.ch",
     "ingestManual": "http://melanie.gitpages.psi.ch/SciCatPages/",
     "gettingStarted": "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
     "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
@@ -34,8 +43,8 @@
         {
             "name": "runNumber",
             "order": 2,
-            "type": "custom",
-            "enabled": false
+            "type": "standard",
+            "enabled": true
         },
         {
             "name": "sourceFolder",
@@ -92,6 +101,98 @@
             "enabled": true
         }
     ],
+    "defaultDatasetsListSettings": {
+        "columns": [
+          {
+            "name": "select",
+            "order": 0,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "pid",
+            "order": 1,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "datasetName",
+            "order": 2,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "runNumber",
+            "order": 3,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "sourceFolder",
+            "order": 4,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "size",
+            "order": 5,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "creationTime",
+            "order": 6,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "type",
+            "order": 7,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "image",
+            "order": 8,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "metadata",
+            "order": 9,
+            "type": "standard",
+            "enabled": false
+          },
+          {
+            "name": "proposalId",
+            "order": 10,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "ownerGroup",
+            "order": 11,
+            "type": "standard",
+            "enabled": false
+          },
+          {
+            "name": "dataStatus",
+            "order": 12,
+            "type": "standard",
+            "enabled": false
+          }
+        ],
+        "filters": [
+          { "LocationFilter": true },
+          { "PidFilter": true },
+          { "GroupFilter": true },
+          { "TypeFilter": true },
+          { "KeywordFilter": true },
+          { "DateRangeFilter": true },
+          { "TextFilter": true }
+        ],
+        "conditions": []
+    },
     "logbookEnabled": false,
     "metadataPreviewEnabled": false,
     "maxDirectDownloadSize": 5000000000,
@@ -101,18 +202,20 @@
     "tableSciDataEnabled": false,
     "shareEnabled": true,
     "searchPublicDataEnabled": true,
-    "landingPage": "doi2.psi.ch/detail/",
+    "landingPage": "oaipmh.development.psi.ch/detail/",
     "fileDownloadEnabled": false,
     "jobsEnabled": true,
     "policiesEnabled": true,
     "addDatasetEnabled": false,
+    "addSampleEnabled": false,
+    "datafilesActionsEnabled": false,
     "editDatasetSampleEnabled": false,
     "scienceSearchUnitsEnabled": false,
     "metadataStructure": "tree",
     "loginFormEnabled": true,
     "oAuth2Endpoints": [
         {
-            "displayText": "PSI account",
+            "displayText": "Single Sign-On",
             "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
             "authURL": "api/v3/auth/oidc"
         }
@@ -128,7 +231,75 @@
         },
         {
             "option": "PSI-RA",
-            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/${groupname}/retrieve/${sourceFolder}/"
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
+        },
+        {
+            "option": "URLs",
+            "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
         }
-    ]
+    ],
+    "datasetOneDepIntegration": true,
+    "depositorURL": "https://depositor.development.psi.ch",
+    "ingestorEnabled": true,
+    "ingestorMode": "transfer",
+    "ingestorAutodiscoveryOptions": [
+        {
+            "mailDomain": "psi.ch",
+            "description": "PSI Electron Microscopy Facility",
+            "facilityBackend": "https://emf-ingestor.psi.ch/"
+        },
+        {
+            "mailDomain": "unil.ch",
+            "description": "DCI-Lausanne (EPFL/UNIL)",
+            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
+        },
+        {
+            "mailDomain": "epfl.ch",
+            "description": "DCI-Lausanne (EPFL/UNIL)",
+            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
+        },
+        {
+            "mailDomain": "unibe.ch",
+            "description": "University of Bern",
+            "facilityBackend": "https://openem-ingestor.id.unibe.ch"
+        },
+        {
+            "mailDomain": "ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        },
+        {
+            "mailDomain": "scopem.ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        },
+        {
+            "mailDomain": "id.ethz.ch",
+            "description": "ScopeM (ETHZ)",
+            "facilityBackend": "http://localhost:8888"
+        }
+    ],
+    "mainMenu": {
+        "nonAuthenticatedUser": {
+            "datasets": true,
+            "files": false,
+            "instruments": true,
+            "jobs": false,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": false
+        },
+        "authenticatedUser": {
+            "ingestor": true,
+            "datasets": true,
+            "files": true,
+            "instruments": true,
+            "jobs": true,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": true
+        }
+    }
 }

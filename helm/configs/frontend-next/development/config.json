@@ -1,13 +1,25 @@
 {
     "addDatasetEnabled": false,
+    "addSampleEnabled": false,
     "archiveWorkflowEnabled": true,
     "datasetReduceEnabled": false,
     "datasetOneDepIntegration": true,
+    "datafilesActionsEnabled": false,
     "editDatasetSampleEnabled": false,
     "editMetadataEnabled": false,
     "editPublishedData": true,
     "editSampleEnabled": false,
     "facility": "PSI",
+    "siteHeaderLogo": "site-logo.png",
+    "siteTitle" : "SciCat Data Catalog",
+    "siteSciCatLogo" : "scicat-header-logo-full.png",
+    "siteLoginLogo" : "site-logo.png",
+    "siteLoginBackground": "site.png",
+    "loginFacilityEnabled": true,
+    "loginFacilityLabel": "Single Sign-On",
+    "loginLdapEnabled": false,
+    "loginLocalEnabled": true,
+    "loginLocalLabel": "Local",
     "fileColorEnabled": false,
     "fileDownloadEnabled": false,
     "gettingStarted": "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
@@ -16,10 +28,11 @@
         "ingestManual": "(PSI intranet only) provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
     },
     "ingestManual": "http://melanie.gitpages.psi.ch/SciCatPages/",
+    "supportEmail": "scicat-help@lists.psi.ch",
     "jobsEnabled": true,
     "jsonMetadataEnabled": true,
     "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
-    "landingPage": "doi2.psi.ch/detail/",
+    "landingPage": "oaipmh.development.psi.ch/detail/",
     "lbBaseURL": "https://scicat.development.psi.ch",
     "depositorURL": "https://depositor.development.psi.ch",
     "localColumns": [
@@ -100,7 +113,7 @@
     "loginFormEnabled": true,
     "oAuth2Endpoints": [
         {
-            "displayText": "PSI account",
+            "displayText": "Single Sign-On",
             "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
             "authURL": "api/v3/auth/oidc"
         }
@@ -228,8 +241,8 @@
         "conditions": []
     },
     "accessTokenPrefix": "Bearer ",
-    "externalAuthEndpoint": "/api/v3/auth/ldap",
     "ingestorEnabled": true,
+    "externalAuthEndpoint": null,
     "ingestorMode": "transfer",
     "ingestorAutodiscoveryOptions": [
         {
@@ -267,5 +280,29 @@
             "description": "ScopeM (ETHZ)",
             "facilityBackend": "http://localhost:8888"
         }
-    ]
+    ],
+    "mainMenu": {
+        "nonAuthenticatedUser": {
+            "ingestor": false,
+            "datasets": true,
+            "files": false,
+            "instruments": true,
+            "jobs": false,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": false
+        },
+        "authenticatedUser": {
+            "ingestor": true,
+            "datasets": true,
+            "files": true,
+            "instruments": true,
+            "jobs": true,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": true
+            }
+    }
 }
