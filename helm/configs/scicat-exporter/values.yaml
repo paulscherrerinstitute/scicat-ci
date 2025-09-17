@@ -1,10 +1,8 @@
 replicatCount: 1
 
 image:
-  # repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
-  # tag: 1.0.0-SNAPSHOT
-  repository: ghcr.io/paulscherrerinstitute/scicat-rocrate@sha256
-  tag: a5d60e76feb1cd6fbaa283f161f4a76fb25c9b79dd04507c573032cb4c3fdb74
+  repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
+  tag: 1.0.2
   pullPolicy: Always
 
 service:
