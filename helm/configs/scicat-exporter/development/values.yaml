@@ -5,3 +5,5 @@ env:
     value: dev
   - name: _DEV_QUARKUS_REST_CLIENT_SCICAT_API_URL
     value: http://backend.scicat-development/api/v3
+  - name: _DEV_SCICAT_CLIENT_USE_BEARER
+    value: 'false'
