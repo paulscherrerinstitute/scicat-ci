@@ -34,7 +34,7 @@ jobs:
           - match: ETHZ
             actions:
             - actionType: log
-              perform: "(Job {{job.jobId}}) Directing to ETHZ"
+              perform: "(Job {{job.id}}) Directing to ETHZ"
 
             - &scopemUrl
               actionType: url
@@ -49,7 +49,7 @@ jobs:
           - # PSI default
             actions:
             - actionType: log
-              perform: "(Job {{job.jobId}}) Directing to PSI"
+              perform: "(Job {{job.id}}) Directing to PSI"
 
             - &rabbitmq
               actionType: rabbitmq
@@ -216,7 +216,7 @@ jobs:
             actions:
             - actionType: log
               perform: |-
-                  (Job {{job.jobId}}) CREATE directed to ETHZ based on datasets=
+                  (Job {{job.id}}) CREATE directed to ETHZ based on datasets=
                   [{{~#each datasets ~}}
                     {"pid": {{~{ jsonify pid }~}}
                     ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
@@ -228,7 +228,7 @@ jobs:
             actions:
             - actionType: log
               perform: |-
-                  (Job {{job.jobId}}) CREATE directed to PSI based on datasets=
+                  (Job {{job.id}}) CREATE directed to PSI based on datasets=
                   [{{~#each datasets ~}}
                     {"pid": {{~{ jsonify pid }~}}
                     ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
