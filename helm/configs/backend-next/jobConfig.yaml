@@ -57,10 +57,24 @@ jobs:
               queue: client.jobs.write.v4
               key: jobqueuev4
 
+        - &email_create
+          actionType: email
+          to: "{{request.contactEmail}}"
+          subject: "[SciCat dev] Your {{request.type}} job was submitted"
+          bodyTemplateFile: email-templates/job-template-simplified.html
+
+
     update:
       auth: archiveManager
       actions:
         - actionType: log
+        - &email_update
+          actionType: email
+          to: "{{request.contactEmail}}"
+          subject: |-
+            [SciCat dev] Your {{request.type}} job {{#if job.jobStatus == "jobSuccess"}}completed successfully{{else}}encountered an error{{/if}}
+          bodyTemplateFile: email-templates/job-template-simplified.html
+
 
   - jobType: retrieve
     create:
@@ -73,11 +87,13 @@ jobs:
               const: true
         - *validStorage
         - *switchStorage
+        - *email_create
 
     update:
       auth: archiveManager
       actions:
         - actionType: log
+        - *email_update
 
   # TODO Make public work for ETHZ
   - jobType: public
@@ -127,12 +143,11 @@ jobs:
     create:
       auth: admin
       actions:
-        - &email_validate
-          actionType: validate
+        - actionType: validate
           request:
             jobParams.subject:
               type: string
-        - &email
+        - &email_demo
           actionType: email
           to: "{{request.contactEmail}}"
           subject: "[SciCat] {{request.jobParams.subject}}"
@@ -141,7 +156,7 @@ jobs:
       auth: "#jobOwnerUser"
       actions:
         - actionType: log
-        - *email
+        - *&email_demo
 
   - jobType: scopem_livez
     create:
