@@ -1,8 +1,8 @@
-{% comment %}
+{{!--
   Minimal job email template.
 
   This is primarily meant as a starting point for customization.
-{% endcomment -%}
+--}}
 <html>
 <head>
     <style type="text/css">
@@ -66,13 +66,13 @@
         <div class="job-id-container">
             <b>Job id:</b> {{job.id}}
         </div>
-        {{#if datasets}}
+        {{#if request.jobParams.datasetList}}
         <p><b>The job will be perfomed on the following dataset(s):</b></p>
         <table>
-            {{#each datasets}}
+            {{#each request.jobParams.datasetList}}
             <tr style="background-color: lightblue;">
                 <td class="key">
-                    {{dataset.pid}}
+                    {{pid}}
                 </td>
             </tr>
             {{/each}}
