@@ -11,8 +11,8 @@ on:
         required: false
   pull_request:
     branches: [ main ]
-  # push:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
   # release:
   #   types: [ published ]
 
