@@ -33,7 +33,7 @@
     "jsonMetadataEnabled": true,
     "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
     "landingPage": "oaipmh.development.psi.ch/detail/",
-    "lbBaseURL": "https://scicat.qa.psi.ch",
+    "lbBaseURL": "https://dacat-qa.psi.ch",
     "depositorURL": "https://depositor.development.psi.ch",
     "localColumns": [
         {
