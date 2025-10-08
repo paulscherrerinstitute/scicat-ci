@@ -70,3 +70,8 @@ volumeMounts:
   - name: downloaddir
     mountPath: /usr/share/nginx/html/assets/images/site-logo.png
     subPath: site-logo.png
+
+probeChecks:
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 5 
