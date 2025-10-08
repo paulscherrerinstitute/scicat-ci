@@ -1,3 +1,48 @@
 envValue: development
 
 host: dacat-development.psi.ch
+
+secrets: 
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data: 
+      mongo_pem: "{{ .Values.secretsJson.MONGO_PEM }}"
+      mongo_ca: "{{ .Values.secretsJson.MONGO_CA }}"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /home/node/app/server/config.local.js
+    subPath: config.local.js
+  - name: config-volume
+    mountPath: /home/node/app/server/middleware.local.json
+    subPath: middleware.json
+  - name: config-volume
+    mountPath: /home/node/app/server/boot/login-callbacks.js
+    subPath: login-callbacks.js
+  - name: config-volume
+    mountPath: /home/node/app/email-templates/job-template.html
+    subPath: job-template.html
+  - name: config-volume
+    mountPath: /home/node/app/server/boot/hideEmail.js
+    subPath: hideEmail.js
+  - name: config-volume
+    mountPath: /home/node/app/server/boot/authorized-jobs.js
+    subPath: authorized-jobs.js
+  - name: secrets-volume
+    mountPath: /home/node/app/server/providers.json
+    subPath: providers.json
+  - name: secrets-volume
+    mountPath: /home/node/app/server/datasources.json
+    subPath: datasources.json
+  - name: secrets-volume
+    mountPath: /home/node/app/server/functionalAccounts.json
+    subPath: functionalAccounts.json
+  - name: secrets-volume
+    mountPath: /home/node/app/server/component-config.json
+    subPath: component-config.json
+  - name: secrets-volume
+    mountPath: /home/node/app/server/mongo.pem
+    subPath: mongo_pem
+  - name: secrets-volume
+    mountPath: /home/node/app/server/mongo.crt
+    subPath: mongo_ca
