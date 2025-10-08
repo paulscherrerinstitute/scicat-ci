@@ -1,3 +1,6 @@
 envValue: development
 
 host: dacat-development.psi.ch
+
+ingress:
+  enabled: false
