@@ -22,12 +22,12 @@
     "loginLocalLabel": "Local",
     "fileColorEnabled": false,
     "fileDownloadEnabled": false,
-    "gettingStarted": "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
+    "gettingStarted": "https://data-catalog-services.pages.psi.ch/gettingStarted/",
     "helpMessages": {
-        "gettingStarted": "(PSI intranet only) gives a brief description on how to get started using the data catalog.",
-        "ingestManual": "(PSI intranet only) provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
+        "gettingStarted": "gives a brief description on how to get started using the data catalog.",
+        "ingestManual": "provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
     },
-    "ingestManual": "http://melanie.gitpages.psi.ch/SciCatPages/",
+    "ingestManual": "https://data-catalog-services.pages.psi.ch/ingestorManual/",
     "supportEmail": "scicat-help@lists.psi.ch",
     "jobsEnabled": true,
     "jsonMetadataEnabled": true,
