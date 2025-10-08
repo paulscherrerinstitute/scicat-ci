@@ -1,16 +1,3 @@
 envValue: qa
 
-host: scicat.qa.psi.ch
- 
-probeChecksEnabled: false
-
-ingress:
-  enabled: false
-
-run:
-  command: 
-    - /bin/sh
-  args: 
-    - -c
-    - >
-      sleep infinity
+host: dacat-qa.psi.ch
