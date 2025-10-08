@@ -3,3 +3,6 @@ envValue: qa
 host: dacat-qa.psi.ch
 
 replicaCount: 0
+
+ingress:
+  enabled: false
