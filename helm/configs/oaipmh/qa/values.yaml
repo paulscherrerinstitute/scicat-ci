@@ -1,3 +1,3 @@
 host: oaipmh.qa.psi.ch
 environment: qa
-backendUrl: http://backend.scicat-qa
+backendUrl: http://backend-next.scicat-qa
