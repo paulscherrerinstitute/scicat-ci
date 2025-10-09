@@ -1,8 +1,3 @@
-{{!--
-  Minimal job email template.
-
-  This is primarily meant as a starting point for customization.
---}}
 <html>
 <head>
     <style type="text/css">
@@ -61,18 +56,19 @@
 <body>
     <div class="container">
         <div>
-            Your {{job.type}} job has been submitted. It currently has status "{{job.status}}".
+            Your {{type}} job has been submitted and will be processed as soon as possible.<br>
+            You will be notified by email as soon as the job is completed.
         </div>
         <div class="job-id-container">
-            <b>Job id:</b> {{job.id}}
+            <b>Job id:</b> {{id}}
         </div>
-        {{#if request.jobParams.datasetList}}
-        <p><b>The job will be perfomed on the following dataset(s):</b></p>
+        {{#if jobParams.datasetIds}}
+        <p><b>Job will be perfomed on the following dataset(s):</b></p>
         <table>
-            {{#each request.jobParams.datasetList}}
+            {{#each jobParams.datasetIds}}
             <tr style="background-color: lightblue;">
                 <td class="key">
-                    {{pid}}
+                    {{this}}
                 </td>
             </tr>
             {{/each}}
