@@ -73,7 +73,7 @@ jobs:
           actionType: email
           to: "{{job.contactEmail}}"
           subject: |-
-            [SciCat dev] Your {{job.type}} job {{#if job.jobStatus == "finishedSuccessful"}}completed successfully{{else}}encountered an error{{/if}}
+            [SciCat dev] Your {{job.type}} job {{#if (eq job.jobStatus "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
           bodyTemplateFile: email-templates/job-template-simplified.html
 
 
