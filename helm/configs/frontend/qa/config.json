@@ -27,7 +27,6 @@
     "shoppingCartOnHeader": true,
     "ingestManual": "http://melanie.gitpages.psi.ch/SciCatPages/",
     "gettingStarted": "http://melanie.gitpages.psi.ch/SciCatPages/SciCatGettingStartedSLSSummary.pdf",
-    "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
     "riotBaseUrl": null,
     "datasetReduceEnabled": false,
     "fileColorEnabled": false,
