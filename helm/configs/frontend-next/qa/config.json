@@ -31,7 +31,6 @@
     "supportEmail": "scicat-help@lists.psi.ch",
     "jobsEnabled": true,
     "jsonMetadataEnabled": true,
-    "jupyterHubUrl": "https://jupyterhub.apps.ocp4a.psi.ch/hub/login",
     "landingPage": "oaipmh.qa.psi.ch/detail/",
     "lbBaseURL": "https://dacat-qa.psi.ch",
     "depositorURL": "https://depositor.development.psi.ch",
