@@ -31,8 +31,8 @@
     "supportEmail": "scicat-help@lists.psi.ch",
     "jobsEnabled": true,
     "jsonMetadataEnabled": true,
-    "landingPage": "oaipmh.development.psi.ch/detail/",
-    "lbBaseURL": "https://scicat.development.psi.ch",
+    "landingPage": "oaipmh.qa.psi.ch/detail/",
+    "lbBaseURL": "https://dacat-qa.psi.ch",
     "depositorURL": "https://depositor.development.psi.ch",
     "localColumns": [
         {
@@ -229,48 +229,13 @@
           }
         ],
         "filters": [
-            {
-                "key": "creationLocation",
-                "label": "Location",
-                "type": "multiSelect",
-                "description": "Filter by creation location on the dataset",
-                "enabled": true
-            },
-            {
-                "key": "pid",
-                "label": "Pid",
-                "type": "text",
-                "description": "Filter by dataset pid",
-                "enabled": true
-            },
-            {
-                "key": "ownerGroup",
-                "label": "Group",
-                "type": "multiSelect",
-                "description": "Filter by owner group of the dataset",
-                "enabled": true
-            },
-            {
-                "key": "type",
-                "label": "Type",
-                "type": "multiSelect",
-                "description": "Filter by dataset type",
-                "enabled": true
-            },
-            {
-                "key": "keywords",
-                "label": "Keyword",
-                "type": "multiSelect",
-                "description": "Filter by keywords in the dataset",
-                "enabled": true
-            },
-            {
-                "key": "creationTime",
-                "label": "Creation Time",
-                "type": "dateRange",
-                "description": "Filter by creation time of the dataset",
-                "enabled": true
-            }
+          { "LocationFilter": true },
+          { "PidFilter": true },
+          { "GroupFilter": true },
+          { "TypeFilter": true },
+          { "KeywordFilter": true },
+          { "DateRangeFilter": true },
+          { "TextFilter": true }
         ],
         "conditions": []
     },
