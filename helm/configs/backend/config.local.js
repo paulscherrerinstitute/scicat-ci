@@ -13,7 +13,7 @@ module.exports = {
   metadataKeysReturnLimit: 100,
   metadataParentInstancesReturnLimit: 10,
   site: "PSI",
-  defaultManager: "scicatingestor@psi.ch",
+  defaultManager: ["scicatingestor@psi.ch"],
   facilities: ["SLS", "SINQ", "SWISSFEL", "SmuS"],
   jobMessages: {
     jobSubmitted: "Submitted for immediate execution",
