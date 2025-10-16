@@ -287,12 +287,12 @@
         {
             "mailDomain": "unil.ch",
             "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
+            "facilityBackend": "https://dci-ingestor.unil.ch"
         },
         {
             "mailDomain": "epfl.ch",
             "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
+            "facilityBackend": "https://dci-ingestor.unil.ch"
         },
         {
             "mailDomain": "unibe.ch",
