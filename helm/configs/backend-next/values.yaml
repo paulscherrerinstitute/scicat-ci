@@ -75,6 +75,25 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template-simplified.html
     subPath: job-template-simplified.html
-  - name: migrations-volume
-    mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
-    subPath: 20250819165001-rename-measurement-id.js
+
+migrateCommand: "echo 'No migration command specified.'"
+
+initContainers:
+  - name: migrate
+    image: "{{ .Values.ciRepository }}:{{ .Values.ciTag }}"
+    imagePullPolicy: Always
+    command:
+      - "/bin/sh"
+      - -c
+    args:
+      - >-
+        npm run migrate:db:status;
+        {{ .Values.migrateCommand }};
+        npm run migrate:db:status;
+    volumeMounts:
+      - name: secrets-volume
+        mountPath: /home/node/app/.env
+        subPath: .env
+      - name: migrations-volume
+        mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
+        subPath: 20250819165001-rename-measurement-id.js
