@@ -1,4 +1,4 @@
-configVersion: v0.1.3 2025-05-14
+configVersion: "v0.1.3 2025-05-14"
 jobs:
   - jobType: archive
     create:
@@ -35,16 +35,16 @@ jobs:
             actions:
             - actionType: log
               perform: "(Job {{job.id}}) Directing to ETHZ"
-
             - &scopemUrl
               actionType: url
+              ignoreErrors: true
               url: 'https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs'
               method: POST
               headers:
                 accept: application/json
                 content-type: application/json
                 Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
-              body: '{{{jsonify job}}}'
+              body: '{"Type":"{{{job.type}}}", "Id": "{{{job.id}}}"}'
 
           - # PSI default
             actions:
@@ -57,10 +57,37 @@ jobs:
               queue: client.jobs.write.v4
               key: jobqueuev4
 
+        - &email_create
+          actionType: email
+          ignoreErrors: true
+          to: "{{job.contactEmail}}"
+          subject: "[SciCat dev] Your {{request.type}} job was submitted"
+          bodyTemplateFile: email-templates/job-template-simplified.html
+
+
     update:
       auth: archiveManager
       actions:
         - actionType: log
+          perform: "(Job {{job.id}}) UPDATE to status {{job.jobStatus}}"
+
+        - &email_update
+          actionType: switch
+          phase: perform
+          property: job.statusCode
+          cases:
+            - regex: "/^finished/"
+              actions:
+              - actionType: email
+                ignoreErrors: true
+                to: "{{job.contactEmail}}"
+                subject: |-
+                  [SciCat dev] Your {{job.type}} job {{#if (eq job.jobStatus "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
+                bodyTemplateFile: email-templates/job-template-simplified.html
+            - actions:
+              - actionType: log
+                perform: "(Job {{job.id}} Skip email notification for status {{job.statusCode}}"
+
 
   - jobType: retrieve
     create:
@@ -73,11 +100,13 @@ jobs:
               const: true
         - *validStorage
         - *switchStorage
+        - *email_create
 
     update:
       auth: archiveManager
       actions:
         - actionType: log
+        - *email_update
 
   # TODO Make public work for ETHZ
   - jobType: public
@@ -127,12 +156,11 @@ jobs:
     create:
       auth: admin
       actions:
-        - &email_validate
-          actionType: validate
+        - actionType: validate
           request:
             jobParams.subject:
               type: string
-        - &email
+        - &email_demo
           actionType: email
           to: "{{request.contactEmail}}"
           subject: "[SciCat] {{request.jobParams.subject}}"
@@ -141,7 +169,7 @@ jobs:
       auth: "#jobOwnerUser"
       actions:
         - actionType: log
-        - *email
+        - *email_demo
 
   - jobType: scopem_livez
     create:
@@ -165,7 +193,7 @@ jobs:
       actions:
         - # Call a REST endpoint
           actionType: url
-          url: http://echo/scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
+          url: http://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
           method: POST
           headers:
             accept: application/json
@@ -173,10 +201,10 @@ jobs:
             Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
           body: |-
             {
-              "type": "archive"
-              "jobParams": {
-                "job": {{{jsonify job}}}
-              }
+              "type": "url_demo",
+              "jobParams": {},
+              "statusCode": "jobSubmitted",
+              "statusMessage": "jobSubmitted"
             }
     update:
       auth: "#jobOwnerUser"
@@ -187,6 +215,7 @@ jobs:
       auth: "@unx-openem"
       actions:
         - actionType: log
+          perform: "(Job {{job.id}}) Creating scopem_test job. Job body: {{{jsonify job}}}"
         - *scopemUrl
     update:
       auth: "@unx-openem"
