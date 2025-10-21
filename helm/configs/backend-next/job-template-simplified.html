@@ -61,15 +61,15 @@
 <body>
     <div class="container">
         <div>
-            Your {{job.type}} job has been submitted. It currently has status "{{job.status}}".
+            Your {{job.type}} job has been submitted. It currently has status "{{job.statusCode}}".
         </div>
         <div class="job-id-container">
             <b>Job id:</b> {{job.id}}
         </div>
-        {{#if request.jobParams.datasetList}}
+        {{#if datasets}}
         <p><b>The job will be perfomed on the following dataset(s):</b></p>
         <table>
-            {{#each request.jobParams.datasetList}}
+            {{#each datasets}}
             <tr style="background-color: lightblue;">
                 <td class="key">
                     {{pid}}

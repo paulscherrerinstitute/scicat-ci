@@ -38,6 +38,7 @@ jobs:
 
             - &scopemUrl
               actionType: url
+              ignoreErrors: true
               url: 'https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs'
               method: POST
               headers:
@@ -59,7 +60,8 @@ jobs:
 
         - &email_create
           actionType: email
-          to: "{{request.contactEmail}}"
+          ignoreErrors: true
+          to: "{{job.contactEmail}}"
           subject: "[SciCat dev] Your {{request.type}} job was submitted"
           bodyTemplateFile: email-templates/job-template-simplified.html
 
@@ -69,12 +71,23 @@ jobs:
       actions:
         - actionType: log
           perform: "(Job {{job.id}}) UPDATE to status {{job.jobStatus}}"
+
         - &email_update
-          actionType: email
-          to: "{{job.contactEmail}}"
-          subject: |-
-            [SciCat dev] Your {{job.type}} job {{#if (eq job.jobStatus "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
-          bodyTemplateFile: email-templates/job-template-simplified.html
+          actionType: switch
+          phase: perform
+          property: job.statusCode
+          cases:
+            - regex: "/^finished/"
+              actions:
+              - actionType: email
+                ignoreErrors: true
+                to: "{{job.contactEmail}}"
+                subject: |-
+                  [SciCat dev] Your {{job.type}} job {{#if (eq job.jobStatus "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
+                bodyTemplateFile: email-templates/job-template-simplified.html
+            - actions:
+              - actionType: log
+                perform: "(Job {{job.id}} Skip email notification for status {{job.statusCode}}"
 
 
   - jobType: retrieve
