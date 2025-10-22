@@ -35,7 +35,6 @@ jobs:
             actions:
             - actionType: log
               perform: "(Job {{job.id}}) Directing to ETHZ"
-
             - &scopemUrl
               actionType: url
               ignoreErrors: true
@@ -216,6 +215,7 @@ jobs:
       auth: "@unx-openem"
       actions:
         - actionType: log
+          perform: "(Job {{job.id}}) Creating scopem_test job. Job body: {{{jsonify job}}}"
         - *scopemUrl
     update:
       auth: "@unx-openem"
