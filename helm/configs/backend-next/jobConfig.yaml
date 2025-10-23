@@ -42,15 +42,10 @@ jobs:
               method: POST
               headers:
                 accept: application/json
-                content-type: application/json
+                #content-type: application/json
                 Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
-              body: |-
-                {
-                  "type": "test_job",
-                  "jobParams": {
-                    "job": {{{jsonify job}}}
-                  }
-                }
+              body: 'Definitely a string (testing): {{{jsonify job}}}'
+
           - # PSI default
             actions:
             - actionType: log
