@@ -201,10 +201,10 @@ jobs:
             Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
           body: |-
             {
-              "type": "archive",
-              "jobParams": {
-                "job": {{{jsonify job}}}
-              }
+              "type": "url_demo",
+              "jobParams": {},
+              "statusCode": "jobSubmitted",
+              "statusMessage": "jobSubmitted"
             }
     update:
       auth: "#jobOwnerUser"
