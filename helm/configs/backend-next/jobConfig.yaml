@@ -193,7 +193,7 @@ jobs:
       actions:
         - # Call a REST endpoint
           actionType: url
-          url: http://echo/scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
+          url: http://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
           method: POST
           headers:
             accept: application/json
