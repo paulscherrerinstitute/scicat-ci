@@ -75,6 +75,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template-simplified.html
     subPath: job-template-simplified.html
+  - name: config-volume
+    mountPath: /home/node/app/publishedDataConfig.json
+    subPath: publishedDataConfig.json
   - name: migrations-volume
     mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
     subPath: 20250819165001-rename-measurement-id.js
