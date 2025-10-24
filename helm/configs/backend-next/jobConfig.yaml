@@ -42,9 +42,9 @@ jobs:
               method: POST
               headers:
                 accept: application/json
-                #content-type: application/json
+                content-type: application/json
                 Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
-              body: 'Definitely a string (testing): {{{jsonify job}}}'
+              body: '{"Type":"{{{job.type}}}", "Id": "{{{job.id}}}"}'
 
           - # PSI default
             actions:
@@ -193,7 +193,7 @@ jobs:
       actions:
         - # Call a REST endpoint
           actionType: url
-          url: http://echo/scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
+          url: http://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
           method: POST
           headers:
             accept: application/json
