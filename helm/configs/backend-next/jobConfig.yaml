@@ -37,14 +37,14 @@ jobs:
               perform: "(Job {{job.id}}) Directing to ETHZ"
             - &scopemUrl
               actionType: url
-              ignoreErrors: true
+              ignoreErrors: false
               url: 'https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs'
               method: POST
               headers:
                 accept: application/json
                 content-type: application/json
                 Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
-              body: '{"Type":"{{{job.type}}}", "Id": "{{{job.id}}}"}'
+              body: '{"type":"{{{job.type}}}", "id": "{{{job.id}}}"}'
 
           - # PSI default
             actions:
