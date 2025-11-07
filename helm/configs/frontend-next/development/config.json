@@ -94,19 +94,19 @@
             "enabled": true
           },
           {
-            "name": "runNumber",
+            "name": "sourceFolder",
             "order": 3,
             "type": "standard",
             "enabled": true
           },
           {
-            "name": "sourceFolder",
+            "name": "size",
             "order": 4,
             "type": "standard",
             "enabled": true
           },
           {
-            "name": "size",
+            "name": "dataStatus",
             "order": 5,
             "type": "standard",
             "enabled": true
@@ -118,41 +118,41 @@
             "enabled": true
           },
           {
-            "name": "type",
+            "name": "ownerGroup",
             "order": 7,
             "type": "standard",
             "enabled": true
           },
           {
-            "name": "image",
+            "name": "type",
             "order": 8,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "runNumber",
+            "order": 9,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "image",
+            "order": 10,
             "type": "standard",
             "enabled": false
           },
           {
             "name": "metadata",
-            "order": 9,
+            "order": 11,
             "type": "standard",
             "enabled": false
           },
           {
             "name": "proposalId",
-            "order": 10,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "ownerGroup",
-            "order": 11,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "dataStatus",
             "order": 12,
             "type": "standard",
             "enabled": true
-          }
+          },
         ],
         "filters": [
             {
