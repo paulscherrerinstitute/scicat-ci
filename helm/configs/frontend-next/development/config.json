@@ -152,7 +152,7 @@
             "order": 12,
             "type": "standard",
             "enabled": true
-          },
+          }
         ],
         "filters": [
             {
