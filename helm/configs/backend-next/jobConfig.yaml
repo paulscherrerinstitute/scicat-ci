@@ -152,6 +152,17 @@ jobs:
       actions:
         - actionType: log
 
+  # Used by the Globus transfer service for transfer tracking
+  - jobType: globus_transfer_job
+    create:
+      auth: '#datasetAccess'
+      actions:
+        - actionType: log
+    update:
+      auth: "#jobOwnerUser"
+      actions:
+        - actionType: log
+
   - jobType: email_demo
     create:
       auth: admin
