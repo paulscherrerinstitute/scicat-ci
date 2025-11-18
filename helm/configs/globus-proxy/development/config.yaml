@@ -18,7 +18,7 @@ globusScopes:
 port: 8080
 facilitySrcGroupTemplate: "/{{ .FacilityName }}"
 facilityDstGroupTemplate: "/{{ .FacilityName }}"
-destinationPathTemplate: "/archive/{{ .Pid }}/{{ .SourceFolder }}"
+destinationPathTemplate: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
 task:
   maxConcurrency: 10
   queueSize: 100
