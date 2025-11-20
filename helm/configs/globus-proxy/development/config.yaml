@@ -13,7 +13,7 @@ defaults:
 facilities:
   - <<: *psiFacility
     name: PSI_DEV
-    collection: f1262bf3-3b63-4f17-9e4a-2f1bd6223c05
+    collection: deda66cc-9e42-49fc-a997-18a02abb7903
   - <<: *psiFacility
     name: PSI_QA
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
