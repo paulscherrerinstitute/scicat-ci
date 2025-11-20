@@ -7,7 +7,7 @@ service:
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
-  probePath: /openapi.yaml
+  probePath: /version
 
 ingress:
   enabled: true
