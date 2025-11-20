@@ -1,7 +1,7 @@
 image:
-  repository: ghcr.io/swissopenem/globus-transfer-service
+  repository: ghcr.io/swissopenem/scicat-globus-proxy
   pullPolicy: Always
-  tag: 0.2.2
+  tag: 0.3.0
 
 service:
   type: ClusterIP
@@ -11,18 +11,18 @@ service:
 
 ingress:
   enabled: true
-  annotations: 
+  annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
     - host: "{{ .Values.host }}"
-      paths: 
+      paths:
         - path: "/"
           pathType: Prefix
   tls:
     - hosts:
       - "{{ .Values.host }}"
-      secretName: "globus-proxy-certificate"  
+      secretName: "globus-proxy-certificate"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -32,7 +32,7 @@ secrets:
 
 configMaps:
   "{{ .Release.Name }}-cm":
-    globus-transfer-service-conf.yaml: "{{ .Values.CONFIG }}"
+    scicat-globus-proxy-conf.yaml: "{{ .Values.CONFIG }}"
 
 volumes:
   - name: secrets-volume
@@ -47,16 +47,16 @@ volumeMounts:
     mountPath: /service/.env
     subPath: .env
   - name: config-volume
-    mountPath: /service/globus-transfer-service-conf.yaml
-    subPath: globus-transfer-service-conf.yaml
+    mountPath: /service/scicat-globus-proxy-conf.yaml
+    subPath: scicat-globus-proxy-conf.yaml
 
 run:
   command:
     - /bin/sh
-  args: 
+  args:
     - -c
     - >
       set -a;
       source /service/.env;
       set +a;
-      /service/globus_transfer_service
+      /service/scicat_globus_proxy
