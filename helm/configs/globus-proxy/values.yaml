@@ -47,7 +47,7 @@ volumeMounts:
     mountPath: /service/.env
     subPath: .env
   - name: config-volume
-    mountPath: /service/scicat-globus-proxy-conf.yaml
+    mountPath: /service/scicat-globus-proxy-config.yaml
     subPath: scicat-globus-proxy-conf.yaml
 
 run:
