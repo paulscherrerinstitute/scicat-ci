@@ -4,7 +4,7 @@ port: 8080
 defaults:
   - &psiFacility
     direction: DST
-    destinationPathTemplate: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
+    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
     accessValue: /PSI
   - &openemFacility
     direction: SRC
@@ -14,9 +14,11 @@ facilities:
   - <<: *psiFacility
     name: PSI_DEV
     collection: deda66cc-9e42-49fc-a997-18a02abb7903
-  - <<: *psiFacility
-    name: PSI_QA
+  - name: PSI_QA
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
+    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
+    accessValue: /PSI
+    direction: BOTH
   - <<: *psiFacility
     name: PSI
     collection: 7a50c4b9-651d-4fba-a8f9-0557f1b4b7ed
@@ -33,4 +35,3 @@ facilities:
   - <<: *openemFacility
     name: DCIL
     collection: b3807ed3-db5e-4e6f-9831-fd8d72dfff8a
-    collectionRootPath: "/mnt/data"
