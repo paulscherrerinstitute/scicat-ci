@@ -11,9 +11,9 @@
     "editSampleEnabled": false,
     "facility": "PSI",
     "siteHeaderLogo": "site-logo.png",
-    "siteTitle" : "SciCat Data Catalog",
-    "siteSciCatLogo" : "scicat-header-logo-full.png",
-    "siteLoginLogo" : "site-logo.png",
+    "siteTitle": "SciCat Data Catalog",
+    "siteSciCatLogo": "scicat-header-logo-full.png",
+    "siteLoginLogo": "site-logo.png",
     "siteLoginBackground": "site.png",
     "loginFacilityEnabled": true,
     "loginFacilityLabel": "Single Sign-On",
@@ -75,84 +75,84 @@
     "tableSciDataEnabled": false,
     "defaultDatasetsListSettings": {
         "columns": [
-          {
-            "name": "select",
-            "order": 0,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "pid",
-            "order": 1,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "datasetName",
-            "order": 2,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "sourceFolder",
-            "order": 3,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "size",
-            "order": 4,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "dataStatus",
-            "order": 5,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "creationTime",
-            "order": 6,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "ownerGroup",
-            "order": 7,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "type",
-            "order": 8,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "runNumber",
-            "order": 9,
-            "type": "standard",
-            "enabled": true
-          },
-          {
-            "name": "image",
-            "order": 10,
-            "type": "standard",
-            "enabled": false
-          },
-          {
-            "name": "metadata",
-            "order": 11,
-            "type": "standard",
-            "enabled": false
-          },
-          {
-            "name": "proposalId",
-            "order": 12,
-            "type": "standard",
-            "enabled": true
-          }
+            {
+                "name": "select",
+                "order": 0,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "pid",
+                "order": 1,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "datasetName",
+                "order": 2,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "sourceFolder",
+                "order": 3,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "size",
+                "order": 4,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "dataStatus",
+                "order": 5,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "creationTime",
+                "order": 6,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "ownerGroup",
+                "order": 7,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "type",
+                "order": 8,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "runNumber",
+                "order": 9,
+                "type": "standard",
+                "enabled": true
+            },
+            {
+                "name": "image",
+                "order": 10,
+                "type": "standard",
+                "enabled": false
+            },
+            {
+                "name": "metadata",
+                "order": 11,
+                "type": "standard",
+                "enabled": false
+            },
+            {
+                "name": "proposalId",
+                "order": 12,
+                "type": "standard",
+                "enabled": true
+            }
         ],
         "filters": [
             {
@@ -201,49 +201,49 @@
         "conditions": []
     },
     "accessTokenPrefix": "Bearer ",
-    "ingestorEnabled": true,
+    "ingestorComponent": {
+        "ingestorEnabled": true,
+        "ingestorAutodiscoveryOptions": [
+            {
+                "mailDomain": "psi.ch",
+                "description": "PSI Electron Microscopy Facility",
+                "facilityBackend": "https://emf-ingestor.psi.ch/"
+            },
+            {
+                "mailDomain": "unil.ch",
+                "description": "DCI-Lausanne (EPFL/UNIL)",
+                "facilityBackend": "https://dci-ingestor.unil.ch"
+            },
+            {
+                "mailDomain": "epfl.ch",
+                "description": "DCI-Lausanne (EPFL/UNIL)",
+                "facilityBackend": "https://dci-ingestor.unil.ch"
+            },
+            {
+                "mailDomain": "unibe.ch",
+                "description": "University of Bern",
+                "facilityBackend": "https://openem-ingestor.id.unibe.ch"
+            },
+            {
+                "mailDomain": "ethz.ch",
+                "description": "ScopeM (ETHZ)",
+                "facilityBackend": "https://scopem-openem.ethz.ch/openem-ingestor"
+            },
+            {
+                "mailDomain": "scopem.ethz.ch",
+                "description": "ScopeM (ETHZ)",
+                "facilityBackend": "https://scopem-openem.ethz.ch/openem-ingestor"
+            },
+            {
+                "mailDomain": "id.ethz.ch",
+                "description": "ScopeM (ETHZ)",
+                "facilityBackend": "https://scopem-openem.ethz.ch/openem-ingestor"
+            }
+        ]
+    },
     "externalAuthEndpoint": null,
-    "ingestorMode": "transfer",
-    "ingestorAutodiscoveryOptions": [
-        {
-            "mailDomain": "psi.ch",
-            "description": "PSI Electron Microscopy Facility",
-            "facilityBackend": "https://emf-ingestor.psi.ch/"
-        },
-        {
-            "mailDomain": "unil.ch",
-            "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch"
-        },
-        {
-            "mailDomain": "epfl.ch",
-            "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch"
-        },
-        {
-            "mailDomain": "unibe.ch",
-            "description": "University of Bern",
-            "facilityBackend": "https://openem-ingestor.id.unibe.ch"
-        },
-        {
-            "mailDomain": "ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        },
-        {
-            "mailDomain": "scopem.ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        },
-        {
-            "mailDomain": "id.ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        }
-    ],
     "mainMenu": {
         "nonAuthenticatedUser": {
-            "ingestor": false,
             "datasets": true,
             "files": false,
             "instruments": true,
@@ -254,7 +254,6 @@
             "samples": false
         },
         "authenticatedUser": {
-            "ingestor": true,
             "datasets": true,
             "files": true,
             "instruments": true,
@@ -263,6 +262,6 @@
             "proposals": true,
             "publishedData": true,
             "samples": true
-            }
+        }
     }
 }
