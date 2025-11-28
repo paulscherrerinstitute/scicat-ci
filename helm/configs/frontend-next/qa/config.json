@@ -201,49 +201,12 @@
         "conditions": []
     },
     "accessTokenPrefix": "Bearer ",
-    "ingestorEnabled": true,
     "externalAuthEndpoint": null,
-    "ingestorMode": "transfer",
-    "ingestorAutodiscoveryOptions": [
-        {
-            "mailDomain": "psi.ch",
-            "description": "PSI Electron Microscopy Facility",
-            "facilityBackend": "https://emf-ingestor.psi.ch/"
-        },
-        {
-            "mailDomain": "unil.ch",
-            "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
-        },
-        {
-            "mailDomain": "epfl.ch",
-            "description": "DCI-Lausanne (EPFL/UNIL)",
-            "facilityBackend": "https://dci-ingestor.unil.ch:8443"
-        },
-        {
-            "mailDomain": "unibe.ch",
-            "description": "University of Bern",
-            "facilityBackend": "https://openem-ingestor.id.unibe.ch"
-        },
-        {
-            "mailDomain": "ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        },
-        {
-            "mailDomain": "scopem.ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        },
-        {
-            "mailDomain": "id.ethz.ch",
-            "description": "ScopeM (ETHZ)",
-            "facilityBackend": "http://localhost:8888"
-        }
-    ],
+    "ingestorComponent": {
+        "ingestorEnabled": false,
+    },
     "mainMenu": {
         "nonAuthenticatedUser": {
-            "ingestor": false,
             "datasets": true,
             "files": false,
             "instruments": true,
@@ -254,7 +217,6 @@
             "samples": false
         },
         "authenticatedUser": {
-            "ingestor": true,
             "datasets": true,
             "files": true,
             "instruments": true,
