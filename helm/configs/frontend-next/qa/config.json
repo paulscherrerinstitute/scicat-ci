@@ -203,7 +203,7 @@
     "accessTokenPrefix": "Bearer ",
     "externalAuthEndpoint": null,
     "ingestorComponent": {
-        "ingestorEnabled": false,
+        "ingestorEnabled": false
     },
     "mainMenu": {
         "nonAuthenticatedUser": {
