@@ -35,7 +35,7 @@ jobs:
         helm/configs/frontend-next/${{ needs.set_env.outputs.environment }}/**
         frontend/**
       commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: bab2eeb6cf3fa57b6d8804900c11527f226804d3
+      submodule_commit: 6f6b1c85eaca5acf8d93ddfab05775feb9764e84
       submodule: frontend
 
   build_deploy_scicat_fe_next:
@@ -51,7 +51,7 @@ jobs:
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
       commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: bab2eeb6cf3fa57b6d8804900c11527f226804d3
+      submodule_commit: 6f6b1c85eaca5acf8d93ddfab05775feb9764e84
       submodule: frontend
       helm_set_files: >-
         KEYCLOAK_ICON=helm/configs/frontend-next/keycloak_icon_256px.svg
