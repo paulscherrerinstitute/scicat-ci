@@ -159,22 +159,37 @@ class TestSciCatProposalFromDuo:
             ANY, FixturesFromDuo.expected_scicat_proposal
         )
 
+    @pytest.mark.parametrize(
+        "measurement_periods, expected",
+        [
+            [
+                FixturesFromSciCatAPI.measurement_periods,
+                FixturesFromSciCatAPI.expected_measurement_periods,
+            ],
+            [FixturesFromSciCatAPI.same_proposals_measurement_periods, False],
+        ],
+    )
     @patch("scicat.ProposalsApi.proposals_controller_update_v3", autospec=True)
     @patch(
         "scicat.ProposalsApi.proposals_controller_find_by_id_v3",
-        return_value=Mock(
-            measurement_period_list=FixturesFromSciCatAPI.measurement_periods
-        ),
         autospec=True,
     )
-    def test__update(self, mock_proposal_find, mock_proposal_patch):
+    def test__update(
+        self, mock_proposal_find, mock_proposal_patch, measurement_periods, expected
+    ):
+        mock_proposal_find.return_value = Mock(
+            measurement_period_list=measurement_periods
+        )
         self.scicat_proposal._update()
         mock_proposal_find.assert_called_once_with(ANY, self.proposalId)
+        if not expected:
+            mock_proposal_patch.assert_not_called()
+            return
         mock_proposal_patch.assert_called_once_with(
             ANY,
             self.proposalId,
             {
-                "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods,
+                "MeasurementPeriodList": expected,
             },
         )
 
@@ -296,18 +311,6 @@ class TestSciCatMeasurementsFromDuoMixin:
 
     def test_keep_new_measurements(self):
         new_measures = self.scicat_measurements.keep_new_measurements(
-            FixturesFromSciCatAPI.measurement_periods,
-        )
-        assert new_measures == FixturesFromSciCatAPI.expected_measurement_periods
-
-    def test__proposal_obj_to_dict(self):
-        proposal_dict = self.scicat_measurements._proposal_obj_to_dict(
-            FixturesFromSciCatAPI.measurement_periods[0]
-        )
-        assert proposal_dict == FixturesFromSciCatAPI.existing_measurment_periods[0]
-
-    def test__keep_new_measurements(self):
-        new_measures = self.scicat_measurements._keep_new_measurements(
             FixturesFromSciCatAPI.measurement_periods,
         )
         assert new_measures == [FixturesFromSciCatAPI.new_measurment_period]

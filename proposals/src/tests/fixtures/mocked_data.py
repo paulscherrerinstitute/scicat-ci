@@ -113,23 +113,27 @@ class FixturesFromSciCatAPI(FixturesCommon):
         },
     ]
 
-    measurement_periods = list(
-        map(
-            lambda x: Mock(
-                **{
-                    **x,
-                    "start": datetime.fromisoformat(x["start"]),
-                    "end": datetime.fromisoformat(x["end"]),
-                }
-            ),
-            existing_measurment_periods,
+    def measurement_periods_mock(measurement_periods):
+        return list(
+            map(
+                lambda x: Mock(
+                    **{
+                        **x,
+                        "start": datetime.fromisoformat(x["start"]),
+                        "end": datetime.fromisoformat(x["end"]),
+                    }
+                ),
+                measurement_periods,
+            )
         )
+
+    measurement_periods = measurement_periods_mock(existing_measurment_periods)
+
+    same_proposals_measurement_periods = measurement_periods_mock(
+        FixturesCommon.measurement_period_list()
     )
 
-    expected_measurement_periods = [
-        new_measurment_period,
-        *existing_measurment_periods,
-    ]
+    expected_measurement_periods = FixturesCommon.measurement_period_list()
 
 
 class FixturesProposalsFromFacility(FixturesFromDuo, FixturesFromSciCatAPI):
@@ -179,7 +183,6 @@ class FixturesProposalsFromPgroups(FixturesCommon):
 
     expected_measurement_periods = [
         _duo_measurement,
-        *FixturesFromSciCatAPI.existing_measurment_periods,
     ]
 
     expected_scicat_proposal = {
