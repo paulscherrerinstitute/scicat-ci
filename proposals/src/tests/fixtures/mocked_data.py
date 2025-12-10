@@ -113,6 +113,7 @@ class FixturesFromSciCatAPI(FixturesCommon):
         },
     ]
 
+    @staticmethod
     def measurement_periods_mock(measurement_periods):
         return list(
             map(
