@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
     with:
       commit: ${{ github.event.inputs.commit }}
-      submodule_commit: ${{ github.event.inputs.submodule_commit }}
+      submodule_commit: 7637c0ee5b9b9f3176580996de7234196f60f52e
 
   check_changed:
     needs: set_env
