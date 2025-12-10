@@ -1,5 +1,11 @@
-baseUrl: http://backend.scicat-development/api/v3
+baseUrl: http://backend-next.scicat-development/api/v3
 panetBaseUrl: http://pan-ontologies-api.scicat-development
 pssBaseUrl: http://pss.scicat-development
 
-host: dacat-development.psi.ch
+host: scicat.development.psi.ch
+
+ingress:
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "scicat-be-next-certificate"
