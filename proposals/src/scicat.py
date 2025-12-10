@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from functools import cache, cached_property
 from os import environ
-from typing import Any
 
 import pytz
 from dotenv import load_dotenv
@@ -205,7 +204,7 @@ class SciCatMeasurementsFromDuoMixin:
         log.info("Measurement periods from proposal extracted")
         return measurement_periods
 
-    def _keep_new_measurements(self, measurements):
+    def keep_new_measurements(self, measurements):
         """Filters out measurement periods already present in SciCat.
 
         Args:
@@ -231,37 +230,6 @@ class SciCatMeasurementsFromDuoMixin:
             new_entries.append(new_entry)
         log.info("Existing proposals excluded")
         return new_entries
-
-    @staticmethod
-    def _proposal_obj_to_dict(proposal_obj: Any) -> dict:
-        """Converts a proposal object to a dictionary representation.
-
-        Args:
-            proposal_obj (Any): A SciCat proposal or measurement object.
-
-        Returns:
-            dict: A dictionary with keys 'id', 'instrument', 'start', 'end', and 'comment'.
-        """
-        return {
-            "id": proposal_obj.id,
-            "instrument": proposal_obj.instrument,
-            "start": proposal_obj.start.isoformat("T"),
-            "end": proposal_obj.end.isoformat("T"),
-            "comment": proposal_obj.comment,
-        }
-
-    def keep_new_measurements(self, measurements: list) -> list[dict]:
-        """Combines newly fetched measurement periods with existing ones.
-
-        Args:
-            measurements (list): Existing SciCat measurement period objects.
-
-        Returns:
-            list[dict]: Combined list of new and existing measurement periods in dict format.
-        """
-        new_measurements = self._keep_new_measurements(measurements)
-        exiting_measurements = list(map(self._proposal_obj_to_dict, measurements))
-        return new_measurements + exiting_measurements
 
 
 class SciCatProposalFromDuo(
@@ -327,7 +295,7 @@ class SciCatProposalFromDuo(
         new_entries = self.keep_new_measurements(existing_measurements)
         if len(new_entries) == 0:
             return
-        patch = {"MeasurementPeriodList": new_entries}
+        patch = {"MeasurementPeriodList": proposal["MeasurementPeriodList"]}
         log.info(f"Modifying proposal, patch object: {patch}")
         ProposalsApi().proposals_controller_update_v3(pid, patch)
         log.info("Proposal modified")
