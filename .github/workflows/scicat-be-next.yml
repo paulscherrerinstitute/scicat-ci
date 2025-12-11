@@ -31,7 +31,7 @@ jobs:
       files: |
         .github/workflows/scicat-be-next.yml
         helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/**
-        helm/configs/backend-next/job-template-simplified.html
+        helm/configs/backend-next/job-template.html
         helm/configs/backend-next/jobConfig.yaml
         helm/configs/backend-next/values.yaml
         scicat-backend-next/**
@@ -55,7 +55,7 @@ jobs:
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
       submodule: scicat-backend-next
       helm_set_files: >-
-        JOB_TEMPLATE_SIMPLIFIED=helm/configs/backend-next/job-template-simplified.html
+        JOB_TEMPLATE=helm/configs/backend-next/job-template.html
         JOB_CONFIG=helm/configs/backend-next/jobConfig.yaml
         RENAME_MEASUREMENT_ID_JS=helm/configs/backend-next/rename-measurement-id.js
     secrets:
