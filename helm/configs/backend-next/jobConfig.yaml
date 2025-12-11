@@ -69,7 +69,7 @@ jobs:
       auth: archiveManager
       actions:
         - actionType: log
-          perform: "(Job {{job.id}}) UPDATE to status {{job.jobStatus}}"
+          perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
 
         - &email_update
           actionType: switch
@@ -82,7 +82,7 @@ jobs:
                 ignoreErrors: true
                 to: "{{job.contactEmail}}"
                 subject: |-
-                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.jobStatus "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
+                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.statusCode "jobSubmitted")}}completed successfully{{else}}encountered an error{{/if}}
                 bodyTemplateFile: email-templates/job-template.html
             - actions:
               - actionType: log
