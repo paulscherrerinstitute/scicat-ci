@@ -75,6 +75,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template.html
     subPath: job-template.html
+  - name: config-volume
+    mountPath: /home/node/app/publishedDataConfig.json
+    subPath: publishedDataConfig.json
 
 migrateCommand: "echo 'No migration command specified.'"
 
