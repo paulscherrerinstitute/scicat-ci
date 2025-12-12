@@ -204,7 +204,7 @@ class SciCatMeasurementsFromDuoMixin:
         log.info("Measurement periods from proposal extracted")
         return measurement_periods
 
-    def keep_new_measurements(self, measurements):
+    def is_same_measurements(self, measurements):
         """Returns true if measurement periods are the same as in SciCat.
 
         Args:
@@ -285,7 +285,7 @@ class SciCatProposalFromDuo(
         log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
         existing_measurements = existing_proposal.measurement_period_list
-        if self.keep_new_measurements(existing_measurements):
+        if self.is_same_measurements(existing_measurements):
             return
         patch = {"MeasurementPeriodList": proposal["MeasurementPeriodList"]}
         log.info(f"Modifying proposal, patch object: {patch}")

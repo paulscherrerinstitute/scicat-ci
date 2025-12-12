@@ -317,6 +317,6 @@ class TestSciCatMeasurementsFromDuoMixin:
             [FixturesFromSciCatAPI.measurement_periods, False],
         ],
     )
-    def test_keep_new_measurements(self, proposals, expected):
-        keep_proposals = self.scicat_measurements.keep_new_measurements(proposals)
+    def test_is_same_measurements(self, proposals, expected):
+        keep_proposals = self.scicat_measurements.is_same_measurements(proposals)
         assert keep_proposals == expected
