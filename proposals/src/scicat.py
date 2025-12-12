@@ -205,31 +205,24 @@ class SciCatMeasurementsFromDuoMixin:
         return measurement_periods
 
     def keep_new_measurements(self, measurements):
-        """Filters out measurement periods already present in SciCat.
+        """Returns true if measurement periods are the same as in SciCat.
 
         Args:
             measurements (list): Existing SciCat measurement periods.
 
         Returns:
-            list[dict]: New measurement periods not in existing ones.
+            boolen: true if measurements have changed.
         """
         log.info("Excluding already existing proposals")
-        existing_measurements_set = {
-            f"{m.instrument}_{m.start.isoformat("T")}_{m.end.isoformat("T")}"
+        existing_measurements = {
+            f"{m.instrument}_{m.start.isoformat('T')}_{m.end.isoformat('T')}"
             for m in measurements
         }
-        new_entries = []
-        for new_entry in self.measurement_period_list:
-            if (
-                f"{new_entry['instrument']}_{new_entry['start']}_{new_entry['end']}"
-                in existing_measurements_set
-            ):
-                log.info("This entry exists already, nothing appended")
-                continue
-            log.info(f"Merge calendar entry to existing proposal data {new_entry}")
-            new_entries.append(new_entry)
-        log.info("Existing proposals excluded")
-        return new_entries
+        expected_measurements = {
+            f"{x['instrument']}_{x['start']}_{x['end']}"
+            for x in self.measurement_period_list
+        }
+        return existing_measurements == expected_measurements
 
 
 class SciCatProposalFromDuo(
@@ -292,8 +285,7 @@ class SciCatProposalFromDuo(
         log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
         existing_measurements = existing_proposal.measurement_period_list
-        new_entries = self.keep_new_measurements(existing_measurements)
-        if len(new_entries) == 0:
+        if self.keep_new_measurements(existing_measurements):
             return
         patch = {"MeasurementPeriodList": proposal["MeasurementPeriodList"]}
         log.info(f"Modifying proposal, patch object: {patch}")
