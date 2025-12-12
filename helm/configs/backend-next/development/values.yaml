@@ -7,20 +7,3 @@ ingress:
     b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_IPS }}"
 
 migrateCommand: npm run migrate:db:up
-
-# Run on nodes whitelisted by scopem
-# Can be removed when scopem-openem.ethz.ch is publically accessible
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - dev-pool1-657c87f665-8lljz
-          - dev-pool1-657c87f665-cvq86
-          - dev-pool1-657c87f665-pn8r4
-          - dev-pool1-657c87f665-qzvvn
-          - dev-pool1-657c87f665-z8zhz
-

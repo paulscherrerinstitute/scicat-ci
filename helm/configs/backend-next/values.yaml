@@ -24,7 +24,7 @@ volumes:
 
 configMaps:
   "{{ .Release.Name }}-cm":
-    job-template-simplified.html: "{{ .Values.JOB_TEMPLATE_SIMPLIFIED }}"
+    job-template.html: "{{ .Values.JOB_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
@@ -73,8 +73,8 @@ volumeMounts:
     mountPath: /home/node/app/jobConfig.yaml
     subPath: jobConfig.yaml
   - name: config-volume
-    mountPath: /home/node/app/email-templates/job-template-simplified.html
-    subPath: job-template-simplified.html
+    mountPath: /home/node/app/email-templates/job-template.html
+    subPath: job-template.html
 
 migrateCommand: "echo 'No migration command specified.'"
 
