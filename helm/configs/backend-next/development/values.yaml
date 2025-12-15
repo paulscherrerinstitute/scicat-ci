@@ -6,8 +6,17 @@ ingress:
   annotations:
     b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_IPS }}"
 
+configMaps:
+  "{{ .Release.Name }}-cm":
+    publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
+
 env:
   - name: DOI_PREFIX
     value: "10.83766"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /home/node/app/publishedDataConfig.json
+    subPath: publishedDataConfig.json
 
 migrateCommand: npm run migrate:db:up
