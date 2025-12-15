@@ -26,6 +26,7 @@ configMaps:
   "{{ .Release.Name }}-cm":
     job-template.html: "{{ .Values.JOB_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
+    publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
 
