@@ -309,8 +309,19 @@ class TestSciCatMeasurementsFromDuoMixin:
         utc_date = self.scicat_measurements._datetime_to_utc(test_date)
         assert utc_date == "2022-12-31T23:00:00+00:00"
 
-    def test_keep_new_measurements(self):
-        new_measures = self.scicat_measurements.keep_new_measurements(
-            FixturesFromSciCatAPI.measurement_periods,
-        )
-        assert new_measures == [FixturesFromSciCatAPI.new_measurment_period]
+    @pytest.mark.parametrize(
+        "proposals, expected",
+        [
+            [FixturesFromSciCatAPI.same_proposals_measurement_periods, True],
+            [[FixturesFromSciCatAPI.same_proposals_measurement_periods[0]], False],
+            [
+                FixturesFromSciCatAPI.same_proposals_measurement_periods
+                + FixturesFromSciCatAPI.measurement_periods,
+                False,
+            ],
+            [FixturesFromSciCatAPI.measurement_periods, False],
+        ],
+    )
+    def test_is_same_measurements(self, proposals, expected):
+        keep_proposals = self.scicat_measurements.is_same_measurements(proposals)
+        assert keep_proposals == expected
