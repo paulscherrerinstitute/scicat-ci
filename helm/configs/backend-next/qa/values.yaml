@@ -1,5 +1,9 @@
 envValue: qa
 
+doiPrefix: "10.83766"
+
+registerDoiUri: https://api.test.datacite.org/dois
+
 host: dacat-qa.psi.ch
 
 migrateCommand: npm run migrate:db:up

@@ -1,5 +1,9 @@
 envValue: development
 
+doiPrefix: "10.83766"
+
+registerDoiUri: https://api.test.datacite.org/dois
+
 host: scicat.development.psi.ch
 
 ingress:

@@ -26,6 +26,7 @@ configMaps:
   "{{ .Release.Name }}-cm":
     job-template.html: "{{ .Values.JOB_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
+    publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
 
@@ -54,7 +55,9 @@ ingress:
 
 env:
   - name: DOI_PREFIX
-    value: "10.16907"
+    value: "{{ .Values.doiPrefix }}"
+  - name: REGISTER_DOI_URI
+    value: "{{ .Values.registerDoiUri }}"
   - name: PID_PREFIX
     value: "20.500.11935"
   - name: SITE
@@ -75,6 +78,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template.html
     subPath: job-template.html
+  - name: config-volume
+    mountPath: /home/node/app/publishedDataConfig.json
+    subPath: publishedDataConfig.json
 
 migrateCommand: "echo 'No migration command specified.'"
 
