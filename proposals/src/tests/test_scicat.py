@@ -314,6 +314,11 @@ class TestSciCatMeasurementsFromDuoMixin:
         [
             [FixturesFromSciCatAPI.same_proposals_measurement_periods, True],
             [[FixturesFromSciCatAPI.same_proposals_measurement_periods[0]], False],
+            [
+                FixturesFromSciCatAPI.same_proposals_measurement_periods
+                + FixturesFromSciCatAPI.measurement_periods,
+                False,
+            ],
             [FixturesFromSciCatAPI.measurement_periods, False],
         ],
     )
