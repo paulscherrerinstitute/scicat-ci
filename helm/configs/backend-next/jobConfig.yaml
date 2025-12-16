@@ -111,7 +111,7 @@ jobs:
   # TODO Make public work for ETHZ
   - jobType: public
     create:
-      auth: '#datasetPublic'
+      auth: '#all'
       actions: &publicActions
         - actionType: log
         - actionType: validate
