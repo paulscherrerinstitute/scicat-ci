@@ -211,7 +211,7 @@ class SciCatMeasurementsFromDuoMixin:
             measurements (list): Existing SciCat measurement periods.
 
         Returns:
-            boolen: true if measurements have changed.
+            boolean: true if measurements have changed.
         """
         log.info("Excluding already existing proposals")
         existing_measurements = {
