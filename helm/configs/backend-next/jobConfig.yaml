@@ -64,7 +64,6 @@ jobs:
           subject: "[SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job was submitted"
           bodyTemplateFile: email-templates/job-template.html
 
-
     update:
       auth: archiveManager
       actions:
@@ -82,12 +81,11 @@ jobs:
                 ignoreErrors: true
                 to: "{{job.contactEmail}}"
                 subject: |-
-                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.statusCode "jobSubmitted")}}completed successfully{{else}}encountered an error{{/if}}
+                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.statusCode "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
                 bodyTemplateFile: email-templates/job-template.html
             - actions:
               - actionType: log
                 perform: "(Job {{job.id}} Skip email notification for status {{job.statusCode}}"
-
 
   - jobType: retrieve
     create:
@@ -162,119 +160,3 @@ jobs:
       auth: "#jobOwnerUser"
       actions:
         - actionType: log
-
-  - jobType: email_demo
-    create:
-      auth: admin
-      actions:
-        - actionType: validate
-          request:
-            jobParams.subject:
-              type: string
-        - &email_demo
-          actionType: email
-          to: "{{request.contactEmail}}"
-          subject: "[SciCat] {{request.jobParams.subject}}"
-          bodyTemplateFile: email-templates/job-template.html
-    update:
-      auth: "#jobOwnerUser"
-      actions:
-        - actionType: log
-        - *email_demo
-
-  - jobType: scopem_livez
-    create:
-      auth: admin
-      actions:
-        - # Call a REST endpoint
-          actionType: url
-          url: https://scopem-openem.ethz.ch/archiver/api/v1/health/livez
-          method: GET
-          headers:
-            accept: application/json
-            content-type: application/json
-    update:
-      auth: "#jobOwnerUser"
-      actions: []
-
-
-  - jobType: url_demo
-    create:
-      auth: admin
-      actions:
-        - # Call a REST endpoint
-          actionType: url
-          url: http://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
-          method: POST
-          headers:
-            accept: application/json
-            content-type: application/json
-            Authorization: 'Basic {{{ env.ETHZ_ARCHIVER_BASIC_AUTH_TOKEN }}}'
-          body: |-
-            {
-              "type": "url_demo",
-              "jobParams": {},
-              "statusCode": "jobSubmitted",
-              "statusMessage": "jobSubmitted"
-            }
-    update:
-      auth: "#jobOwnerUser"
-      actions: []
-
-  - jobType: scopem_test
-    create:
-      auth: "@unx-openem"
-      actions:
-        - actionType: log
-          perform: "(Job {{job.id}}) Creating scopem_test job. Job body: {{{jsonify job}}}"
-        - *scopemUrl
-    update:
-      auth: "@unx-openem"
-      actions:
-        - actionType: log
-        - *scopemUrl
-
-  - jobType: env_test
-    create:
-      auth: "admin"
-      actions:
-        - actionType: log
-          perform: "env: {{{jsonify env}}}"
-    update:
-      auth: "admin"
-      actions: []
-
-  - jobType: switch_test
-    create:
-      auth: "#datasetAccess"
-      actions: &switchTestActions
-        - actionType: switch
-          phase: perform
-          property: datasets[*].datasetlifecycle.storageLocation
-          cases:
-          - match: ETHZ
-            actions:
-            - actionType: log
-              perform: |-
-                  (Job {{job.id}}) CREATE directed to ETHZ based on datasets=
-                  [{{~#each datasets ~}}
-                    {"pid": {{~{ jsonify pid }~}}
-                    ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
-                    ,"datasetlifecycle": {{~{ jsonify datasetlifecycle }~}}
-                    }{{#unless @last}},{{/unless~}}
-                  {{/each ~}}]
-
-          - # PSI default
-            actions:
-            - actionType: log
-              perform: |-
-                  (Job {{job.id}}) CREATE directed to PSI based on datasets=
-                  [{{~#each datasets ~}}
-                    {"pid": {{~{ jsonify pid }~}}
-                    ,"ownerGroup": {{~{ jsonify ownerGroup }~}}
-                    ,"datasetlifecycle": {{~{ jsonify datasetlifecycle }~}}
-                    }{{#unless @last}},{{/unless~}}
-                  {{/each ~}}]
-    update:
-      auth: archiveManager
-      actions: *switchTestActions
