@@ -39,14 +39,14 @@ The following inline partials are defined for inclusion below:
   </tr>
   {{#each datasets}}
   <tr>
-      <td><a href="{{env.SCICAT_FRONTEND_URL}}/datasets/{{urlencode pid}}">{{pid}}</a></td>
+      <td><a href="{{@root.env.SCICAT_FRONTEND_URL}}/datasets/{{urlencode pid}}">{{pid}}</a></td>
       <td>{{datasetName}}</td>
-      {{#unless (eq ../job.type "public")}}
+      {{#unless (eq @root.job.type "public")}}
       <td>{{ownerGroup}}</td>
       {{/unless}}
       <td>{{sourceFolder}}</td>
       <td>{{formatUnit size "B" }}</td>
-      {{#unless (eq ../job.type "public")}}
+      {{#unless (eq @root.job.type "public")}}
       <td class="archivable-{{datasetlifecycle.archivable}}">{{datasetlifecycle.archivable}}</td>
       <td class="retrievable-{{datasetlifecycle.retrievable}}">{{datasetlifecycle.retrievable}}</td>
       {{/unless}}
@@ -64,10 +64,10 @@ The following inline partials are defined for inclusion below:
       {{#unless (eq job.type "public")}}
       <th>Owner Group</th>
       {{/unless}}
-      {{#if (eq job.jobParams.option "URLs")}}
+      {{#if (eq @root.job.jobParams.option "URLs")}}
       <th>Sourcefolder</th>
       <th>Download parts (size)</th>
-      {{else if (eq ../jobParams.option "PSI-RA")}}
+      {{else if (eq @root.job.jobParams.option "PSI-RA")}}
       <th>PSI-RA folder</th>
       <th>Size</th>
       {{else}}
@@ -77,23 +77,23 @@ The following inline partials are defined for inclusion below:
   </tr>
   {{#each datasets}}
   <tr>
-      <td><a href="{{env.SCICAT_FRONTEND_URL}}/datasets/{{urlencode pid}}">{{pid}}</a></td>
+      <td><a href="{{@root.env.SCICAT_FRONTEND_URL}}/datasets/{{urlencode pid}}">{{pid}}</a></td>
       <td>{{datasetName}}</td>
-      {{#unless (eq ../../job.type "public")}}
+      {{#unless (eq @root.job.type "public")}}
       <td>{{ownerGroup}}</td>
       {{/unless}}
-      {{#if (eq ../job.jobParams.option "URLs")}}
+      {{#if (eq @root.job.jobParams.option "URLs")}}
       <td>{{sourceFolder}}</td>
       <td>
           <ol>
-              {{#each ../job.jobResultObject.result}}
-              {{#if (eq datasetId ../pid)}}
+              {{#each @root.job.jobResultObject.result}}
+              {{#if (eq datasetId @root.pid)}}
               <li><a href="{{url}}" download="{{name}}">Download</a> ({{formatUnit size "B"}})</li>
               {{/if}}
               {{/each}}
           </ol>
       </td>
-      {{else if (eq ../job.jobParams.option "PSI-RA")}}
+      {{else if (eq @root.job.jobParams.option "PSI-RA")}}
       <td>/das/work/{{subString ownerGroup 0 3}}/retrieve/{{ownerGroup}}/{{strip sourceFolder "/"}}/</td>
       <td>{{formatUnit size "B"}}</td>
       {{else}}
