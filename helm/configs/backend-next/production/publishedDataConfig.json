@@ -1,0 +1,103 @@
+{
+  "metadataSchema": {
+    "type": "object",
+    "required": [ "creators", "publisher", "resourceType", "dataDescription" ],
+    "properties": {
+      "creators": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [ "name" ],
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "publisher": {
+        "type": "object",
+        "required": [ "name" ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "resourceType": {
+        "type": "string",
+        "enum": [ "raw", "derived" ]
+      },
+      "dataDescription": {
+        "type": "string"
+      },
+      "downloadLink": {
+        "type": "string"
+      },
+      "relatedIdentifiers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [ "relatedIdentifier" ],
+          "properties": {
+            "relatedIdentifier": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "uiSchema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Group",
+        "label": "Creators",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/creators"
+          }
+        ]
+      },
+      {
+        "type": "Group",
+        "label": "Publisher",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/publisher/properties/name"
+          }
+        ]
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/resourceType"
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/dataDescription",
+        "label": "Description",
+        "options": {
+          "multi": true
+        }
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/downloadLink"
+      },
+      {
+        "type": "Group",
+        "label": "Related Publications",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/relatedIdentifiers"
+          }
+        ]
+      }
+    ]
+  }
+}
