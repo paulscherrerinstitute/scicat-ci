@@ -130,13 +130,14 @@ jobs:
                     - ""
                     - PSI
               additionalProperties: true
-
+        - *email_create
         - *rabbitmq
 
     update:
       auth: 'archiveManager'
       actions:
         - actionType: log
+        - *email_update
 
   - jobType: reset
     create:
