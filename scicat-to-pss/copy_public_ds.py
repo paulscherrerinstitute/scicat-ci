@@ -15,7 +15,7 @@ meaningful_fields = {
         "creator": "creator",
         "title": "title",
         "abstract": "abstract",
-        "description": "datasetDescription"
+        "description": "dataDescription"
     },
 }
 
