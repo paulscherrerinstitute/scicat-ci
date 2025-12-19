@@ -130,7 +130,7 @@ jobs:
                     - ""
                     - PSI
               additionalProperties: true
-        - *email_update
+        - *email_create
         - *rabbitmq
 
     update:
