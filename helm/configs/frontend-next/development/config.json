@@ -268,46 +268,33 @@
         "columns": [
           {
             "name": "proposalId",
-            "width": 180,
             "enabled": true
           },
           {
             "name": "title",
-            "width": 250,
             "enabled": true
           },
           {
             "name": "abstract",
             "type": "hoverContent",
-            "width": 150,
             "enabled": true
           },
           {
             "name": "createdAt",
             "type": "date",
             "format": "yyyy-MM-dd",
-            "width": 200,
             "enabled": true
           },
           {
             "name": "pi_lastname, pi_firstname",
-            "enabled": true,
             "width": 200
           },
           {
             "name": "numberOfDatasets",
-            "width": 150,
             "enabled": true
           }
         ],
         "filters": [
-          {
-            "key": "pi_firstname",
-            "label": "First Name",
-            "type": "checkbox",
-            "description": "Filter by first name",
-            "enabled": true
-          },
           {
             "key": "pi_lastname",
             "label": "Last Name",
