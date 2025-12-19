@@ -15,7 +15,7 @@
     "title": "Please enter your email address where you will receive the download procedure",
     "confirmMessage": "Are you sure you want to continue?"
   },
-  "statusCode": "WARN",
-  "statusMessage": "Dataset retrieval is currently down due to technical issues at CSCS. Visit <a href=\"https://scistatus.psi.ch/\">scistatus.psi.ch</a> for more information.",
+  "statusCode": "NONE",
+  "statusMessage": "All services operational. Visit <a href=\"https://scistatus.psi.ch/\">scistatus.psi.ch</a> for more information.",
   "contactEmail": "scicat-help@lists.psi.ch"
 }
