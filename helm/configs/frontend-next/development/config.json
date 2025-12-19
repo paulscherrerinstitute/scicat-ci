@@ -263,5 +263,52 @@
             "publishedData": true,
             "samples": true
         }
+    },
+    "defaultProposalsListSettings": {
+        "columns": [
+          {
+            "name": "proposalId",
+            "enabled": true
+          },
+          {
+            "name": "title",
+            "enabled": true
+          },
+          {
+            "name": "abstract",
+            "type": "hoverContent",
+            "enabled": true
+          },
+          {
+            "name": "createdAt",
+            "type": "date",
+            "format": "yyyy-MM-dd",
+            "enabled": true
+          },
+          {
+            "name": "pi_lastname, pi_firstname",
+            "width": 200
+          },
+          {
+            "name": "numberOfDatasets",
+            "enabled": true
+          }
+        ],
+        "filters": [
+          {
+            "key": "pi_lastname",
+            "label": "Last Name",
+            "type": "checkbox",
+            "description": "Filter by last name",
+            "enabled": true
+          },
+          {
+            "key": "createdAt",
+            "label": "Creation Time",
+            "type": "dateRange",
+            "description": "Filter by dataset start time",
+            "enabled": true
+          }
+        ]
     }
 }
