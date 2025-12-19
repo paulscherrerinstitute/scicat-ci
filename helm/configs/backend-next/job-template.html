@@ -87,7 +87,7 @@ The following inline partials are defined for inclusion below:
       <td>
           <ol>
               {{#each @root.job.jobResultObject.result}}
-              {{#if (eq datasetId @root.pid)}}
+              {{#if (eq datasetId ../pid)}}
               <li><a href="{{url}}" download="{{name}}">Download</a> ({{formatUnit size "B"}})</li>
               {{/if}}
               {{/each}}
@@ -189,7 +189,8 @@ The following inline partials are defined for inclusion below:
       color: #9e1a1a;
     }
 
-    {{#if (eq job.type "retrieve") }}
+    {{#if (or (matches job.type "retrieve|public") (and (eq job.type "archive") (not (eq job.statusCode "jobSubmitted")))) }}
+    {{! Highlight unretrievable datasets only for retrieval jobs and non-new archive jobs }}
     .retrievable-false {
       color: #9e1a1a;
       font-weight: bold;
@@ -198,7 +199,8 @@ The following inline partials are defined for inclusion below:
       background-color: #fadada;
     }
     {{/if}}
-    {{#if (eq job.type "archive") }}
+    {{#if (and (eq job.type "archive") (eq job.statusCode "jobSubmitted")) }}
+    {{! Highlight unarchivable datasets only for newly created archive jobs }}
     .archivable-false {
       color: #9e1a1a;
       font-weight: bold;
