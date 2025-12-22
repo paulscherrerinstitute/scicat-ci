@@ -2,4 +2,4 @@ envValue: production
 
 doiPrefix: "10.16907"
 
-host: scicat-prod.qa.psi.ch
+host: dacat.psi.ch
