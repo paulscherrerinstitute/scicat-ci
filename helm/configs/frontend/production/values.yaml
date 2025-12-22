@@ -1,1 +1,3 @@
 host: discovery.psi.ch
+
+replicaCount: 0
