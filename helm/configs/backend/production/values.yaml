@@ -1,3 +1,5 @@
 envValue: production
 
 host: dacat.psi.ch
+
+replicaCount: 0
