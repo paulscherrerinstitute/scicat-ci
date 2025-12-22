@@ -3,3 +3,16 @@ envValue: production
 doiPrefix: "10.16907"
 
 host: dacat.psi.ch
+
+probeChecksEnabled: false
+
+ingress:
+  enabled: false
+
+run:
+  command: 
+    - /bin/sh
+  args: 
+    - -c
+    - >
+      sleep infinity
