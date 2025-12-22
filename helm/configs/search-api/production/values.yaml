@@ -1,4 +1,4 @@
-baseUrl: http://backend.scicat-production/api/v3
+baseUrl: http://backend-next.scicat-production/api/v3
 panetBaseUrl: http://pan-ontologies-api.scicat-production
 pssBaseUrl: http://pss.scicat-production
 
