@@ -17,7 +17,7 @@ The following inline partials are defined for inclusion below:
 {{#if (and @root.env.SCICAT_FRONTEND_URL (not (eq @root.job.type "public"))) ~}}
   <a href="{{@root.env.SCICAT_FRONTEND_URL}}/user/jobs/{{{urlencode job.id}}}">{{> @partial-block}}</a>
 {{~ else ~}}
-  {{@partial-block}}
+  {{> @partial-block}}
 {{~/if}}
 {{/inline~}}
 
