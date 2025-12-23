@@ -14,7 +14,7 @@ The following inline partials are defined for inclusion below:
 --}}
 {{~#*inline "jobLink" ~}}
 {{!-- block partial; wraps the contents with an html link to the job --}}
-{{#if env.SCICAT_FRONTEND_URL ~}}
+{{#if (and env.SCICAT_FRONTEND_URL (not (eq job.type "public"))) ~}}
   <a href="{{env.SCICAT_FRONTEND_URL}}/user/jobs/{{{urlencode job.id}}}">{{> @partial-block}}</a>
 {{~ else ~}}
   {{@partial-block}}
