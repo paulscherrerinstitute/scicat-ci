@@ -35,3 +35,6 @@ facilities:
   - <<: *openemFacility
     name: DCIL
     collection: b3807ed3-db5e-4e6f-9831-fd8d72dfff8a
+  - <<: *openemFacility
+    name: EMPA
+    collection: ed650f52-0235-4c40-a573-5f8de55841a6
