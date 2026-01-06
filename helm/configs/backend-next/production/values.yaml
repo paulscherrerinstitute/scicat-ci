@@ -16,8 +16,11 @@ run:
     - /bin/sh
   args: 
     - -c
-    - >
-      sleep infinity
+    - >-
+      npm run migrate:db:status;
+      npm run migrate:db:up;
+      npm run migrate:db:status;
+      sleep infinity;
 
 volumeMounts:
   - name: secrets-volume
