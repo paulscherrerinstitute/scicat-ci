@@ -3,9 +3,3 @@ panetBaseUrl: http://pan-ontologies-api.scicat-qa
 pssBaseUrl: http://pss.scicat-qa
 
 host: dacat-qa.psi.ch
-
-ingress:
-  tls:
-    - hosts:
-      - "{{ .Values.host }}"
-      secretName: "scicat-be-next-certificate"
