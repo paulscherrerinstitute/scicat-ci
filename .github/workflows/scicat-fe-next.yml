@@ -13,8 +13,8 @@ on:
     branches: [ main ]
   push:
     branches: [ main ]
-  # release:
-  #   types: [ published ]
+  release:
+    types: [ published ]
 
 jobs:
 
@@ -39,7 +39,7 @@ jobs:
       submodule: frontend
 
   build_deploy_scicat_fe_next:
-    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fe-next'
+    if: (needs.check_changed.outputs.changed == 'true' && !needs.set_env.outputs.component) || needs.set_env.outputs.component == 'fn'
     needs:
      - check_changed
      - set_env

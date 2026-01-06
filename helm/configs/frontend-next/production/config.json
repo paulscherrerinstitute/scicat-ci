@@ -1,0 +1,277 @@
+{
+    "addDatasetEnabled": false,
+    "addSampleEnabled": false,
+    "archiveWorkflowEnabled": true,
+    "datasetReduceEnabled": false,
+    "datasetOneDepIntegration": true,
+    "datafilesActionsEnabled": false,
+    "editDatasetSampleEnabled": false,
+    "editMetadataEnabled": false,
+    "editPublishedData": true,
+    "editSampleEnabled": false,
+    "facility": "PSI",
+    "siteHeaderLogo": "site-logo.png",
+    "siteTitle" : "SciCat Data Catalog",
+    "siteSciCatLogo" : "scicat-header-logo-full.png",
+    "siteLoginLogo" : "site-logo.png",
+    "siteLoginBackground": "site.png",
+    "loginFacilityEnabled": true,
+    "loginFacilityLabel": "Single Sign-On",
+    "loginLdapEnabled": false,
+    "loginLocalEnabled": true,
+    "loginLocalLabel": "Local",
+    "fileColorEnabled": false,
+    "fileDownloadEnabled": false,
+    "gettingStarted": "https://data-catalog-services.pages.psi.ch/gettingStarted/",
+    "helpMessages": {
+        "gettingStarted": "gives a brief description on how to get started using the data catalog.",
+        "ingestManual": "provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
+    },
+    "ingestManual": "https://data-catalog-services.pages.psi.ch/ingestorManual/",
+    "supportEmail": "scicat-help@lists.psi.ch",
+    "jobsEnabled": true,
+    "jsonMetadataEnabled": true,
+    "landingPage": "doi.psi.ch/detail/",
+    "lbBaseURL": "https://dacat.psi.ch",
+    "depositorURL": "https://depositor.development.psi.ch",
+    "logbookEnabled": false,
+    "loginFormEnabled": true,
+    "oAuth2Endpoints": [
+        {
+            "displayText": "Single Sign-On",
+            "displayImage": "../../../assets/images/keycloak_icon_256px.svg",
+            "authURL": "api/v3/auth/oidc"
+        }
+    ],
+    "maxDirectDownloadSize": 5000000000,
+    "metadataPreviewEnabled": false,
+    "metadataStructure": "tree",
+    "multipleDownloadAction": null,
+    "multipleDownloadEnabled": false,
+    "policiesEnabled": true,
+    "retrieveDestinations": [
+        {
+            "option": "PSI",
+            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
+        },
+        {
+            "option": "PSI-RA",
+            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
+        },
+        {
+            "option": "URLs",
+            "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
+        }
+    ],
+    "riotBaseUrl": null,
+    "scienceSearchEnabled": true,
+    "scienceSearchUnitsEnabled": false,
+    "searchPublicDataEnabled": true,
+    "searchSamples": true,
+    "sftpHost": null,
+    "shareEnabled": true,
+    "shoppingCartEnabled": true,
+    "shoppingCartOnHeader": true,
+    "tableSciDataEnabled": false,
+    "defaultDatasetsListSettings": {
+        "columns": [
+          {
+            "name": "select",
+            "order": 0,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "pid",
+            "order": 1,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "datasetName",
+            "order": 2,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "sourceFolder",
+            "order": 3,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "size",
+            "order": 4,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "dataStatus",
+            "order": 5,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "creationTime",
+            "order": 6,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "ownerGroup",
+            "order": 7,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "type",
+            "order": 8,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "runNumber",
+            "order": 9,
+            "type": "standard",
+            "enabled": true
+          },
+          {
+            "name": "image",
+            "order": 10,
+            "type": "standard",
+            "enabled": false
+          },
+          {
+            "name": "metadata",
+            "order": 11,
+            "type": "standard",
+            "enabled": false
+          },
+          {
+            "name": "proposalId",
+            "order": 12,
+            "type": "standard",
+            "enabled": true
+          }
+        ],
+        "filters": [
+            {
+                "key": "creationLocation",
+                "label": "Location",
+                "type": "multiSelect",
+                "description": "Filter by creation location on the dataset",
+                "enabled": true
+            },
+            {
+                "key": "pid",
+                "label": "Pid",
+                "type": "text",
+                "description": "Filter by dataset pid",
+                "enabled": true
+            },
+            {
+                "key": "ownerGroup",
+                "label": "Group",
+                "type": "multiSelect",
+                "description": "Filter by owner group of the dataset",
+                "enabled": true
+            },
+            {
+                "key": "type",
+                "label": "Type",
+                "type": "multiSelect",
+                "description": "Filter by dataset type",
+                "enabled": true
+            },
+            {
+                "key": "keywords",
+                "label": "Keyword",
+                "type": "multiSelect",
+                "description": "Filter by keywords in the dataset",
+                "enabled": true
+            },
+            {
+                "key": "creationTime",
+                "label": "Creation Time",
+                "type": "dateRange",
+                "description": "Filter by creation time of the dataset",
+                "enabled": true
+            }
+        ],
+        "conditions": []
+    },
+    "accessTokenPrefix": "Bearer ",
+    "externalAuthEndpoint": null,
+    "ingestorComponent": {
+        "ingestorEnabled": false
+    },
+    "mainMenu": {
+        "nonAuthenticatedUser": {
+            "datasets": true,
+            "files": false,
+            "instruments": true,
+            "jobs": false,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": false
+        },
+        "authenticatedUser": {
+            "datasets": true,
+            "files": true,
+            "instruments": true,
+            "jobs": true,
+            "policies": false,
+            "proposals": true,
+            "publishedData": true,
+            "samples": true
+            }
+    },
+    "defaultProposalsListSettings": {
+        "columns": [
+          {
+            "name": "proposalId",
+            "enabled": true
+          },
+          {
+            "name": "title",
+            "enabled": true
+          },
+          {
+            "name": "abstract",
+            "type": "hoverContent",
+            "enabled": true
+          },
+          {
+            "name": "createdAt",
+            "type": "date",
+            "format": "yyyy-MM-dd",
+            "enabled": true
+          },
+          {
+            "name": "pi_lastname, pi_firstname",
+            "width": 200
+          },
+          {
+            "name": "numberOfDatasets",
+            "enabled": true
+          }
+        ],
+        "filters": [
+          {
+            "key": "pi_lastname",
+            "label": "Last Name",
+            "type": "checkbox",
+            "description": "Filter by last name",
+            "enabled": true
+          },
+          {
+            "key": "createdAt",
+            "label": "Creation Time",
+            "type": "dateRange",
+            "description": "Filter by dataset start time",
+            "enabled": true
+          }
+        ]
+    }
+}
