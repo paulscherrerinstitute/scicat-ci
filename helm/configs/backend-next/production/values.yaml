@@ -6,6 +6,8 @@ host: dacat.psi.ch
 
 probeChecksEnabled: false
 
+replicaCount: 1
+
 ingress:
   enabled: false
 
