@@ -18,3 +18,23 @@ run:
     - -c
     - >
       sleep infinity
+
+volumeMounts:
+  - name: secrets-volume
+    mountPath: /home/node/app/.env
+    subPath: .env
+  - name: secrets-volume
+    mountPath: /home/node/app/functionalAccounts.json
+    subPath: functionalAccounts.json
+  - name: config-volume
+    mountPath: /home/node/app/jobConfig.yaml
+    subPath: jobConfig.yaml
+  - name: config-volume
+    mountPath: /home/node/app/email-templates/job-template.html
+    subPath: job-template.html
+  - name: config-volume
+    mountPath: /home/node/app/publishedDataConfig.json
+    subPath: publishedDataConfig.json
+  - name: migrations-volume
+    mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
+    subPath: 20250819165001-rename-measurement-id.js
