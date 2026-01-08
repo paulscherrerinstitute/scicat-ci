@@ -1,4 +1,4 @@
-scicatBaseUrl: http://backend.scicat-production/api/v3
+scicatBaseUrl: http://backend-next.scicat-production/api/v3
 pssBaseUrl: http://pss.scicat-production
 
 cronjob:
