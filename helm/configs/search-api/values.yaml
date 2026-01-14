@@ -26,7 +26,7 @@ ingress:
   tls:
     - hosts:
       - "{{ .Values.host }}"
-      secretName: "scicat-be-certificate"
+      secretName: "scicat-be-next-certificate"
 
 env:
   - name: BASE_URL
