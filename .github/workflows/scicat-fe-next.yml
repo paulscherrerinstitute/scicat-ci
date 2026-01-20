@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
     with:
       commit: ${{ github.event.inputs.commit }}
-      submodule_commit: 7637c0ee5b9b9f3176580996de7234196f60f52e
+      submodule_commit: 922f3c22130cf37e074e2ccc1e43a1ad34e2c1fc
 
   check_changed:
     needs: set_env
@@ -35,7 +35,7 @@ jobs:
         helm/configs/frontend-next/${{ needs.set_env.outputs.environment }}/**
         frontend/**
       commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: 7637c0ee5b9b9f3176580996de7234196f60f52e
+      submodule_commit: 922f3c22130cf37e074e2ccc1e43a1ad34e2c1fc
       submodule: frontend
 
   build_deploy_scicat_fe_next:
@@ -51,7 +51,7 @@ jobs:
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
       commit: ${{ needs.set_env.outputs.commit }}
-      submodule_commit: 7637c0ee5b9b9f3176580996de7234196f60f52e
+      submodule_commit: 922f3c22130cf37e074e2ccc1e43a1ad34e2c1fc
       submodule: frontend
       helm_set_files: >-
         KEYCLOAK_ICON=helm/configs/frontend-next/keycloak_icon_256px.svg

@@ -99,5 +99,10 @@
         ]
       }
     ]
+  },
+  "defaultValues": {
+    "publisher": {
+      "name": "PSI"
+    }
   }
 }
