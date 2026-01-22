@@ -47,3 +47,5 @@ env:
     value: oai-pmh-service
   - name: FACILITY_NAME
     value: PSI
+  - name: BASE_URL
+    value: https://{{ .Values.host }}
