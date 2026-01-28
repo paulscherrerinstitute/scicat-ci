@@ -69,7 +69,7 @@ The following inline partials are defined for inclusion below:
       <th>Owner Group</th>
       {{/unless}}
       {{#if (eq @root.job.jobParams.option "URLs")}}
-      <th>Sourcefolder</th>
+      <th>Source Folder</th>
       <th>Download parts (size)</th>
       {{else if (eq @root.job.jobParams.option "PSI-RA")}}
       <th>PSI-RA folder</th>
@@ -256,7 +256,7 @@ The following inline partials are defined for inclusion below:
     </div>
     {{#if datasets}}
     <p><b>The following datasets were processed during the job:</b></p>
-    {{#if (and (eq job.type "retrieve") (eq job.statusCode "finishedSuccessful")) }}
+    {{#if (and (matches job.type "retrieve|public") (eq job.statusCode "finishedSuccessful")) }}
     {{> retrieve-table}}
     {{else}}
     {{> dataset-table}}
