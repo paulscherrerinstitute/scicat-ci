@@ -29,6 +29,7 @@ configMaps:
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
+    20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -103,3 +104,7 @@ initContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20250819165001-rename-measurement-id.js
         subPath: 20250819165001-rename-measurement-id.js
+      - name: migrations-volume
+        mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
+        subPath: 20260127161201-migrate-broken-legacy-history.js
+
