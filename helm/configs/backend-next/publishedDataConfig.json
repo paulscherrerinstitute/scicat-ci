@@ -1058,10 +1058,7 @@
                       {
                         "type": "Control",
                         "scope": "#/properties/nameType",
-                        "label": "Name type",
-                        "options": {
-                          "readOnly": true
-                        }
+                        "label": "Name type"
                       },
                       {
                         "type": "HorizontalLayout",
