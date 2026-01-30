@@ -1254,7 +1254,7 @@
       },
       {
         "type": "Category",
-        "label": "Dates",
+        "label": "Dates*",
         "elements": [
           {
             "type": "Control",
