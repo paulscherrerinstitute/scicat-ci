@@ -11,22 +11,27 @@
             "name": {
               "type": "string",
               "title": "Name",
+              "minLength": 1,
               "$dataciteRequired": true
             },
             "nameType": {
               "type": "string",
               "title": "Name Type",
               "$dataciteRequired": false,
-              "enum": [ "Personal", "Organizational" ]
+              "enum": [ "Personal", "Organizational" ],
+              "pattern": "Personal",
+              "default": "Personal"
             },
             "givenName": {
               "type": "string",
               "title": "Given Name",
+              "minLength": 1,
               "$dataciteRequired": false
             },
             "familyName": {
               "type": "string",
               "title": "Family Name",
+              "minLength": 1,
               "$dataciteRequired": false
             },
             "nameIdentifiers": {
@@ -37,57 +42,70 @@
                 "properties": {
                   "nameIdentifier": {
                     "type": "string",
-                    "title": "Identifier",
+                    "title": "ORCID",
+                    "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$",
                     "$dataciteRequired": false
                   },
                   "nameIdentifierScheme": {
                     "type": "string",
                     "title": "Identifier Scheme",
+                    "enum": [ "ORCID" ],
+                    "default": "ORCID",
                     "$dataciteRequired": true
                   },
                   "schemeUri": {
                     "type": "string",
                     "title": "Scheme URI",
+                    "enum": [ "https://orcid.org" ],
+                    "default": "https://orcid.org",
                     "$dataciteRequired": false
                   }
                 },
-                "required": [ "nameIdentifierScheme" ]
+                "required": [ "nameIdentifier", "nameIdentifierScheme", "schemeUri" ]
               },
               "$dataciteRequired": false
             },
             "affiliation": {
               "type": "array",
-              "title": "Affiliations",
+              "title": "Affiliations*",
+              "minItems": 1,
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
                     "title": "Affiliation Name",
+                    "minLength": 1,
                     "$dataciteRequired": true
                   },
                   "affiliationIdentifier": {
                     "type": "string",
-                    "title": "Affiliation Identifier",
+                    "pattern": "^https://ror.org/0[a-z|0-9]{6}[0-9]{2}$",
+                    "title": "ROR URL",
                     "$dataciteRequired": false
                   },
                   "affiliationIdentifierScheme": {
                     "type": "string",
                     "title": "Affiliation Identifier Scheme",
+                    "enum": [ "ROR" ],
                     "$dataciteRequired": true
                   },
                   "schemeUri": {
                     "type": "string",
                     "title": "Scheme URI",
+                    "enum": [ "https://ror.org" ],
                     "$dataciteRequired": false
                   }
                 },
-                "required": [ "name", "affiliationIdentifierScheme" ]
+                "required": [ "name" ],
+                "dependentRequired": {
+                  "affiliationIdentifier": [ "affiliationIdentifierScheme", "schemeUri" ]
+                }
               },
               "$dataciteRequired": false
             }
           },
-          "required": [ "name" ]
+          "required": [ "name", "givenName", "familyName", "affiliation" ]
         },
         "$dataciteRequired": true
       },
@@ -98,30 +116,36 @@
           "name": {
             "type": "string",
             "title": "Publisher Name",
+            "default": "PSI Open Data Provider",
             "$dataciteRequired": true
           },
           "publisherIdentifier": {
             "type": "string",
             "title": "Publisher Identifier",
+            "default": "https://www.re3data.org/repository/r3d100013504",
             "$dataciteRequired": false
           },
           "publisherIdentifierScheme": {
             "type": "string",
             "title": "Publisher Identifier Scheme",
+            "default": "r3data",
             "$dataciteRequired": false
           },
           "schemeUri": {
             "type": "string",
             "title": "Scheme URI",
+            "default": "https://re3data.org/",
             "$dataciteRequired": false
           }
         },
-        "required": [ "name", "publisherIdentifierScheme" ],
+        "required": [ "name", "publisherIdentifier", "publisherIdentifierScheme", "schemeUri" ],
         "$dataciteRequired": true
       },
       "publicationYear": {
         "type": "integer",
         "title": "Publication Year",
+        "mininum": 2000,
+        "maximum": 9999,
         "$dataciteRequired": true
       },
       "contributors": {
@@ -159,22 +183,26 @@
             "name": {
               "type": "string",
               "title": "Contributor Name",
+              "minLength": 1,
               "$dataciteRequired": true
             },
             "nameType": {
               "type": "string",
               "title": "Name Type",
               "$dataciteRequired": false,
-              "enum": [ "Personal", "Organizational" ]
+              "enum": [ "Personal" ],
+              "default": "Personal"
             },
             "givenName": {
               "type": "string",
               "title": "Given Name",
+              "minLength": 1,
               "$dataciteRequired": false
             },
             "familyName": {
               "type": "string",
               "title": "Family Name",
+              "minLength": 1,
               "$dataciteRequired": false
             },
             "nameIdentifiers": {
@@ -185,57 +213,70 @@
                 "properties": {
                   "nameIdentifier": {
                     "type": "string",
-                    "title": "Identifier",
+                    "title": "ORCID",
+                    "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$",
                     "$dataciteRequired": false
                   },
                   "nameIdentifierScheme": {
                     "type": "string",
                     "title": "Identifier Scheme",
+                    "enum": [ "ORCID" ],
+                    "default": "ORCID",
                     "$dataciteRequired": true
                   },
                   "schemeUri": {
                     "type": "string",
                     "title": "Scheme URI",
+                    "enum": [ "https://orcid.org" ],
+                    "default": "https://orcid.org",
                     "$dataciteRequired": false
                   }
                 },
-                "required": [ "nameIdentifierScheme" ]
+                "required": [ "nameIdentifier", "nameIdentifierScheme", "schemeUri" ]
               },
               "$dataciteRequired": false
             },
             "affiliation": {
               "type": "array",
               "title": "Affiliations",
+              "minItems": 1,
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
                     "title": "Affiliation Name",
+                    "minLength": 1,
                     "$dataciteRequired": true
                   },
                   "affiliationIdentifier": {
                     "type": "string",
-                    "title": "Affiliation Identifier",
+                    "pattern": "^https://ror.org/0[a-z|0-9]{6}[0-9]{2}$",
+                    "title": "ROR URL",
                     "$dataciteRequired": false
                   },
                   "affiliationIdentifierScheme": {
                     "type": "string",
                     "title": "Affiliation Identifier Scheme",
+                    "enum": [ "ROR" ],
                     "$dataciteRequired": true
                   },
                   "schemeUri": {
                     "type": "string",
                     "title": "Scheme URI",
+                    "enum": [ "https://ror.org" ],
                     "$dataciteRequired": false
                   }
                 },
-                "required": [ "name", "affiliationIdentifierScheme" ]
+                "required": [ "name" ],
+                "dependentRequired": {
+                  "affiliationIdentifier": [ "affiliationIdentifierScheme", "schemeUri" ]
+                }
               },
               "$dataciteRequired": false
             }
           },
-          "required": [ "name", "contributorType" ],
+          "required": [ "contributorType", "name", "givenName", "familyName", "affiliation" ],
           "$dataciteRequired": false
         }
       },
@@ -243,10 +284,11 @@
         "type": "array",
         "items": {
           "type": "object",
+          "required": [ "subject", "lang" ],
           "properties": {
             "subject": {
               "type": "string",
-              "title": "Subject",
+              "title": "Keyword",
               "$dataciteRequired": false
             },
             "subjectScheme": {
@@ -267,6 +309,8 @@
             "lang": {
               "type": "string",
               "title": "Language",
+              "enum": [ "en" ],
+              "default": "en",
               "$dataciteRequired": false
             },
             "classificationCode": {
@@ -282,10 +326,11 @@
         "type": "array",
         "items": {
           "type": "object",
+          "minItems": 1,
           "properties": {
             "date": {
               "type": "string",
-              "format": "date-time",
+              "pattern": "^\\d{4}$",
               "title": "Date",
               "$dataciteRequired": true
             },
@@ -321,12 +366,23 @@
       "language": {
         "type": "string",
         "title": "Language",
+        "enum": [ "en" ],
+        "default": "en",
         "$dataciteRequired": false
       },
-      "resourceType": {
-        "type": "string",
+      "types": {
+        "type": "object",
         "title": "Resource Type",
-        "$dataciteRequired": true
+        "$dataciteRequired": true,
+        "properties": {
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceTypeGeneral": {
+            "type": "string",
+            "enum": [ "Dataset" ]
+          }
+        }
       },
       "alternateIdentifiers": {
         "type": "array",
@@ -460,7 +516,7 @@
         "type": "array",
         "items": {
           "type": "string",
-          "title": "Size",
+          "title": "Total size in bytes",
           "$dataciteRequired": false
         },
         "$dataciteRequired": false
@@ -968,666 +1024,264 @@
         }
       }
     },
-    "required": [ "creators", "publisher", "publicationYear", "resourceType" ]
+    "required": [
+      "creators",
+      "publisher",
+      "publicationYear",
+      "language",
+      "rightsList",
+      "relatedItems"
+    ]
   },
 
   "uiSchema": {
-    "type": "VerticalLayout",
+    "type": "Categorization",
+    "options": {
+      "variant": "stepper",
+      "showNavButtons": true
+    },
     "elements": [
       {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/creators",
-        "options": {
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/name"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/nameType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/givenName"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/familyName"
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/nameIdentifiers",
-                "options": {
-                  "displayProperty": "nameIdentifier",
-                  "detail": {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/nameIdentifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/nameIdentifierScheme"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeUri"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/affiliation",
-                "options": {
-                  "detail": {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/name"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/affiliationIdentifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/affiliationIdentifierScheme"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeUri"
-                      }
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/publisher",
-        "options": {
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Label",
-                "text": "Publisher"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/name"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/publisherIdentifier"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/publisherIdentifierScheme"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/schemeUri"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/publicationYear",
-        "rule": { "effect": "HIDE", "condition": { } }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/contributors",
-        "options": {
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/contributorType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/name"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/nameType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/givenName"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/familyName"
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/nameIdentifiers",
-                "options": {
-                  "displayProperty": "nameIdentifier",
-                  "detail": {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/nameIdentifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/nameIdentifierScheme"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeUri"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/affiliation",
-                "options": {
-                  "detail": {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/name"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/affiliationIdentifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/affiliationIdentifierScheme"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeUri"
-                      }
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/subjects",
-        "options": {
-          "displayProperty": "subject",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/subject"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/subjectScheme"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/schemeUri"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/valueUri"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/lang"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/classificationCode"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/dates",
-        "options": {
-          "displayProperty": "date",
-          "detail": {
-            "type": "HorizontalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/date"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/dateType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/dateInformation"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/language"
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/resourceType"
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/alternateIdentifiers",
-        "options": {
-          "displayProperty": "alternateIdentifier",
-          "detail": {
-            "type": "HorizontalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/alternateIdentifier"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/alternateIdentifierType"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/relatedIdentifiers",
-        "options": {
-          "displayProperty": "relatedIdentifier",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/relatedIdentifier"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/relatedIdentifierType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/relationType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/relatedMetadataScheme"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/schemeUri"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/schemeType"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/sizes"
-      },
-      {
-        "type": "Control",
-        "scope": "#/properties/formats"
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/rightsList",
-        "options": {
-          "displayProperty": "rights",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/rights"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/rightsUri"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/rightsIdentifier"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/rightsIdentifierScheme"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/schemeUri"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/descriptions",
-        "options": {
-          "displayProperty": "description",
-          "detail": {
-            "type": "HorizontalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/description"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/descriptionType"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/geoLocations",
-        "options": {
-          "displayProperty": "geoLocationPlace",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/geoLocationPlace"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/geoLocationPoint",
-                "options": {
-                  "detail": {
-                    "type": "VerticalLayout",
-                    "elements": [
-                      {
-                        "type": "Label",
-                        "text": "Geo location point"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/pointLongitude"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/pointLatitude"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/geoLocationBox",
-                "options": {
-                  "detail": {
-                    "type": "VerticalLayout",
-                    "elements": [
-                      {
-                        "type": "Label",
-                        "text": "Geo location box"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/westBoundLongitude"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/eastBoundLongitude"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/southBoundLatitude"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/northBoundLatitude"
-                      }
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/fundingReferences",
-        "options": {
-          "displayProperty": "funderName",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/funderName"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/funderIdentifier"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/funderIdentifierType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/awardTitle"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/awardNumber"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/awardUri"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "AccordionArrayLayout",
-        "scope": "#/properties/relatedItems",
-        "options": {
-          "displayProperty": "relatedItemType",
-          "detail": {
-            "type": "VerticalLayout",
-            "elements": [
-              {
-                "type": "Control",
-                "scope": "#/properties/relatedItemType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/relationType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/relatedItemIdentifier",
-                "options": {
-                  "detail": {
-                    "type": "VerticalLayout",
-                    "elements": [
-                      {
-                        "type": "Label",
-                        "text": "Related Item Identifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/relatedItemIdentifier"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/relatedItemIdentifierType"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/relatedMetadataScheme"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeUri"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/schemeType"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/creators",
-                "options": {
-                  "detail": {
+        "type": "Category",
+        "label": "Creators*",
+        "elements": [
+          {
+            "type": "ListWithDetail",
+            "scope": "#/properties/creators",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
                     "type": "VerticalLayout",
                     "elements": [
                       {
                         "type": "Control",
-                        "scope": "#/properties/name"
+                        "scope": "#/properties/nameType",
+                        "label": "Name type",
+                        "options": {
+                          "readOnly": true
+                        }
+                      },
+                      {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/givenName",
+                            "label": "First Name"
+                          },
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/familyName",
+                            "label": "Last Name"
+                          }
+                        ]
                       },
                       {
                         "type": "Control",
-                        "scope": "#/properties/nameType"
+                        "scope": "#/properties/name",
+                        "label": "Name",
+                        "options": {
+                          "readOnly": true
+                        }
                       },
                       {
-                        "type": "Control",
-                        "scope": "#/properties/givenName"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/familyName"
+                        "type": "HorizontalLayout",
+                        "elements": [
+                          {
+                            "type": "Group",
+                            "label": "Affiliations",
+                            "elements": [
+                              {
+                                "type": "ListWithDetail",
+                                "scope": "#/properties/affiliation"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Group",
+                            "label": "Personal Identifiers",
+                            "elements": [
+                              {
+                                "type": "ListWithDetail",
+                                "scope": "#/properties/nameIdentifiers",
+                                "label": "Affiliations"
+                              }
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
-                }
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/titles",
-                "options": {
-                  "displayProperty": "title",
-                  "detail": {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/title"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/titleType"
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/publicationYear"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/volume"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/issue"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/number"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/numberType"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/firstPage"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/lastPage"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/publisher"
-              },
-              {
-                "type": "Control",
-                "scope": "#/properties/edition"
-              },
-              {
-                "type": "AccordionArrayLayout",
-                "scope": "#/properties/contributors",
-                "options": {
-                  "detail": {
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Contributors",
+        "elements": [
+          {
+            "type": "ListWithDetail",
+            "scope": "#/properties/contributors",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
                     "type": "VerticalLayout",
                     "elements": [
                       {
                         "type": "Control",
-                        "scope": "#/properties/contributorType"
+                        "scope": "#/properties/nameType",
+                        "label": "Name type",
+                        "options": {
+                          "readOnly": true
+                        }
                       },
                       {
                         "type": "Control",
-                        "scope": "#/properties/name"
+                        "scope": "#/properties/contributorType",
+                        "label": "Contributor type"
+                      },
+                      {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/givenName",
+                            "label": "First Name"
+                          },
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/familyName",
+                            "label": "Last Name"
+                          }
+                        ]
                       },
                       {
                         "type": "Control",
-                        "scope": "#/properties/nameType"
+                        "scope": "#/properties/name",
+                        "label": "Name",
+                        "options": {
+                          "readOnly": true
+                        }
                       },
                       {
-                        "type": "Control",
-                        "scope": "#/properties/givenName"
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/familyName"
+                        "type": "HorizontalLayout",
+                        "elements": [
+                          {
+                            "type": "Group",
+                            "label": "Affiliations",
+                            "elements": [
+                              {
+                                "type": "ListWithDetail",
+                                "scope": "#/properties/affiliation"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Group",
+                            "label": "Personal Identifiers",
+                            "elements": [
+                              {
+                                "type": "ListWithDetail",
+                                "scope": "#/properties/nameIdentifiers",
+                                "label": "Affiliations"
+                              }
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
-                }
+                ]
               }
-            ]
+            }
           }
-        }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Keywords",
+        "elements": [
+          {
+            "type": "ListWithDetail",
+            "scope": "#/properties/subjects",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/subject"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/lang",
+                    "option": {
+                      "readOnly": true
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Publisher",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/publisher"
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "License",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/rightsList"
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Dates",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/dates",
+            "label": "Dates"
+          }
+        ]
+      }
+    ]
+  },
+  "defaultValues": {
+    "language": "en",
+    "publisher": {
+      "name": "PSI Open Data Provider",
+      "publisherIdentifierScheme": "r3data",
+      "schemeUri": "https://re3data.org/",
+      "publisherIdentifier": "https://www.re3data.org/repository/r3d100013504",
+      "lang": "en"
+    },
+    "rightsList": [
+      {
+        "rights": "Creative Commons Attribution Share Alike 4.0 International",
+        "rightsUri": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "schemeUri": "https://spdx.org/licenses/",
+        "rightsIdentifier": "CC-BY-SA-4.0",
+        "rightsIdentifierScheme": "SPDX",
+        "lang": "en"
       }
     ]
   }

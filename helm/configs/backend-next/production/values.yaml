@@ -2,4 +2,6 @@ envValue: production
 
 doiPrefix: "10.16907"
 
+registerDoiUri: https://api.datacite.org/dois
+
 host: dacat.psi.ch
