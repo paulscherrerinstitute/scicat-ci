@@ -128,7 +128,7 @@
           "publisherIdentifierScheme": {
             "type": "string",
             "title": "Publisher Identifier Scheme",
-            "default": "r3data",
+            "default": "re3data",
             "$dataciteRequired": false
           },
           "schemeUri": {
