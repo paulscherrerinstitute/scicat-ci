@@ -85,7 +85,7 @@ volumeMounts:
 
 migrateCommand: "echo 'No migration command specified.'"
 
-initContainers:
+jobContainers:
   - name: migrate
     image: "{{ .Values.ciRepository }}:{{ .Values.ciTag }}"
     imagePullPolicy: Always
@@ -94,9 +94,9 @@ initContainers:
       - -c
     args:
       - >-
-        npm run migrate:db:status;
-        {{ .Values.migrateCommand }};
-        npm run migrate:db:status;
+        npm run migrate:db:status &&
+        {{ .Values.migrateCommand }} &&
+        npm run migrate:db:status
     volumeMounts:
       - name: secrets-volume
         mountPath: /home/node/app/.env

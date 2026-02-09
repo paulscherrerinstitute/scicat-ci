@@ -1,0 +1,28 @@
+{{ $jobPrefix := include "helm_chart.jobPrefix" . }}
+{{- if .Values.jobFromCronJob }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $jobPrefix }}-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $jobPrefix }}-role
+rules:
+- apiGroups: ["batch"]
+  resources: ["cronjobs", "jobs"]
+  verbs: ["get", "create", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $jobPrefix }}-binding
+subjects:
+- kind: ServiceAccount
+  name: {{ $jobPrefix }}-sa
+roleRef:
+  kind: Role
+  name: {{ $jobPrefix }}-role
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

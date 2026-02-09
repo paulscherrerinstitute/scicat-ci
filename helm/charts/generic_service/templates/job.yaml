@@ -1,0 +1,44 @@
+{{ $jobPrefix := include "helm_chart.jobPrefix" . }}
+{{- with .Values.jobContainers }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $jobPrefix }}-job
+  labels:
+    {{- include "helm_chart.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- if $.Values.jobFromCronJob }}
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- end }}
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 86400
+  ttlSecondsAfterFinished: 604800
+  template:
+    spec:
+      {{- if $.Values.jobFromCronJob }}
+      serviceAccountName: {{ $jobPrefix }}-sa
+      containers:
+        - name: {{ $jobPrefix }}-trigger
+          image: registry.k8s.io/kubectl:v1.33.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - create
+            - job
+            - {{ $jobPrefix }}-{{ randAlphaNum 5 | lower }}
+            - --from=cronjob/{{ $jobPrefix }}-cron
+            - -n
+            - {{ $.Release.Namespace }}
+      {{- else }}
+      containers:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- with $.Values.volumes}}
+      volumes:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      restartPolicy: OnFailure
+{{- end }}
