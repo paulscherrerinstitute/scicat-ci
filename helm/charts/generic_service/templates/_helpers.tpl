@@ -72,3 +72,12 @@ Validate the secret, checking if base64 encoded
 {{- $secret }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create the name of the job prefix to use
+*/}}
+{{- define "helm_chart.jobPrefix" -}}
+{{- if .Values.jobContainers }}
+{{- printf "%s-%s" (include "helm_chart.fullname" .) (index .Values.jobContainers 0).name }}
+{{- end }}
+{{- end }}

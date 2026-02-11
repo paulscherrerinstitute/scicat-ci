@@ -22,3 +22,5 @@ ingress:
   enabled: false
 
 probeChecksEnabled: true
+
+jobFromCronJob: true

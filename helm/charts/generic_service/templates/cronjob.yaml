@@ -1,0 +1,25 @@
+{{- if .Values.jobFromCronJob }}
+{{- with .Values.jobContainers }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "helm_chart.jobPrefix" $ }}-cron
+spec:
+  schedule: "0 0 31 2 *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 86400
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          containers:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- with $.Values.volumes}}
+          volumes:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
+          restartPolicy: OnFailure
+{{- end }}
+{{- end }}
