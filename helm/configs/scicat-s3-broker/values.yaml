@@ -1,0 +1,44 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/paulscherrerinstitute/scicat-s3-broker
+  tag: 0.1.0
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  probePath: /health
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+        - "{{ .Values.host }}"
+      secretName: "scicat-s3-broker-certificate"
+
+secrets:
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data:
+      job_manager_password: "{{ .Values.secretsJson.JOB_MANAGER_PASSWORD }}"
+
+env:
+  - name: SCICAT_URL
+    value: "{{ .Values.scicat.backend_url }}"
+  - name: JOB_MANAGER_USERNAME
+    value: "{{ .Values.scicat.job_manager_username }}"
+  - name: JOB_MANAGER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: "{{ .Release.Name }}-s"
+        key: job_manager_password
