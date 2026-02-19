@@ -54,7 +54,7 @@ ingresses:
         - "{{ .Values.host }}"
         secretName: "scicat-be-next-certificate"
   - enabled: true
-    name: backend-login
+    name: backend-next-login
     annotations:
       kubernetes.io/ingress.class: nginx
       b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
