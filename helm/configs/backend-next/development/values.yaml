@@ -6,8 +6,21 @@ registerDoiUri: https://api.test.datacite.org/dois
 
 host: scicat.development.psi.ch
 
-ingress:
-  annotations:
-    b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_IPS }}"
+ingresses:
+  - enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: 50m
+      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_IPS }}"
+    hosts:
+      - host: "{{ .Values.host }}"
+        paths: 
+          - path: "/"
+            pathType: Prefix
+    tls:
+      - hosts:
+        - "{{ .Values.host }}"
+        secretName: "scicat-be-next-certificate"
 
 migrateCommand: npm run migrate:db:up
