@@ -1,5 +1,5 @@
 {{ $jobPrefix := include "helm_chart.jobPrefix" . }}
-{{- if .Values.jobFromCronJob }}
+{{- if and .Values.jobFromCronJob .Values.jobContainers }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
