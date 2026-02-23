@@ -1,4 +1,4 @@
-host: scicat-s3-broker.development.psi.ch
+host: s3-broker.development.psi.ch
 
 scicat:
   backend_url: http://backend-next.scicat-development/

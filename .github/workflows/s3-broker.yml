@@ -1,13 +1,13 @@
-name: scicat-s3-broker
+name: s3-broker
 
 on:
   workflow_dispatch:
   pull_request:
     branches: [main]
     paths:
-      - .github/workflows/scicat-s3-broker.yml
-      - helm/configs/scicat-s3-broker/values.yaml
-      - helm/configs/scicat-s3-broker/development/**
+      - .github/workflows/s3-broker.yml
+      - helm/configs/s3-broker/values.yaml
+      - helm/configs/s3-broker/development/**
 
 jobs:
   set_env:
@@ -41,6 +41,6 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
         env:
           KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
-          RELEASE_NAME: scicat-s3-broker
+          RELEASE_NAME: s3-broker
           ENVIRONMENT: "${{ needs.set_env.outputs.environment }}"
           NAMESPACE_PREFIX: scicat-
