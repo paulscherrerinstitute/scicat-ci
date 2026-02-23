@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-s3-broker
-  tag: 0.1.1-debug
+  tag: 0.1.1
   pullPolicy: Always
 
 service:
