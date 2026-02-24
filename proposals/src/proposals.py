@@ -159,16 +159,31 @@ class ProposalsFromPgroups(Proposals):
     @property
     def xname_name_map(self):
         """
-        Maps xname to beamline and facility name.
+        Maps xname to a list of beamlines and their associated facility.
 
         Returns:
-            dict: A map of xname to (beamline name, facility name)
+            dict: A mapping where:
+                - Key: The beamline's xname (str).
+                - Value: A tuple containing:
+                    0: A list of tuples, each being (beamline_name, is_active).
+                    1: The facility name (str).
+                Example: {"X06SA": ([("PXI", True), ("PXII", False)], "SLS")}
         """
-        _xname_name_map = self._xname_name_map or {
-            beamline["xname"]: (beamline["name"], facility["name"])
-            for facility in self.response("CalendarInfos/facilities")
-            for beamline in facility["beamlines"]
-        }
+        if self._xname_name_map:
+            return self._xname_name_map
+        _xname_name_map = {}
+        for facility in self.response("CalendarInfos/facilities"):
+            facility_name = facility["name"]
+            for beamline in facility["beamlines"]:
+                mapping_key = beamline["xname"]
+                beamline_tuple = (beamline["name"], beamline["active"])
+                if mapping_key in _xname_name_map:
+                    _xname_name_map[mapping_key][0].append(beamline_tuple)
+                else:
+                    _xname_name_map[mapping_key] = (
+                        [beamline_tuple],
+                        facility_name,
+                    )
         self._xname_name_map = _xname_name_map
         return _xname_name_map
 

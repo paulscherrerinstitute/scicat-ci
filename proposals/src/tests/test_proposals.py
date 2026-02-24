@@ -114,15 +114,16 @@ class TestProposalsFromPgroups:
             {
                 "name": "a_name",
                 "beamlines": [
-                    {"name": "a_beamline", "xname": "a_xname"},
-                    {"name": "a_beamline1", "xname": "a_xname1"},
+                    {"name": "a_beamline0", "xname": "a_xname", "active": False},
+                    {"name": "a_beamline", "xname": "a_xname", "active": True},
+                    {"name": "a_beamline1", "xname": "a_xname1", "active": False},
                 ],
             },
             {
                 "name": "a_name1",
                 "beamlines": [
-                    {"name": "a_beamline2", "xname": "a_xname2"},
-                    {"name": "a_beamline3", "xname": "a_xname3"},
+                    {"name": "a_beamline2", "xname": "a_xname2", "active": True},
+                    {"name": "a_beamline3", "xname": "a_xname3", "active": False},
                 ],
             },
         ),
@@ -133,10 +134,19 @@ class TestProposalsFromPgroups:
         xname_name_map = proposals.xname_name_map
         mock_response.assert_called_with(proposals, "CalendarInfos/facilities")
         assert xname_name_map == {
-            "a_xname": ("a_beamline", "a_name"),
-            "a_xname1": ("a_beamline1", "a_name"),
-            "a_xname2": ("a_beamline2", "a_name1"),
-            "a_xname3": ("a_beamline3", "a_name1"),
+            "a_xname": ([("a_beamline0", False), ("a_beamline", True)], "a_name"),
+            "a_xname1": (
+                [("a_beamline1", False)],
+                "a_name",
+            ),
+            "a_xname2": (
+                [("a_beamline2", True)],
+                "a_name1",
+            ),
+            "a_xname3": (
+                [("a_beamline3", False)],
+                "a_name1",
+            ),
         }
         proposals.xname_name_map
         assert mock_response.call_count == 1
@@ -162,7 +172,7 @@ class TestProposalsFromPgroups:
                         "email": "an_email",
                         "pi_email": "",
                         "pgroup": "a_name",
-                        "beamline": "a_beamline",
+                        "beamline": [("a_beamline", True)],
                         "pi_firstname": "a_firstname",
                         "pi_lastname": "a_lastname",
                         "firstname": "a_firstname",
@@ -192,7 +202,7 @@ class TestProposalsFromPgroups:
     @patch.object(
         pr.ProposalsFromPgroups,
         "xname_name_map",
-        {"a_xname": ("a_beamline", "a_facility")},
+        {"a_xname": ([("a_beamline", True)], "a_facility")},
     )
     def test__pgroup_no_proposal_formatter(self, p_group, expected):
         p_group_from_list = "a_pgroup"

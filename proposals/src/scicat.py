@@ -102,10 +102,33 @@ class SciCatCreatorFromDuoMixin:
         return row["pgroup"] or f'p{row["proposal"]}'
 
     @property
+    def beamline(self):
+        """
+        Extracts the primary beamline name from the proposal data.
+
+        Handles two data formats:
+        1. Legacy/Direct: Returns the beamline identifier as-is if it's not a list.
+        2. Grouped: If given a list of tuples (e.g., [(name, is_active), ...]), it
+           attempts to return the name of the first 'active' beamline.
+
+        If no beamline is explicitly marked active in a list, it falls back
+        to the name of the last beamline in the sequence.
+
+        Returns:
+            str: The resolved beamline name.
+        """
+        beamlines = self.duo_proposal["beamline"]
+        if not isinstance(beamlines, list):
+            return beamlines
+        try:
+            return next(filter(lambda x: x[1], beamlines))[0]
+        except (StopIteration, IndexError):
+            return beamlines[-1][0]
+
+    @property
     def access_groups(self):
         """Returns a list of access groups."""
-        row = self.duo_proposal
-        bl = row["beamline"].lower()
+        bl = self.beamline.lower()
         if bl.startswith("px"):
             bl = "mx"
         return [f"{self.accelerator}{bl}"]
@@ -166,10 +189,9 @@ class SciCatMeasurementsFromDuoMixin:
         Returns:
             dict: SciCat-formatted measurement period.
         """
-        row = self.duo_proposal
         return {
             "id": uuid.uuid4().hex,
-            "instrument": f'/PSI/{self.accelerator.upper()}/{row["beamline"].upper()}',
+            "instrument": f"/PSI/{self.accelerator.upper()}/{self.beamline.upper()}",
             "start": self._datetime_to_utc(schedule["start"]),
             "end": self._datetime_to_utc(schedule["end"]),
             "comment": "",
@@ -224,6 +246,27 @@ class SciCatMeasurementsFromDuoMixin:
         }
         return existing_measurements == expected_measurements
 
+    def keep_beamline(self, proposal_time):
+        """
+        Determines if the legacy beamline list structure should be preserved.
+
+        This check is used to maintain compatibility with proposals created
+        before the system transition on December 1, 2025. It specifically
+        targets instances where the beamline data is still formatted as a list.
+
+        Args:
+            proposal_time (datetime.datetime): The creation or reference time
+                of the proposal to check.
+
+        Returns:
+            bool: True if the beamline is a list and the proposal predates
+                December 2025; False otherwise.
+        """
+        beamlines = self.duo_proposal["beamline"]
+        return isinstance(beamlines, list) and proposal_time < datetime.datetime(
+            2025, 12, 1, tzinfo=proposal_time.tzinfo
+        )
+
 
 class SciCatProposalFromDuo(
     SciCatFromDuo, SciCatCreatorFromDuoMixin, SciCatMeasurementsFromDuoMixin
@@ -246,6 +289,20 @@ class SciCatProposalFromDuo(
         super().__init__(duo_proposal, accelerator)
         self.duo_facility = duo_facility
 
+    @property
+    def proposal_id(self):
+        """
+        Generates the unique SciCat proposal identifier using the DUO proposal number.
+
+        The ID is formatted as a persistent identifier (PID) using the
+        PSI-specific prefix (20.500.11935).
+
+        Returns:
+            str: The formatted SciCat proposal ID (e.g., '20.500.11935/12345').
+        """
+        row = self.duo_proposal
+        return f'20.500.11935/{row["proposal"]}'
+
     @cache
     def compose(self):
         """Composes the SciCat proposal dictionary from DUO data."""
@@ -253,7 +310,7 @@ class SciCatProposalFromDuo(
         row = self.duo_proposal
         if not row["email"]:
             log.warning(f"Empty email: {row}")
-        proposal_id = f'20.500.11935/{row["proposal"]}'
+        proposal_id = self.proposal_id
         proposal = {
             "proposalId": proposal_id,
             "pi_email": self.principal_investigator,
@@ -280,11 +337,13 @@ class SciCatProposalFromDuo(
 
     def _update(self):
         """Updates an existing SciCat proposal by appending new measurement periods."""
-        proposal = self.compose()
-        pid = proposal["proposalId"]
+        pid = self.proposal_id
         log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
         existing_measurements = existing_proposal.measurement_period_list
+        if self.keep_beamline(existing_proposal.created_at):
+            return
+        proposal = self.compose()
         if self.is_same_measurements(existing_measurements):
             return
         patch = {"MeasurementPeriodList": proposal["MeasurementPeriodList"]}
