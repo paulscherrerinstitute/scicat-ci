@@ -1,3 +1,4 @@
+import datetime
 import os
 from unittest.mock import ANY, Mock, patch
 
@@ -116,6 +117,20 @@ class TestSciCatCreatorFromDuoMixin:
         self.scicat_creator.accelerator = "sls"
         assert self.scicat_creator.access_groups == expected
 
+    @pytest.mark.parametrize(
+        "beamline_input, expected",
+        [
+            ["single_beamline", "single_beamline"],
+            [("tuple_bl", "facility"), ("tuple_bl", "facility")],
+            [[("skip", False), ("match", True), ("last", True)], "match"],
+            [[("first", False), ("second", False), ("fallback", False)], "fallback"],
+            [[("bl1", ""), ("bl2", "active")], "bl2"],
+        ],
+    )
+    def test_beamline(self, beamline_input, expected):
+        self.scicat_creator.duo_proposal = {"beamline": beamline_input}
+        assert self.scicat_creator.beamline == expected
+
 
 class TestSciCatPolicyFromDuo:
 
@@ -223,6 +238,7 @@ class TestSciCatMeasurementsFromDuoMixin:
         scicat_measurements.duo_facility = FixturesFromDuo.duo_facility
         scicat_measurements.duo_proposal = FixturesFromDuo.duo_proposal
         scicat_measurements.accelerator = FixturesFromDuo.accelerator
+        scicat_measurements.beamline = "px"
         self.scicat_measurements = scicat_measurements
 
     def test_init(self):
@@ -325,3 +341,17 @@ class TestSciCatMeasurementsFromDuoMixin:
     def test_is_same_measurements(self, proposals, expected):
         keep_proposals = self.scicat_measurements.is_same_measurements(proposals)
         assert keep_proposals == expected
+
+    @pytest.mark.parametrize(
+        "beamline_data, proposal_date, expected",
+        [
+            [["MS", "X06SA"], datetime.datetime(2025, 11, 30), True],
+            [["MS"], datetime.datetime(2025, 12, 2), False],
+            (("MS", "X06SA"), datetime.datetime(2025, 1, 1), False),
+            ("MS", datetime.datetime(2025, 1, 1), False),
+        ],
+    )
+    def test_keep_beamline(self, beamline_data, proposal_date, expected):
+        self.scicat_measurements.duo_proposal = {"beamline": beamline_data}
+        result = self.scicat_measurements.keep_beamline(proposal_date)
+        assert result == expected
