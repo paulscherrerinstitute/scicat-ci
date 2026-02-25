@@ -1,0 +1,5 @@
+host: s3-broker.development.psi.ch
+
+scicat:
+  backend_url: http://backend-next.scicat-development/
+  job_manager_username: jobManager
