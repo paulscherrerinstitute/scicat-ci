@@ -345,10 +345,24 @@ class TestSciCatMeasurementsFromDuoMixin:
     @pytest.mark.parametrize(
         "beamline_data, proposal_date, expected",
         [
-            [["MS", "X06SA"], datetime.datetime(2025, 11, 30), True],
-            [["MS"], datetime.datetime(2025, 12, 2), False],
-            (("MS", "X06SA"), datetime.datetime(2025, 1, 1), False),
+            [
+                [("S-TOMCAT", True), ("X06SA", False)],
+                datetime.datetime(2025, 11, 30),
+                False,
+            ],
+            [
+                [("TOMCAT", True), ("X06SA", False)],
+                datetime.datetime(2025, 11, 30),
+                False,
+            ],
+            [[("MS", True)], datetime.datetime(2025, 12, 2), False],
+            ([("MS", True), ("X06SA", False)], datetime.datetime(2025, 1, 1), True),
             ("MS", datetime.datetime(2025, 1, 1), False),
+            [
+                [("TOMCAT", True), ("X06SA", False)],
+                datetime.datetime(2024, 11, 30),
+                True,
+            ],
         ],
     )
     def test_keep_beamline(self, beamline_data, proposal_date, expected):

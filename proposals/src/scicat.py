@@ -250,20 +250,26 @@ class SciCatMeasurementsFromDuoMixin:
         """
         Determines if the legacy beamline list structure should be preserved.
 
-        This check is used to maintain compatibility with proposals created
-        before the system transition on December 1, 2025. It specifically
-        targets instances where the beamline data is still formatted as a list.
+        This method maintains compatibility with proposals created before
+        December 1, 2025. For beamlines containing 'tomcat', the cutoff date
+        is January 1, 2025.
 
         Args:
-            proposal_time (datetime.datetime): The creation or reference time
-                of the proposal to check.
+            proposal_time (datetime.datetime): Creation time of the proposal.
 
         Returns:
-            bool: True if the beamline is a list and the proposal predates
-                December 2025; False otherwise.
+            bool: True if beamline is a list and proposal predates the applicable
+                cutoff date (January 1, 2025 for tomcat, December 1, 2025 otherwise);
+                False otherwise.
         """
         beamlines = self.duo_proposal["beamline"]
-        return isinstance(beamlines, list) and proposal_time < datetime.datetime(
+        if not isinstance(beamlines, list):
+            return False
+        if any("tomcat" in b[0].lower() for b in beamlines):
+            return proposal_time < datetime.datetime(
+                2025, 1, 1, tzinfo=proposal_time.tzinfo
+            )
+        return proposal_time < datetime.datetime(
             2025, 12, 1, tzinfo=proposal_time.tzinfo
         )
 
