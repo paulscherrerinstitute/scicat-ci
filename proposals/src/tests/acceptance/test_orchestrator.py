@@ -1,3 +1,4 @@
+import datetime
 import os
 from unittest.mock import ANY, Mock, patch
 
@@ -31,12 +32,13 @@ class TestDuoSciCatOrchestratorFromFacility:
 
         measurement_period_list = FixturesFromSciCatAPI.measurement_periods
 
-        def __init__(self, exists=True):
+        def __init__(self, exists=True, created_at=datetime.datetime(2026, 1, 1)):
             find_by_id_result = [
                 {"side_effect": NotFoundException},
                 {
                     "return_value": Mock(
-                        measurement_period_list=self.measurement_period_list
+                        measurement_period_list=self.measurement_period_list,
+                        created_at=created_at,
                     )
                 },
             ]
@@ -101,3 +103,11 @@ class TestDuoSciCatOrchestratorFromPgroups(TestDuoSciCatOrchestratorFromFacility
         if path == "PGroupAttributes/listProposalAssignments?withoutproposal=true":
             return FixturesProposalsFromPgroups._pgroups_with_no_proposal
         return FixturesProposalsFromPgroups._pgroup_no_proposal_formatter
+
+    def test_update_proposals_from_duo_to_scicat_with_old_date(self):
+        old_date = datetime.datetime(2025, 1, 1)
+        mock_proposal = self.MockProposalApi(created_at=old_date)
+
+        with patch("scicat.ProposalsApi", return_value=mock_proposal, autospec=True):
+            self.orchestrator.orchestrate()
+            mock_proposal.proposals_controller_update_v3.assert_not_called()
