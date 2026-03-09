@@ -1,7 +1,5 @@
 host: scicat-exporter.development.psi.ch
 
 env:
-  - name: SCICAT_URL
-    value: http://backend.scicat-development
-  - name: SCICAT_V4
-    value: "false"
+  - name: QUARKUS_REST_CLIENT_SCICAT_URL
+    value: http://backend-next.scicat-development
