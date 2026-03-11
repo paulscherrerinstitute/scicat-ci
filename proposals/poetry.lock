@@ -445,14 +445,14 @@ files = [
 
 [[package]]
 name = "scicat-sdk-py"
-version = "4.21.0"
+version = "4.27.0"
 description = "SciCat backend API"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "scicat_sdk_py-4.21.0-py3-none-any.whl", hash = "sha256:6fb8e6a036bcbbcf5b9cd2f07cb054a7f96092d60c5061aed6615fbb10415d66"},
-    {file = "scicat_sdk_py-4.21.0.tar.gz", hash = "sha256:0ae6d20582785c36476d0c8c25c8b3f7bf3bd2a42204bc8020dc378b1b485c33"},
+    {file = "scicat_sdk_py-4.27.0-py3-none-any.whl", hash = "sha256:98b173c86a4ddd3dfea1dd94c8a4531a03af6847b839cf76e4eb26798c6cf15a"},
+    {file = "scicat_sdk_py-4.27.0.tar.gz", hash = "sha256:3ec7798e2d823135c079689969a5855cea82baa2d9d78b958047691ac746576c"},
 ]
 
 [package.dependencies]
