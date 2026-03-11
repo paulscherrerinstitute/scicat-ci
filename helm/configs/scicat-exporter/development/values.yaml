@@ -3,3 +3,5 @@ host: scicat-exporter.development.psi.ch
 env:
   - name: QUARKUS_REST_CLIENT_SCICAT_URL
     value: http://backend-next.scicat-development
+  - name: QUARKUS_REST_CLIENT_S3BROKER_URL
+    value: http://s3-broker.scicat-development
