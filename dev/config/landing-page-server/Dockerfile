@@ -24,7 +24,7 @@ COPY --from=installer /home/node/app /home/node/app
 
 RUN npx ng build --configuration=${env}
 
-FROM nginx:1.22.0-alpine
+FROM nginx:1.29.6-alpine
 
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /home/node/app/dist /usr/share/nginx/html
