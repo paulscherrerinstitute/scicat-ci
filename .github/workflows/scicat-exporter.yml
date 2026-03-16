@@ -25,7 +25,7 @@ jobs:
       - set_env
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Open ssh tunnel
         uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
