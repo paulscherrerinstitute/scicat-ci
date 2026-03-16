@@ -40,7 +40,7 @@ jobs:
       changed: ${{ steps.changed-files.outputs.any_modified }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
