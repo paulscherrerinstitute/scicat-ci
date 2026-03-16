@@ -100,7 +100,7 @@ jobs:
         done
 
     - name: Log in to the Container registry
-      uses: docker/login-action@c144859092e8e353f3e118b0b329679a62351c3e
+      uses: docker/login-action@v4
       with:
         registry: ${{ inputs.registry }}
         username: ${{ github.actor }}
