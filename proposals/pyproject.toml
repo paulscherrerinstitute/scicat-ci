@@ -14,7 +14,7 @@ scicat-sdk-py = "^4.21.0"
 [tool.poetry.group.dev.dependencies]
 black = "^26.0.0"
 isort = "^5.13.2"
-pylint = "^3.3.3"
+pylint = "^4.0.0"
 pytest = "^8.3.4"
 
 [tool.isort]
