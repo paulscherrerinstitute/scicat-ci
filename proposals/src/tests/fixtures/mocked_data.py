@@ -152,7 +152,6 @@ class FixturesProposalsFromPgroups(FixturesCommon):
                 {
                     "name": "PX",
                     "xname": "xbeam1",
-                    "active": True,
                 },
             ],
         },
