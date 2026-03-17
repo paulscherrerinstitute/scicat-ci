@@ -140,6 +140,8 @@ class ProposalsFromPgroups(Proposals):
 
     _type = "pgroup"
 
+    _duo_date_format = "%Y-%m-%d"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._xname_name_map = {}
@@ -159,16 +161,35 @@ class ProposalsFromPgroups(Proposals):
     @property
     def xname_name_map(self):
         """
-        Maps xname to beamline and facility name.
+        Maps xnames to their facility and a list of beamline-date tuples.
 
         Returns:
-            dict: A map of xname to (beamline name, facility name)
+            dict: {xname: ([(name, datetime), ...], facility_name)}
         """
-        _xname_name_map = self._xname_name_map or {
-            beamline["xname"]: (beamline["name"], facility["name"])
-            for facility in self.response("CalendarInfos/facilities")
-            for beamline in facility["beamlines"]
-        }
+        if self._xname_name_map:
+            return self._xname_name_map
+        _xname_name_map = {}
+        for facility in self.response("CalendarInfos/facilities"):
+            facility_name = facility["name"]
+            for beamline in facility["beamlines"]:
+                mapping_key = beamline["xname"]
+                try:
+                    beamline_date = datetime.strptime(
+                        beamline["created"], self._duo_date_format
+                    )
+                except ValueError:
+                    beamline_date = datetime.min
+                beamline_tuple = (
+                    beamline["name"],
+                    beamline_date,
+                )
+                if mapping_key in _xname_name_map:
+                    _xname_name_map[mapping_key][0].append(beamline_tuple)
+                else:
+                    _xname_name_map[mapping_key] = (
+                        [beamline_tuple],
+                        facility_name,
+                    )
         self._xname_name_map = _xname_name_map
         return _xname_name_map
 
@@ -192,7 +213,8 @@ class ProposalsFromPgroups(Proposals):
         except KeyError as e:
             log.warning("Missing owner")
             raise MissingOwnerError from e
-        beamline, facility = self.xname_name_map[p_group["xname"]]
+        beamlines, facility = self.xname_name_map[p_group["xname"]]
+        beamline = self.find_relevant_beamline(p_group["created"], beamlines)
         proposal = {
             "proposal": p_group["name"],
             "email": p_group["owner"]["email"],
@@ -211,6 +233,29 @@ class ProposalsFromPgroups(Proposals):
         }
         log.info("Pgroup with no proposal composed")
         return proposal, facility
+
+    def find_relevant_beamline(self, p_group_created, beamlines):
+        """
+        Finds the latest beamline created on or before p_group_created.
+
+        Args:
+            p_group_created (str): Creation date string.
+            beamlines (list): List of (name, datetime) tuples.
+
+        Returns:
+            str: Best match beamline name or first entry as fallback.
+        """
+        beamline = beamlines[0][0] if beamlines else ""
+        try:
+            created_date = datetime.strptime(p_group_created, self._duo_date_format)
+        except ValueError:
+            return beamline
+        max_beamline_date = datetime.min
+        for name, beamline_date in beamlines:
+            if max_beamline_date < beamline_date <= created_date:
+                beamline = name
+                max_beamline_date = beamline_date
+        return beamline
 
     def proposals(self):
         """
