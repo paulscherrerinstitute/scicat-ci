@@ -44,18 +44,18 @@ MetadataExtractors:
           Schema: oscem_env_tomo.json
           Url: https://w3id.org/oscem-schemas/latest/env_tomo/jsonschema/oscem_schemas_env_tomo.schema.json
 
-    - Name: MS
-      GithubOrg: osc-em
-      GithubProject: oscem-extractor-materials
-      Version: v1.0.3
-      Executable: MS_Metadata_reader
-      Checksum: 56925ded88d6719d42eaafe66f98fce43a67f0132d6488ece8bcbcfd5f0704a3
-      ChecksumAlg: sha256
-      CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}'"
-      Methods:
-        - Name: Material Science
-          Schema: oscem_general.json
-          Url: https://w3id.org/oscem-schemas/latest/general/jsonschema/oscem_schemas_general.schema.json
+    # - Name: MS
+    #   GithubOrg: osc-em
+    #   GithubProject: oscem-extractor-materials
+    #   Version: v1.0.3
+    #   Executable: MS_Metadata_reader
+    #   Checksum: 56925ded88d6719d42eaafe66f98fce43a67f0132d6488ece8bcbcfd5f0704a3
+    #   ChecksumAlg: sha256
+    #   CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}'"
+    #   Methods:
+    #     - Name: Material Science
+    #       Schema: oscem_general.json
+    #       Url: https://w3id.org/oscem-schemas/latest/general/jsonschema/oscem_schemas_general.schema.json
 
 WebServer:
   Auth:
@@ -88,6 +88,8 @@ WebServer:
     ConcurrencyLimit: 4
     QueueSize: 200
   Other:
+    BackendAddress: "{{.Values.host}}"
     Port: 8080
     LogLevel: Debug
     SecureCookies: true
+    DisableServiceAccountCheck: true
