@@ -1,4 +1,4 @@
-FROM node:16 AS installer
+FROM node:24 AS installer
 
 RUN apt update && apt -y upgrade && \
     apt install -y bash git
@@ -16,7 +16,7 @@ RUN npm ci
 COPY --chown=node:node . /home/node/app/
 
 # Build app
-FROM node:16 as builder
+FROM node:24 as builder
 
 ARG env=production
 WORKDIR /home/node/app

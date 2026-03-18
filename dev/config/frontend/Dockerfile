@@ -1,4 +1,4 @@
-FROM node:22.22.1-alpine AS installer
+FROM node:24.14.0-alpine AS installer
 
 RUN apk add --update python3 py3-setuptools make g++ chromium && rm -rf /var/cache/apk/*
 
@@ -11,7 +11,7 @@ COPY . /frontend/
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROME_PATH=/usr/lib/chromium/
 
-FROM node:22.22.1-alpine AS builder
+FROM node:24.14.0-alpine AS builder
 WORKDIR /frontend
 COPY --from=installer /frontend /frontend
 
