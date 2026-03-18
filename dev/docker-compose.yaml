@@ -196,7 +196,7 @@ services:
       - 3002:3000
 
   rabbitmq:
-    image: rabbitmq:4.0-management-alpine
+    image: rabbitmq:4.2-management-alpine
     volumes:
       - rabbitmq_data:/bitnami
     healthcheck:
