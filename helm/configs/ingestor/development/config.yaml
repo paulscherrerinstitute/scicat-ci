@@ -88,7 +88,7 @@ WebServer:
     ConcurrencyLimit: 4
     QueueSize: 200
   Other:
-    BackendAddress: "{{.Values.host}}"
+    BackendAddress: ingestor.development.psi.ch
     Port: 8080
     LogLevel: Debug
     SecureCookies: true
