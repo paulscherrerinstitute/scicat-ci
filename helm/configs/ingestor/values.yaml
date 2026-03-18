@@ -54,14 +54,15 @@ configMaps:
     docker-entrypoint.sh: |-
       #!/bin/sh
 
-      # Download tutorial data if needed
-      if ! [ -d /data/tutorial ]; then
+      # Download tutorial data if needed\
+      COLLECTION_ROOT="/test2/demo"
+      if ! [ -d $COLLECTION_ROOT/tutorial ]; then
           apk update && apk add ca-certificates git && update-ca-certificates
           echo "Downloading tutorial data"
           git clone --depth 1 --filter=blob:none --sparse https://github.com/SwissOpenEM/LS_Metadata_reader.git
           cd LS_Metadata_reader
           git sparse-checkout set tutorial
-          mkdir -p /data/
+          mkdir -p $COLLECTION_ROOT
           mv tutorial /data/
           cd ..
           rm -rf LS_Metadata_reader/

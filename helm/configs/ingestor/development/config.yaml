@@ -17,32 +17,45 @@ MetadataExtractors:
   DownloadMissingExtractors: true
   Timeout: 10m
   Extractors:
-  - Name: LS
-    GithubOrg: SwissOpenEM
-    GithubProject: LS_Metadata_reader
-    Version: v2.0.0
-    Executable: LS_Metadata_reader
-    # sha256sum LS_Metadata_reader_Linux_x86_64.tar.gz
-    Checksum: 826a0ff9cbb2e38854d5da12f0238d5121fe7dcfdd70eb989623f333db456e4d
-    ChecksumAlg: sha256
-    CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}' {{.AdditionalParameters}}"
-    AdditionalParameters:
+    - Name: LS
+      GithubOrg: osc-em
+      GithubProject: oscem-extractor-life
+      Version: v2.0.2
+      Executable: oscem-extractor-life
+      # x86_64 tar.gz sha256sum
+      Checksum: a596ade8dd115b57fb8d5aad56b96b0e0ad2820bf57252443c21d4c80278ca6e
+      ChecksumAlg: sha256
+      CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}' {{.AdditionalParameters}}"
+      AdditionalParameters:
       - cs=2.7
       - gain_flip_rotate="None"
-    # - epu="xmls/"
-    Methods:
-      - Name: Single Particle
-        Schema: oscem_schemas_spa.schema.json
-        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/spa/jsonschema/oscem_schemas_spa.schema.json
-      - Name: Cellular Tomography
-        Schema: oscem_cellular_tomo.json
-        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/cellular_tomo/jsonschema/oscem_schemas_cellular_tomo.schema.json
-      - Name: Tomography
-        Schema: oscem_tomo.json
-        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/subtomo/jsonschema/oscem_schemas_subtomo.schema.json
-      - Name: EnvironmentalTomography
-        Schema: oscem_env_tomo.json
-        Url: https://raw.githubusercontent.com/osc-em/OSCEM_Schemas/refs/heads/any_fix/project/env_tomo/jsonschema/oscem_schemas_env_tomo.schema.json
+      # - epu="xmls/"
+      Methods:
+        - Name: Single Particle
+          Schema: oscem_schemas_spa.schema.json
+          Url: https://w3id.org/oscem-schemas/latest/spa/jsonschema/oscem_schemas_spa.schema.json
+        - Name: Cellular Tomography
+          Schema: oscem_cellular_tomo.json
+          Url: https://w3id.org/oscem-schemas/latest/cellular_tomo/jsonschema/oscem_schemas_cellular_tomo.schema.json
+        - Name: Tomography
+          Schema: oscem_tomo.json
+          Url: https://w3id.org/oscem-schemas/latest/subtomo/jsonschema/oscem_schemas_subtomo.schema.json
+        - Name: Environmental Tomography
+          Schema: oscem_env_tomo.json
+          Url: https://w3id.org/oscem-schemas/latest/env_tomo/jsonschema/oscem_schemas_env_tomo.schema.json
+
+    - Name: MS
+      GithubOrg: osc-em
+      GithubProject: oscem-extractor-materials
+      Version: v1.0.3
+      Executable: MS_Metadata_reader
+      Checksum: 56925ded88d6719d42eaafe66f98fce43a67f0132d6488ece8bcbcfd5f0704a3
+      ChecksumAlg: sha256
+      CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}'"
+      Methods:
+        - Name: Material Science
+          Schema: oscem_general.json
+          Url: https://w3id.org/oscem-schemas/latest/general/jsonschema/oscem_schemas_general.schema.json
 
 WebServer:
   Auth:
@@ -70,7 +83,7 @@ WebServer:
       ViewTasksRole: "ingestor-read"
   Paths:
     CollectionLocations:
-      demo: "/data"
+      demo: "/test2/demo"
   MetadataExtJobs:
     ConcurrencyLimit: 4
     QueueSize: 200
