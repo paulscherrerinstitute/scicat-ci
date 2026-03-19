@@ -152,7 +152,12 @@ class FixturesProposalsFromPgroups(FixturesCommon):
                 {
                     "name": "PX",
                     "xname": "xbeam1",
-                    "active": True,
+                    "created": "2020-01-01",
+                },
+                {
+                    "name": "PX",
+                    "xname": "xbeam2",
+                    "created": "2025-01-01",
                 },
             ],
         },
@@ -167,6 +172,7 @@ class FixturesProposalsFromPgroups(FixturesCommon):
             "name": "123",
             "xname": "xbeam1",
             "comments": "",
+            "created": "2022-01-01",
             "owner": {
                 "firstname": "John",
                 "lastname": "Doe",

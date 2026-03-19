@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from types import GeneratorType
 from unittest.mock import mock_open, patch
 from urllib.error import URLError
@@ -107,46 +108,63 @@ class TestProposalsFromFacility:
 
 
 class TestProposalsFromPgroups:
+    @pytest.fixture
+    def proposals(self):
+        obj = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
+        return obj
+
     @patch.object(
         pr.Proposals,
         "response",
-        return_value=(
+        return_value=[
             {
                 "name": "a_name",
                 "beamlines": [
-                    {"name": "a_beamline0", "xname": "a_xname", "active": False},
-                    {"name": "a_beamline", "xname": "a_xname", "active": True},
-                    {"name": "a_beamline1", "xname": "a_xname1", "active": False},
+                    {"name": "a_beamline", "xname": "a_xname", "created": "2020-01-01"},
+                    {
+                        "name": "a_beamline1",
+                        "xname": "a_xname1",
+                        "created": "2021-01-01",
+                    },
+                    {
+                        "name": "a_beamline_new_1",
+                        "xname": "a_xname1",
+                        "created": "",
+                    },
                 ],
             },
             {
                 "name": "a_name1",
                 "beamlines": [
-                    {"name": "a_beamline2", "xname": "a_xname2", "active": True},
-                    {"name": "a_beamline3", "xname": "a_xname3", "active": False},
+                    {
+                        "name": "a_beamline2",
+                        "xname": "a_xname2",
+                        "created": "2022-01-01",
+                    },
+                    {
+                        "name": "a_beamline3",
+                        "xname": "a_xname3",
+                        "created": "2023-01-01",
+                    },
                 ],
             },
-        ),
+        ],
         autospec=True,
     )
-    def test_xname_name_map(self, mock_response):
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
+    def test_xname_name_map(self, mock_response, proposals):
         xname_name_map = proposals.xname_name_map
         mock_response.assert_called_with(proposals, "CalendarInfos/facilities")
         assert xname_name_map == {
-            "a_xname": ([("a_beamline0", False), ("a_beamline", True)], "a_name"),
+            "a_xname": ([("a_beamline", datetime(2020, 1, 1))], "a_name"),
             "a_xname1": (
-                [("a_beamline1", False)],
+                [
+                    ("a_beamline1", datetime(2021, 1, 1)),
+                    ("a_beamline_new_1", datetime.min),
+                ],
                 "a_name",
             ),
-            "a_xname2": (
-                [("a_beamline2", True)],
-                "a_name1",
-            ),
-            "a_xname3": (
-                [("a_beamline3", False)],
-                "a_name1",
-            ),
+            "a_xname2": ([("a_beamline2", datetime(2022, 1, 1))], "a_name1"),
+            "a_xname3": ([("a_beamline3", datetime(2023, 1, 1))], "a_name1"),
         }
         proposals.xname_name_map
         assert mock_response.call_count == 1
@@ -159,6 +177,7 @@ class TestProposalsFromPgroups:
                     "group": {
                         "name": "a_name",
                         "xname": "a_xname",
+                        "created": "2022-01-01",
                         "owner": {
                             "email": "an_email",
                             "firstname": "a_firstname",
@@ -172,7 +191,7 @@ class TestProposalsFromPgroups:
                         "email": "an_email",
                         "pi_email": "",
                         "pgroup": "a_name",
-                        "beamline": [("a_beamline", True)],
+                        "beamline": "a_beamline",
                         "pi_firstname": "a_firstname",
                         "pi_lastname": "a_lastname",
                         "firstname": "a_firstname",
@@ -202,11 +221,18 @@ class TestProposalsFromPgroups:
     @patch.object(
         pr.ProposalsFromPgroups,
         "xname_name_map",
-        {"a_xname": ([("a_beamline", True)], "a_facility")},
+        {
+            "a_xname": (
+                [
+                    ("a_beamline", datetime(2020, 1, 1)),
+                    ("a_beamline_extra", datetime(2025, 1, 1)),
+                ],
+                "a_facility",
+            )
+        },
     )
-    def test__pgroup_no_proposal_formatter(self, p_group, expected):
+    def test__pgroup_no_proposal_formatter(self, proposals, p_group, expected):
         p_group_from_list = "a_pgroup"
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(
             pr.Proposals, "response", return_value=p_group
         ) as mock_response:
@@ -225,9 +251,8 @@ class TestProposalsFromPgroups:
     @patch.object(
         pr.ProposalsFromPgroups, "_pgroup_no_proposal_formatter", autospec=True
     )
-    def test_proposals(self, mock_formatter):
+    def test_proposals(self, mock_formatter, proposals):
         p_groups = [{"g": "a_pgroup"}, {"g": "a_pgroup1"}]
-        proposals = pr.ProposalsFromPgroups(DUO_ENDPOINT, DUO_SECRET, DUO_FACILITY)
         with patch.object(
             pr.ProposalsFromPgroups,
             "_pgroups_with_no_proposal",
@@ -238,6 +263,46 @@ class TestProposalsFromPgroups:
             assert isinstance(proposals_call, GeneratorType)
             for p_group, _ in zip(p_groups, proposals_call):
                 mock_formatter.assert_called_with(proposals, p_group["g"])
+
+    @pytest.mark.parametrize(
+        "created_str, beamlines, expected",
+        [
+            (
+                "2022-01-01",
+                [("BL_OLD", datetime(2020, 1, 1)), ("BL_TARGET", datetime(2022, 1, 1))],
+                "BL_TARGET",
+            ),
+            (
+                "2022-01-01",
+                [
+                    ("BL_1", datetime(2020, 1, 1)),
+                    ("BL_2", datetime(2021, 1, 1)),
+                    ("BL_3", datetime(2025, 1, 1)),
+                ],
+                "BL_2",
+            ),
+            (
+                "1950-01-01",
+                [
+                    ("BL_DEFAULT", datetime(2020, 1, 1)),
+                    ("BL_FUTURE", datetime(2025, 1, 1)),
+                ],
+                "BL_DEFAULT",
+            ),
+            ("2022-01-01", [], ""),
+            (
+                "",
+                [
+                    ("BL_DEFAULT", datetime(2020, 1, 1)),
+                    ("BL_FUTURE", datetime(2025, 1, 1)),
+                ],
+                "BL_DEFAULT",
+            ),
+        ],
+    )
+    def test_find_relevant_beamline(self, proposals, created_str, beamlines, expected):
+        result = proposals.find_relevant_beamline(created_str, beamlines)
+        assert result == expected
 
 
 class TestProposalsFactory:

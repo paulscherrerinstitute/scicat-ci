@@ -140,6 +140,8 @@ class ProposalsFromPgroups(Proposals):
 
     _type = "pgroup"
 
+    _duo_date_format = "%Y-%m-%d"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._xname_name_map = {}
@@ -159,15 +161,10 @@ class ProposalsFromPgroups(Proposals):
     @property
     def xname_name_map(self):
         """
-        Maps xname to a list of beamlines and their associated facility.
+        Maps xnames to their facility and a list of beamline-date tuples.
 
         Returns:
-            dict: A mapping where:
-                - Key: The beamline's xname (str).
-                - Value: A tuple containing:
-                    0: A list of tuples, each being (beamline_name, is_active).
-                    1: The facility name (str).
-                Example: {"X06SA": ([("PXI", True), ("PXII", False)], "SLS")}
+            dict: {xname: ([(name, datetime), ...], facility_name)}
         """
         if self._xname_name_map:
             return self._xname_name_map
@@ -176,7 +173,16 @@ class ProposalsFromPgroups(Proposals):
             facility_name = facility["name"]
             for beamline in facility["beamlines"]:
                 mapping_key = beamline["xname"]
-                beamline_tuple = (beamline["name"], beamline["active"])
+                try:
+                    beamline_date = datetime.strptime(
+                        beamline["created"], self._duo_date_format
+                    )
+                except ValueError:
+                    beamline_date = datetime.min
+                beamline_tuple = (
+                    beamline["name"],
+                    beamline_date,
+                )
                 if mapping_key in _xname_name_map:
                     _xname_name_map[mapping_key][0].append(beamline_tuple)
                 else:
@@ -207,7 +213,8 @@ class ProposalsFromPgroups(Proposals):
         except KeyError as e:
             log.warning("Missing owner")
             raise MissingOwnerError from e
-        beamline, facility = self.xname_name_map[p_group["xname"]]
+        beamlines, facility = self.xname_name_map[p_group["xname"]]
+        beamline = self.find_relevant_beamline(p_group["created"], beamlines)
         proposal = {
             "proposal": p_group["name"],
             "email": p_group["owner"]["email"],
@@ -226,6 +233,29 @@ class ProposalsFromPgroups(Proposals):
         }
         log.info("Pgroup with no proposal composed")
         return proposal, facility
+
+    def find_relevant_beamline(self, p_group_created, beamlines):
+        """
+        Finds the latest beamline created on or before p_group_created.
+
+        Args:
+            p_group_created (str): Creation date string.
+            beamlines (list): List of (name, datetime) tuples.
+
+        Returns:
+            str: Best match beamline name or first entry as fallback.
+        """
+        beamline = beamlines[0][0] if beamlines else ""
+        try:
+            created_date = datetime.strptime(p_group_created, self._duo_date_format)
+        except ValueError:
+            return beamline
+        max_beamline_date = datetime.min
+        for name, beamline_date in beamlines:
+            if max_beamline_date < beamline_date <= created_date:
+                beamline = name
+                max_beamline_date = beamline_date
+        return beamline
 
     def proposals(self):
         """
