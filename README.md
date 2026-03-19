@@ -6,7 +6,7 @@ the [SciCat Live](https://github.com/SciCatProject/scicatlive) project.
 
 # Local environment
 
-To spin up the container(s) of interest, follow the documentation in the [README](./dev/README.md) in the dev folder.
+To develop locally, please use the [SciCat Live](https://github.com/SciCatProject/scicatlive) project.
 
 # Deployment behaviour
 The CI is responsible for deploying the SciCat components in the k8s clusters (one for `development`, another for `qa` and `production`), based on some rules.
