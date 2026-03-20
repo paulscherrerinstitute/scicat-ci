@@ -412,80 +412,22 @@
             "relatedIdentifier": {
               "type": "string",
               "title": "Related Identifier",
+              "pattern": "^10\\.\\d{4,9}/[-._;()/:a-zA-Z0-9]+$",
               "$dataciteRequired": true
             },
             "relatedIdentifierType": {
               "type": "string",
               "title": "Related Identifier Type",
               "$dataciteRequired": true,
-              "enum": [
-                "ARK",
-                "DOI",
-                "Handle",
-                "ISBN",
-                "ISSN",
-                "ISTC",
-                "LSID",
-                "PURL",
-                "URL",
-                "arXiv",
-                "bibcode",
-                "CSTR",
-                "EAN13",
-                "EISSN",
-                "PMID",
-                "UPC",
-                "URN",
-                "w3id",
-                "RRID",
-                "LISSN",
-                "IGSN"
-              ]
+              "default": "DOI",
+              "enum": [ "DOI" ]
             },
             "relationType": {
               "type": "string",
               "title": "Relation Type",
               "$dataciteRequired": true,
-              "enum": [
-                "IsCitedBy",
-                "Cites",
-                "IsSupplementTo",
-                "IsSupplementedBy",
-                "IsContinuedBy",
-                "Continues",
-                "IsDescribedBy",
-                "Describes",
-                "IsMetadataFor",
-                "HasMetadata",
-                "IsVersionOf",
-                "HasVersion",
-                "IsNewVersionOf",
-                "IsPreviousVersionOf",
-                "IsPartOf",
-                "HasPart",
-                "IsPublishedIn",
-                "IsReferencedBy",
-                "References",
-                "IsDocumentedBy",
-                "Documents",
-                "IsCompiledBy",
-                "Compiles",
-                "IsVariantFormOf",
-                "IsOriginalFormOf",
-                "IsIdenticalTo",
-                "IsReviewedBy",
-                "Reviews",
-                "IsDerivedFrom",
-                "IsSourceOf",
-                "IsRequiredBy",
-                "Requires",
-                "IsObsoletedBy",
-                "Obsoletes",
-                "IsCollectedBy",
-                "Collects",
-                "IsTranslationOf",
-                "HasTranslation"
-              ]
+              "default": "IsSupplementTo",
+              "enum": [ "IsSupplementTo" ]
             },
             "relatedMetadataScheme": {
               "type": "string",
@@ -502,12 +444,19 @@
               "title": "Scheme Type",
               "$dataciteRequired": false,
               "enum": [ "DOI", "Handle", "URL", "Other" ]
+            },
+            "resourceTypeGeneral": {
+              "type": "string",
+              "title": "Resource Type",
+              "default": "JournalArticle",
+              "enum": [ "JournalArticle" ]
             }
           },
           "required": [
             "relatedIdentifier",
             "relatedIdentifierType",
-            "relationType"
+            "relationType",
+            "resourceTypeGeneral"
           ]
         },
         "$dataciteRequired": false
@@ -1257,6 +1206,41 @@
             "type": "Control",
             "scope": "#/properties/dates",
             "label": "Dates"
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Linked Publications",
+        "elements": [
+          {
+            "type": "ListWithDetail",
+            "scope": "#/properties/relatedIdentifiers",
+            "label": "Linked Publications",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
+                    "type": "Control",
+                    "label": "Publication's DOI",
+                    "scope": "#/properties/relatedIdentifier"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/relatedIdentifierType"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/relationType"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/resourceTypeGeneral"
+                  }
+                ]
+              }
+            }
           }
         ]
       }
