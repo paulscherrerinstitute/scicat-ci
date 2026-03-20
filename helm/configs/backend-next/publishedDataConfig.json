@@ -412,6 +412,7 @@
             "relatedIdentifier": {
               "type": "string",
               "title": "Related Identifier",
+              "pattern": "^10\\.\\d{4,9}/[-._;()/:a-zA-Z0-9]+$",
               "$dataciteRequired": true
             },
             "relatedIdentifierType": {
