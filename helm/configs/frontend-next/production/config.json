@@ -130,7 +130,7 @@
             "enabled": true
           },
           {
-            "name": "runNumber",
+            "name": "scientificMetadata.runNumber",
             "order": 9,
             "type": "standard",
             "enabled": true
