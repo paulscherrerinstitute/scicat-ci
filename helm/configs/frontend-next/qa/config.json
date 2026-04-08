@@ -208,7 +208,7 @@
             {
                 "mailDomain": "psi.ch",
                 "description": "PSI Electron Microscopy Facility",
-                "facilityBackend": "https://emf-ingestor.psi.ch/"
+                "facilityBackend": "https://emf-ingestor.psi.ch/qa"
             },
             {
                 "mailDomain": "unil.ch",
