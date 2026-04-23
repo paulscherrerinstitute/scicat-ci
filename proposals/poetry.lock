@@ -528,14 +528,14 @@ files = [
 
 [[package]]
 name = "scicat-sdk-py"
-version = "4.27.0"
+version = "5.1.1"
 description = "SciCat backend API"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "scicat_sdk_py-4.27.0-py3-none-any.whl", hash = "sha256:98b173c86a4ddd3dfea1dd94c8a4531a03af6847b839cf76e4eb26798c6cf15a"},
-    {file = "scicat_sdk_py-4.27.0.tar.gz", hash = "sha256:3ec7798e2d823135c079689969a5855cea82baa2d9d78b958047691ac746576c"},
+    {file = "scicat_sdk_py-5.1.1-py3-none-any.whl", hash = "sha256:9786f04040566b1fc58fbda2fd733dedb0c4f5d694d7e4b16ad956ec98137705"},
+    {file = "scicat_sdk_py-5.1.1.tar.gz", hash = "sha256:2741282376b43c9dc72a641d03215c4682910ce1acf0523e467e1034409de56d"},
 ]
 
 [package.dependencies]
@@ -616,4 +616,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "ca6bc696cca5d9a0e4d28d593af44128f12904cbea67f7733774d8865b3b8d4e"
+content-hash = "f269245a6d318e7f384ee3e793fd20779679813b9c8ff81e7e08a4d11f887ea8"
