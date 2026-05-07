@@ -27,6 +27,7 @@ configMaps:
     job-template.html: "{{ .Values.JOB_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
+    ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
@@ -92,6 +93,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/publishedDataConfig.json
     subPath: publishedDataConfig.json
+  - name: config-volume
+    mountPath: /home/node/app/ajvCustomDefinitions.js
+    subPath: ajvCustomDefinitions.js
 
 migrateCommand: "echo 'No migration command specified.'"
 
