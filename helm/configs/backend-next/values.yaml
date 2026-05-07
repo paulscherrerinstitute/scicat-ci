@@ -76,6 +76,8 @@ env:
     value: "PSI"
   - name: JOB_CONFIGURATION_FILE
     value: /home/node/app/jobConfig.yaml
+  - name: AJV_CUSTOM_DEFINITIONS_FILE
+    value: /home/node/app/ajvCustomDefinitions.js
 
 volumeMounts:
   - name: secrets-volume
