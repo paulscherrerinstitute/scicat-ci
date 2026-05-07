@@ -26,6 +26,7 @@ keywords = [
         data.dates ??= [];
         data.dates.push({ date: dateAvailable, dateType: dateType });
       }
+      return true;
     },
   },
 ];
