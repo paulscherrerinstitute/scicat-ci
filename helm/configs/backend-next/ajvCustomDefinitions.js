@@ -1,6 +1,6 @@
 keywords = [
   {
-    keyword: "setFullName",
+    keyword: 'setFullName',
     schema: false,
     modifying: true,
     validate: function (data, dataCxt) {
@@ -9,6 +9,23 @@ keywords = [
           ? `${data.familyName}, ${data.givenName}`
           : data.givenName || data.familyName || undefined;
       return true;
+    },
+  },
+  {
+    keyword: 'setDateAvailable',
+    schema: false,
+    modifying: true,
+    validate: function (data, dataCxt) {
+      const dateAvailable = data.publicationYear;
+      const dateType = 'Available';
+      if (
+        !data.dates?.some(
+          (d) => d.date === dateAvailable && d.dateType === dateType,
+        )
+      ) {
+        data.dates ??= [];
+        data.dates.push({ date: dateAvailable, dateType: dateType });
+      }
     },
   },
 ];
@@ -28,7 +45,7 @@ async function mergeKeywords(ctx) {
     return Array.from(new Set(datasets.flatMap((ds) => ds.keywords))).map(
       (k) => ({
         subject: k,
-        lang: "en",
+        lang: 'en',
       }),
     );
   };
@@ -47,9 +64,9 @@ async function mergeCreators(ctx) {
     if (!datasets) return;
 
     return Array.from(
-      new Set(datasets.flatMap((ds) => ds.owner.split(","))),
+      new Set(datasets.flatMap((ds) => ds.owner.split(','))),
     ).flatMap((creator) => {
-      const split = creator.split(" ");
+      const split = creator.split(' ');
       if (split.length !== 2) {
         return [];
       }
@@ -60,10 +77,10 @@ async function mergeCreators(ctx) {
         familyName: split[1],
         affiliation: [
           {
-            name: "Paul Scherrer Institute",
-            schemeUri: "https://ror.org",
-            affiliationIdentifier: "https://ror.org/03eh3y714",
-            affiliationIdentifierScheme: "ROR",
+            name: 'Paul Scherrer Institute',
+            schemeUri: 'https://ror.org',
+            affiliationIdentifier: 'https://ror.org/03eh3y714',
+            affiliationIdentifierScheme: 'ROR',
           },
         ],
       };
@@ -90,11 +107,11 @@ async function computeTotalSize(ctx) {
 async function datasetLinks(ctx) {
   const relatedIdentifiers = ctx.publishedData.datasetPids.map((pid) => {
     return {
-      relatedItemType: "Other",
-      relationType: "References",
+      relatedItemType: 'Other',
+      relationType: 'References',
       relatedItemIdentifier: {
-        relatedItemIdentifierType: "URL",
-        relatedItemIdentifier: `${process.env["SCICAT_FRONTEND_URL"]}/datasets/${encodeURIComponent(pid)}`,
+        relatedItemIdentifierType: 'URL',
+        relatedItemIdentifier: `${process.env['SCICAT_FRONTEND_URL']}/datasets/${encodeURIComponent(pid)}`,
       },
     };
   });
@@ -105,10 +122,10 @@ async function datasetLinks(ctx) {
 }
 
 const dynamicDefaults = new Map([
-  ["mergeKeywords", mergeKeywords],
-  ["mergeCreators", mergeCreators],
-  ["computeTotalSize", computeTotalSize],
-  ["datasetLinks", datasetLinks],
+  ['mergeKeywords', mergeKeywords],
+  ['mergeCreators', mergeCreators],
+  ['computeTotalSize', computeTotalSize],
+  ['datasetLinks', datasetLinks],
 ]);
 
 module.exports = {
