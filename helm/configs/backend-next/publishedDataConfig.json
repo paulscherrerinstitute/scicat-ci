@@ -1217,7 +1217,10 @@
         "elements": [
           {
             "type": "Control",
-            "scope": "#/properties/publisher"
+            "scope": "#/properties/publisher",
+            "options": {
+              "readOnly": true
+            }
           }
         ]
       },
@@ -1227,7 +1230,10 @@
         "elements": [
           {
             "type": "Control",
-            "scope": "#/properties/rightsList"
+            "scope": "#/properties/rightsList",
+            "options": {
+              "readOnly": true
+            }
           }
         ]
       },
@@ -1238,7 +1244,10 @@
           {
             "type": "Control",
             "scope": "#/properties/dates",
-            "label": "Dates"
+            "label": "Dates",
+            "options": {
+              "readOnly": true
+            }
           }
         ]
       },
