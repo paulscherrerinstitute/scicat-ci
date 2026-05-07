@@ -1074,14 +1074,6 @@
                         ]
                       },
                       {
-                        "type": "Control",
-                        "scope": "#/properties/name",
-                        "label": "Name",
-                        "options": {
-                          "readOnly": true
-                        }
-                      },
-                      {
                         "type": "HorizontalLayout",
                         "elements": [
                           {
@@ -1156,14 +1148,6 @@
                             "label": "Last Name"
                           }
                         ]
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/name",
-                        "label": "Name",
-                        "options": {
-                          "readOnly": true
-                        }
                       },
                       {
                         "type": "HorizontalLayout",
