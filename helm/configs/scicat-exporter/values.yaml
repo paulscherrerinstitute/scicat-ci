@@ -16,6 +16,7 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
     b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
   hosts:
     - host: "{{ .Values.host }}"
