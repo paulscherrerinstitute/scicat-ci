@@ -16,7 +16,11 @@ keywords = [
     schema: false,
     modifying: true,
     validate: function (data, dataCxt) {
-      const dateAvailable = data.publicationYear;
+      if (!data.publicationYear) {
+        return false;
+      }
+
+      const dateAvailable = data.publicationYear.toString();
       const dateType = 'Available';
       if (
         !data.dates?.some(
