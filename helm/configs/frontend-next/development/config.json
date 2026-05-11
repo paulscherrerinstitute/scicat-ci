@@ -212,17 +212,32 @@
             {
                 "mailDomain": "unil.ch",
                 "description": "DCI-Lausanne (EPFL/UNIL)",
-                "facilityBackend": "https://dci-ingestor.unil.ch"
+                "facilityBackend": "https://dci-ingestor.unil.ch/dev"
             },
             {
                 "mailDomain": "epfl.ch",
                 "description": "DCI-Lausanne (EPFL/UNIL)",
-                "facilityBackend": "https://dci-ingestor.unil.ch"
+                "facilityBackend": "https://dci-ingestor.unil.ch/dev"
             },
             {
                 "mailDomain": "unibe.ch",
                 "description": "University of Bern",
-                "facilityBackend": "https://openem-ingestor.id.unibe.ch"
+                "facilityBackend": "https://openem-ingestor.id.unibe.ch/dev"
+            },
+            {
+                "mailDomain": "unibas.ch",
+                "description": "University of Basel",
+                "facilityBackend": "https://openem.unibas.ch/dev"
+            },
+            {
+                "mailDomain": "unige.ch",
+                "description": "University of Geneva",
+                "facilityBackend": "https://openem-ingestor.unige.ch/dev"
+            },
+            {
+                "mailDomain": "empa.ch",
+                "description": "EMPA",
+                "facilityBackend": "https://openem-ingestor.empa.ch/dev"
             },
             {
                 "mailDomain": "ethz.ch",
