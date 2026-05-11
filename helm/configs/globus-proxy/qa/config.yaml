@@ -1,4 +1,4 @@
-scicatUrl: "http://backend-next.scicat-development/"
+scicatUrl: "https://dacat-qa.psi.ch"
 port: 8080
 
 defaults:
@@ -12,14 +12,10 @@ defaults:
 
 facilities:
   - <<: *psiFacility
-    name: PSI_DEV
-    collection: deda66cc-9e42-49fc-a997-18a02abb7903
-  # Use QA as a source for some test transfers
-  - <<: *psiFacility
     name: PSI_QA
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
     accessValue: /PSI
-    direction: SRC
+    direction: DST
 
   - <<: *openemFacility
     name: UNIBAS
