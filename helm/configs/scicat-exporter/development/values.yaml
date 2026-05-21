@@ -5,3 +5,5 @@ env:
     value: http://backend-next.scicat-development
   - name: QUARKUS_REST_CLIENT_S3BROKER_URL
     value: http://s3-broker.scicat-development
+  - name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
+    value: 50M
