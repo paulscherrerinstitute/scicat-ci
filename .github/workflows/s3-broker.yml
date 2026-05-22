@@ -39,7 +39,7 @@ jobs:
             helm/configs/${{ env.RELEASE_NAME }}/values.yaml
             helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml
           secrets: ${{ toJSON(secrets) }}
-          helm_set_files: >-
+          files: >-
             AWS_CONFIG=helm/configs/s3-broker/config
         env:
           KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
