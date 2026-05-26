@@ -1,0 +1,3 @@
+[profile ceph]
+endpoint_url = https://rgw.cscs.ch
+region = us-east-1

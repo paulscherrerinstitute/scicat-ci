@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-s3-broker
-  tag: 0.3.1
+  tag: 0.4.0
   pullPolicy: Always
 
 service:
@@ -26,11 +26,16 @@ ingress:
         - "{{ .Values.host }}"
       secretName: "s3-broker-certificate"
 
+configMaps:
+  "{{ .Release.Name }}-cm":
+    config: "{{ .Values.AWS_CONFIG }}"
+
 secrets:
   "{{ .Release.Name }}-s":
     type: Opaque
     data:
       job_manager_password: "{{ .Values.secretsJson.JOB_MANAGER_PASSWORD }}"
+      credentials: "{{ .Values.secretsJson.S3_BROKER_CREDENTIALS }}"
 
 env:
   - name: SCICAT_URL
@@ -42,3 +47,19 @@ env:
       secretKeyRef:
         name: "{{ .Release.Name }}-s"
         key: job_manager_password
+
+volumes:
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /env/config
+    subPath: config
+  - name: secrets-volume
+    mountPath: /env/credentials
+    subPath: credentials
