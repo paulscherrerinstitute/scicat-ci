@@ -21,6 +21,18 @@
               "type": "object",
               "setFullName": true,
               "properties": {
+                "familyName": {
+                  "type": "string",
+                  "title": "Family Name",
+                  "minLength": 1,
+                  "$dataciteRequired": false
+                },
+                "givenName": {
+                  "type": "string",
+                  "title": "Given Name",
+                  "minLength": 1,
+                  "$dataciteRequired": false
+                },
                 "name": {
                   "type": "string",
                   "title": "Name",
@@ -34,18 +46,6 @@
                   "enum": [ "Personal", "Organizational" ],
                   "pattern": "Personal",
                   "default": "Personal"
-                },
-                "givenName": {
-                  "type": "string",
-                  "title": "Given Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
-                },
-                "familyName": {
-                  "type": "string",
-                  "title": "Family Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
                 },
                 "nameIdentifiers": {
                   "type": "array",
@@ -180,6 +180,18 @@
               "type": "object",
               "setFullName": true,
               "properties": {
+                "familyName": {
+                  "type": "string",
+                  "title": "Family Name",
+                  "minLength": 1,
+                  "$dataciteRequired": false
+                },
+                "givenName": {
+                  "type": "string",
+                  "title": "Given Name",
+                  "minLength": 1,
+                  "$dataciteRequired": false
+                },
                 "contributorType": {
                   "type": "string",
                   "title": "Contributor Type",
@@ -219,18 +231,6 @@
                   "$dataciteRequired": false,
                   "enum": [ "Personal" ],
                   "default": "Personal"
-                },
-                "givenName": {
-                  "type": "string",
-                  "title": "Given Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
-                },
-                "familyName": {
-                  "type": "string",
-                  "title": "Family Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
                 },
                 "nameIdentifiers": {
                   "type": "array",
