@@ -9,7 +9,7 @@ package-mode = false
 python = "^3.13"
 pytz = "^2024.2"
 python-dotenv = "^1.0.1"
-scicat-sdk-py = "^4.21.0"
+scicat-sdk-py = "^5.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^26.0.0"
