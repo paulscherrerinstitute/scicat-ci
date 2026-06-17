@@ -162,10 +162,10 @@ jobs:
       actions:
         - actionType: log
 
-  - jobType: create_origs
+  - jobType: create_origDatablocks
     create:
       auth: '#datasetOwner'
-      actions: &create_origsActions
+      actions: &create_origDatablocksActions
         - actionType: log
         - *psiStorage
         - *email_create
