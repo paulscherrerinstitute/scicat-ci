@@ -161,3 +161,17 @@ jobs:
       auth: "#jobOwnerUser"
       actions:
         - actionType: log
+
+  - jobType: create_origs
+    create:
+      auth: '#datasetOwner'
+      actions: &create_origsActions
+        - actionType: log
+        - *psiStorage
+        - *email_create
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions:
+        - actionType: log
+        - *email_update
