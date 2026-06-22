@@ -6,8 +6,18 @@ on:
     branches: [main]
     paths:
       - .github/workflows/s3-broker.yml
-      - helm/configs/s3-broker/values.yaml
       - helm/configs/s3-broker/development/**
+      - helm/configs/s3-broker/values.yaml
+      - helm/configs/s3-broker/config
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/s3-broker.yml
+      - helm/configs/s3-broker/qa/**
+      - helm/configs/s3-broker/values.yaml
+      - helm/configs/s3-broker/config
+  release:
+    types: [published]
 
 jobs:
   set_env:
