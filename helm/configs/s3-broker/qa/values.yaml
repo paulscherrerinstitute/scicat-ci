@@ -3,3 +3,6 @@ host: s3-broker.qa.psi.ch
 scicat:
   backend_url: http://backend-next.scicat-qa
   job_manager_username: jobManager
+
+ingress:
+  enabled: false
