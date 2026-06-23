@@ -7,7 +7,7 @@ keywords = [
       data.name =
         data.givenName && data.familyName
           ? `${data.familyName}, ${data.givenName}`
-          : data.givenName || data.familyName || undefined;
+          : data.givenName || data.familyName || data.name || undefined;
       return true;
     },
   },
