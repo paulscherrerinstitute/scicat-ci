@@ -35,6 +35,7 @@ jobs:
         helm/configs/backend-next/jobConfig.yaml
         helm/configs/backend-next/values.yaml
         helm/configs/backend-next/publishedDataConfig.json
+        helm/configs/backend-next/ajvCustomDefinitions.js
         scicat-backend-next/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
