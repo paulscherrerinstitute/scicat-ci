@@ -2,20 +2,17 @@ scicatUrl: "https://dacat-qa.psi.ch"
 port: 8080
 
 defaults:
-  - &psiFacility
-    direction: DST
-    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
-    accessValue: /PSI
   - &openemFacility
     direction: SRC
     accessValue: "/{{.Name}}"
 
 facilities:
-  - <<: *psiFacility
-    name: PSI_QA
+  - name: PSI_QA
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
-    accessValue: /PSI
     direction: DST
+    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
+    accessPath: profile.realmAccess.roles
+    accessValue: globus-proxy-user
 
   - <<: *openemFacility
     name: UNIBAS
