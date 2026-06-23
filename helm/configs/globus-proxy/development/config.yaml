@@ -3,7 +3,6 @@ port: 8080
 
 defaults:
   - &psiFacility
-    direction: DST
     destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
     accessPath: profile.realmAccess.roles
     accessValue: globus-proxy-user
@@ -15,6 +14,7 @@ facilities:
   - <<: *psiFacility
     name: PSI_DEV
     collection: deda66cc-9e42-49fc-a997-18a02abb7903
+    direction: DST
 
   # Use QA as a source for some test transfers
   - <<: *psiFacility
