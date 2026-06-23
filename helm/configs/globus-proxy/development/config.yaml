@@ -6,6 +6,7 @@ defaults:
     destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
     accessPath: profile.realmAccess.roles
     accessValue: globus-proxy-user
+
   - &openemFacility
     direction: SRC
     accessValue: "{{.Name}}"
