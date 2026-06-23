@@ -2,16 +2,20 @@ name: scicat-exporter
 
 on:
   workflow_dispatch:
-    paths:
-      - .github/workflows/scicat-exporter.yml
-      - helm/configs/scicat-exporter/values.yaml
-      - helm/configs/scicat-exporter/development/**
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/scicat-exporter.yml
-      - helm/configs/scicat-exporter/values.yaml
       - helm/configs/scicat-exporter/development/**
+      - helm/configs/scicat-exporter/values.yaml
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/scicat-exporter.yml
+      - helm/configs/scicat-exporter/qa/**
+      - helm/configs/scicat-exporter/values.yaml
+  release:
+    types: [published]
 
 jobs:
   set_env:
