@@ -13,4 +13,4 @@ ingress:
     - host: "{{ .Values.host }}"
       paths:
         - path: "/apiv/v1/zenodo"
-          pathType: Exact
+          pathType: Prefix
