@@ -7,3 +7,12 @@ env:
     value: http://s3-broker.scicat-development
   - name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
     value: 50M
+
+ingress:
+  annotations:
+    b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
