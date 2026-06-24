@@ -1,4 +1,5 @@
 host: oaipmh.development.psi.ch
+exporterHost: scicat-exporter.development.psi.ch
 
 ingresses:
   - enabled: true
@@ -8,7 +9,7 @@ ingresses:
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
       - host: "{{ .Values.host }}"
-        paths: 
+        paths:
           - path: "/"
             pathType: Prefix
     tls:
@@ -23,7 +24,7 @@ ingresses:
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/configuration-snippet: |
         if ($http_accept = "application/ld+json") {
-          return 302 "https://scicat-exporter.development.psi.ch/api/v1/zenodo/$1%2F$2/export";
+          return 302 "https://{{ .Values.exporterHost }}/api/v1/zenodo/$1%2F$2/export";
         }
     hosts:
       - host: "{{ .Values.host }}"

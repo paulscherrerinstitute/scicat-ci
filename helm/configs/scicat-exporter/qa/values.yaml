@@ -1,0 +1,16 @@
+host: scicat-exporter.qa.psi.ch
+
+env:
+  - name: QUARKUS_REST_CLIENT_SCICAT_URL
+    value: http://backend-next.scicat-qa
+  - name: QUARKUS_REST_CLIENT_S3BROKER_URL
+    value: http://s3-broker.scicat-qa
+  - name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
+    value: 50M
+
+ingress:
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/api/v1/zenodo"
+          pathType: Prefix
