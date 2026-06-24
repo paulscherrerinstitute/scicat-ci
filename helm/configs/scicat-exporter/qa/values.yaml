@@ -7,3 +7,10 @@ env:
     value: http://s3-broker.scicat-qa
   - name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
     value: 50M
+
+ingress:
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/apiv/v1/zenodo"
+          pathType: Exact
