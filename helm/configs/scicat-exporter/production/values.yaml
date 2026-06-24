@@ -12,5 +12,5 @@ ingress:
   hosts:
     - host: "{{ .Values.host }}"
       paths:
-        - path: "/apiv/v1/zenodo"
+        - path: "/api/v1/zenodo"
           pathType: Prefix
