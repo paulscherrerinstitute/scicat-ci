@@ -22,3 +22,7 @@ ingress:
       paths:
         - path: "/api/v1/zenodo"
           pathType: Prefix
+  tls:
+    - hosts:
+        - "{{ .Values.host }}"
+      secretName: "scicat-exporter-certificate"
