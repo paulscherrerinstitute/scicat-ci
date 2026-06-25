@@ -611,13 +611,17 @@
                   "title": "Description Type",
                   "$dataciteRequired": true,
                   "enum": [
-                    "Abstract",
                     "Methods",
                     "SeriesInformation",
                     "TableOfContents",
                     "TechnicalInfo",
                     "Other"
                   ]
+                },
+                "lang": {
+                  "type": "string",
+                  "title": "Language",
+                  "default": "en"
                 }
               },
               "required": [ "description", "descriptionType" ]
@@ -1204,6 +1208,36 @@
                         ]
                       }
                     ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Descriptions",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/descriptions",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/descriptionType",
+                    "label": "Type"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/description",
+                    "label": "Description",
+                    "options": {
+                      "multi": true
+                    }
                   }
                 ]
               }
