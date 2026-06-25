@@ -44,18 +44,18 @@ MetadataExtractors:
           Schema: oscem_env_tomo.json
           Url: https://w3id.org/oscem-schemas/latest/env_tomo/jsonschema/oscem_schemas_env_tomo.schema.json
 
-    # - Name: MS
-    #   GithubOrg: osc-em
-    #   GithubProject: oscem-extractor-materials
-    #   Version: v1.0.3
-    #   Executable: MS_Metadata_reader
-    #   Checksum: 56925ded88d6719d42eaafe66f98fce43a67f0132d6488ece8bcbcfd5f0704a3
-    #   ChecksumAlg: sha256
-    #   CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}'"
-    #   Methods:
-    #     - Name: Material Science
-    #       Schema: oscem_general.json
-    #       Url: https://w3id.org/oscem-schemas/latest/general/jsonschema/oscem_schemas_general.schema.json
+    - Name: MS
+      GithubOrg: osc-em
+      GithubProject: oscem-extractor-materials
+      Version: v1.0.5
+      Executable: oscem-extractor-materials
+      Checksum: 47dc7f1fcb4bd51b10ac22d017d69838b671babb45c12bef6c9008d98d47e9f1
+      ChecksumAlg: sha256
+      CommandLineTemplate: "-i '{{.SourceFolder}}' -o '{{.OutputFile}}'"
+      Methods:
+        - Name: Material Science
+          Schema: oscem_general.json
+          Url: https://w3id.org/oscem-schemas/latest/general/jsonschema/oscem_schemas_general.schema.json
 
 WebServer:
   Auth:
@@ -88,7 +88,7 @@ WebServer:
     ConcurrencyLimit: 4
     QueueSize: 200
   Other:
-    BackendAddress: ingestor.development.psi.ch
+    BackendAddress: https://ingestor.development.psi.ch
     Port: 8080
     LogLevel: Debug
     SecureCookies: true
