@@ -611,7 +611,6 @@
                   "title": "Description Type",
                   "$dataciteRequired": true,
                   "enum": [
-                    "Abstract",
                     "Methods",
                     "SeriesInformation",
                     "TableOfContents",
