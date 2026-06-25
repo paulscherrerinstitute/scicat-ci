@@ -1222,7 +1222,27 @@
         "elements": [
           {
             "type": "Control",
-            "scope": "#/properties/descriptions"
+            "scope": "#/properties/descriptions",
+            "options": {
+              "detail": {
+                "type": "VerticalLayout",
+                "elements": [
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/descriptionType",
+                    "label": "Type"
+                  },
+                  {
+                    "type": "Control",
+                    "scope": "#/properties/description",
+                    "label": "Description",
+                    "options": {
+                      "multi": true
+                    }
+                  }
+                ]
+              }
+            }
           }
         ]
       },
