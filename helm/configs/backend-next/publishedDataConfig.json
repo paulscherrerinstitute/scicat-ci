@@ -618,6 +618,11 @@
                     "TechnicalInfo",
                     "Other"
                   ]
+                },
+                "lang": {
+                  "type": "string",
+                  "title": "Language",
+                  "default": "en"
                 }
               },
               "required": [ "description", "descriptionType" ]
@@ -1208,6 +1213,16 @@
                 ]
               }
             }
+          }
+        ]
+      },
+      {
+        "type": "Category",
+        "label": "Descriptions",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/descriptions"
           }
         ]
       },
