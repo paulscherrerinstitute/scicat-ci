@@ -79,11 +79,12 @@ async function mergeCreators(ctx) {
       if (split.length < 2) {
         return [];
       }
+      const givenName = split[0];
       const familyName = split.at(-1);
 
       return {
-        name: `${familyName}, ${split[0]}`,
-        givenName: split[0],
+        name: `${familyName}, ${givenName}`,
+        givenName: givenName,
         familyName: familyName,
         affiliation: [
           {
