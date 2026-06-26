@@ -69,17 +69,23 @@ async function mergeCreators(ctx) {
     if (!datasets) return;
 
     return Array.from(
-      new Set(datasets.flatMap((ds) => ds.owner.split(','))),
+      new Set(datasets.flatMap((ds) => {
+        const owner = ds.owner;
+        const commaSplit = owner.split(',');
+        return commaSplit.length > 1 ? commaSplit: owner.split(';');
+      })),
     ).flatMap((creator) => {
       const split = creator.split(' ');
-      if (split.length !== 2) {
+      if (split.length < 2) {
         return [];
       }
+      const givenName = split[0];
+      const familyName = split.at(-1);
 
       return {
-        name: `${split[1]}, ${split[0]}`,
-        givenName: split[0],
-        familyName: split[1],
+        name: `${familyName}, ${givenName}`,
+        givenName: givenName,
+        familyName: familyName,
         affiliation: [
           {
             name: 'Paul Scherrer Institute',
