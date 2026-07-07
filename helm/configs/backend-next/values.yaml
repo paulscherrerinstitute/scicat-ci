@@ -79,7 +79,7 @@ env:
   - name: AJV_CUSTOM_DEFINITIONS_FILE
     value: /home/node/app/ajvCustomDefinitions.js
   - name: OPENSEARCH_ENABLED
-    value: "yes
+    value: "yes"
   - name: OPENSEARCH_HOST
     value: http://opensearch-cluster.opensearch.svc.cluster.local
 
