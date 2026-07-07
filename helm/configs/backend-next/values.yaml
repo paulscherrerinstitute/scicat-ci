@@ -78,6 +78,10 @@ env:
     value: /home/node/app/jobConfig.yaml
   - name: AJV_CUSTOM_DEFINITIONS_FILE
     value: /home/node/app/ajvCustomDefinitions.js
+  - name: OPENSEARCH_ENABLED
+    value: "yes
+  - name: OPENSEARCH_HOST
+    value: http://opensearch-cluster.opensearch.svc.cluster.local
 
 volumeMounts:
   - name: secrets-volume
