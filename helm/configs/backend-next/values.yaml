@@ -85,6 +85,8 @@ env:
     value: https://opensearch-cluster.opensearch.svc.cluster.local:9200
   - name: OPENSEARCH_CONFIG_FILE
     value: /home/node/app/opensearchConfig.json
+  - name: OPENSEARCH_DEFAULT_INDEX
+    value: "dataset-{{ .Values.envValue }}"
 
 volumeMounts:
   - name: secrets-volume
