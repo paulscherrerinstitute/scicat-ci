@@ -57,7 +57,7 @@ jobs:
       submodule: scicat-backend-next
       helm_set_files: >-
         JOB_TEMPLATE=helm/configs/backend-next/job-template.html
-        JOB_CONFIG=helm/configs/backend-next/jobConfig.yaml
+        JOB_CONFIG=helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/jobConfig.yaml
         PUBLISHED_DATA_CONFIG=helm/configs/backend-next/publishedDataConfig.json
         RENAME_MEASUREMENT_ID_JS=helm/configs/backend-next/rename-measurement-id.js
         AJV_CUSTOM_DEFINITIONS=helm/configs/backend-next/ajvCustomDefinitions.js
