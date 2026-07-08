@@ -1,0 +1,155 @@
+configVersion: "v0.2.0 2026-07-08 (development)"
+jobs:
+  - jobType: archive
+    create:
+      auth: '#datasetOwner'
+      actions: &archiveActions
+        - actionType: log
+
+        - actionType: validate
+          datasets:
+            "datasetlifecycle.archivable":
+              const: true
+
+        - &validStorage
+          # Validate PSI storageLocations
+          actionType: validate
+          datasets:
+            datasetlifecycle:
+              type: object
+              properties:
+                storageLocation:
+                  type: string
+                  enum:
+                    - ""
+                    - PSI
+                    - ETHZ
+              additionalProperties: true
+
+        - &switchStorage
+          actionType: switch
+          phase: perform
+          property: datasets[*].datasetlifecycle.storageLocation
+          cases:
+          - match: ETHZ
+            actions:
+            - actionType: log
+              perform: "(Job {{job.id}}) Directing to ETHZ, but ETHZ is not supported on dev"
+            - actionType: error
+              message: The ETHZ archiver is not configured in development.
+
+          - # PSI default
+            actions:
+            - actionType: log
+              perform: "(Job {{job.id}}) Directing to PSI"
+
+            - &rabbitmq
+              actionType: rabbitmq
+              exchange: jobs.write
+              queue: client.jobs.write.v4
+              key: jobqueuev4
+
+        - &email_create
+          actionType: email
+          ignoreErrors: true
+          to: "{{job.contactEmail}}"
+          subject: "[SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job was submitted"
+          bodyTemplateFile: email-templates/job-template.html
+
+    update:
+      auth: archiveManager
+      actions:
+        - actionType: log
+          perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+
+        - &email_update
+          actionType: switch
+          phase: perform
+          property: job.statusCode
+          cases:
+            - regex: "/^finished/"
+              actions:
+              - actionType: email
+                ignoreErrors: true
+                to: "{{job.contactEmail}}"
+                subject: |-
+                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.statusCode "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
+                bodyTemplateFile: email-templates/job-template.html
+            - actions:
+              - actionType: log
+                perform: "(Job {{job.id}} Skip email notification for status {{job.statusCode}}"
+
+  - jobType: retrieve
+    create:
+      auth: '#datasetAccess'
+      actions: &retrieveActions
+        - actionType: log
+        - actionType: validate
+          datasets:
+            "datasetlifecycle.retrievable":
+              const: true
+        - *validStorage
+        - *switchStorage
+        - *email_create
+
+    update:
+      auth: archiveManager
+      actions:
+        - actionType: log
+        - *email_update
+
+  # TODO Make public work for ETHZ
+  - jobType: public
+    create:
+      auth: '#datasetPublic'
+      actions: &publicActions
+        - actionType: log
+        - actionType: validate
+          datasets:
+            isPublished:
+              const: true
+        #- *validStorage
+        - &psiStorage
+          # Only allow PSI storage (TODO)
+          actionType: validate
+          datasets:
+            datasetlifecycle:
+              type: object
+              properties:
+                storageLocation:
+                  type: string
+                  enum:
+                    - ""
+                    - PSI
+              additionalProperties: true
+        - *email_create
+        - *rabbitmq
+
+    update:
+      auth: 'archiveManager'
+      actions:
+        - actionType: log
+        - *email_update
+
+  - jobType: reset
+    create:
+      auth: archiveManager
+      actions: &resetActions
+        - actionType: log
+        - *psiStorage
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions:
+        - actionType: log
+
+  # Used by scicat-globus-proxy for transfer tracking
+  - jobType: globus_transfer_job
+    create:
+      auth: '#datasetAccess'
+      actions:
+        - actionType: log
+    update:
+      auth: "#jobOwnerUser"
+      actions:
+        - actionType: log
