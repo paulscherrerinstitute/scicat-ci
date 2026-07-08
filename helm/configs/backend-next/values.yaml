@@ -47,7 +47,7 @@ ingresses:
       nginx.ingress.kubernetes.io/proxy-body-size: 50m
     hosts:
       - host: "{{ .Values.host }}"
-        paths: 
+        paths:
           - path: "/"
             pathType: Prefix
     tls:
@@ -101,6 +101,8 @@ volumeMounts:
 
 migrateCommand: "echo 'No migration command specified.'"
 
+ethzArchiverUrl: https://scopem-openem.ethz.ch/{{.Values.ENVIRONMENT}}/archiver/api/v1/archiver/jobs
+
 jobContainers:
   - name: migrate
     image: "{{ .Values.ciRepository }}:{{ .Values.ciTag }}"
@@ -123,4 +125,3 @@ jobContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
-
