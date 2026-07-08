@@ -36,6 +36,7 @@ jobs:
         helm/configs/backend-next/values.yaml
         helm/configs/backend-next/publishedDataConfig.json
         helm/configs/backend-next/ajvCustomDefinitions.js
+        helm/configs/backend-next/opensearchConfig.json
         scicat-backend-next/**
       commit: ${{ needs.set_env.outputs.commit }}
       submodule_commit: ${{ github.event.inputs.submodule_commit }}
@@ -65,6 +66,7 @@ jobs:
         RENAME_MEASUREMENT_ID_JS=helm/configs/backend-next/rename-measurement-id.js
         AJV_CUSTOM_DEFINITIONS=helm/configs/backend-next/ajvCustomDefinitions.js
         MIGRATE_BROKEN_HISTORY=helm/configs/backend-next/migrate-broken-legacy-history.js
+        OPENSEARCH_CONFIG=helm/configs/backend-next/opensearchConfig.json
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
