@@ -32,6 +32,7 @@ jobs:
         .github/workflows/scicat-be-next.yml
         helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/**
         helm/configs/backend-next/job-template.html
+        helm/configs/backend-next/jobConfig.yaml
         helm/configs/backend-next/values.yaml
         helm/configs/backend-next/publishedDataConfig.json
         helm/configs/backend-next/ajvCustomDefinitions.js
@@ -57,7 +58,7 @@ jobs:
       submodule: scicat-backend-next
       helm_set_files: >-
         JOB_TEMPLATE=helm/configs/backend-next/job-template.html
-        JOB_CONFIG=helm/configs/backend-next/${{ needs.set_env.outputs.environment }}/jobConfig.yaml
+        JOB_CONFIG=helm/configs/backend-next/jobConfig.yaml
         PUBLISHED_DATA_CONFIG=helm/configs/backend-next/publishedDataConfig.json
         RENAME_MEASUREMENT_ID_JS=helm/configs/backend-next/rename-measurement-id.js
         AJV_CUSTOM_DEFINITIONS=helm/configs/backend-next/ajvCustomDefinitions.js

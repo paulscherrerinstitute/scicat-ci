@@ -7,3 +7,5 @@ registerDoiUri: https://api.datacite.org/dois
 host: dacat.psi.ch
 
 migrateCommand: npm run migrate:db:up
+
+ethzArchiverUrl: https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs
