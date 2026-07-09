@@ -1,4 +1,5 @@
-configVersion: "v0.1.3 2025-05-14"
+# Please bump configVersion on changes
+configVersion: "v0.2.0 2026-07-09"
 jobs:
   - jobType: archive
     create:
@@ -38,7 +39,7 @@ jobs:
             - &scopemUrl
               actionType: url
               ignoreErrors: false
-              url: 'https://scopem-openem.ethz.ch/archiver/api/v1/archiver/jobs'
+              url: "{{{ env.ETHZ_ARCHIVER_URL }}}"
               method: POST
               headers:
                 accept: application/json
