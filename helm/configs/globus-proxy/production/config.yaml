@@ -1,4 +1,4 @@
-scicatUrl: "https://dacat.psi.ch/"
+scicatUrl: "http://backend-next.scicat-production/"
 port: 8080
 
 defaults:
