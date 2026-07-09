@@ -1,4 +1,4 @@
-scicatUrl: "https://dacat.psi.ch"
+scicatUrl: "https://dacat.psi.ch/"
 port: 8080
 
 defaults:
