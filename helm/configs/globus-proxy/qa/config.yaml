@@ -4,7 +4,7 @@ port: 8080
 defaults:
   - &openemFacility
     direction: SRC
-    accessValue: "/{{.Name}}"
+    accessValue: "{{.Name}}"
 
 facilities:
   - name: PSI_QA
