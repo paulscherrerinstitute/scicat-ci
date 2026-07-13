@@ -11,9 +11,13 @@ inputs:
     required: false
     type: string
     default: default
-  chart: 
+  chart:
     description: chart to deploy
     required: true
+    type: string
+  version:
+    description: chart version, for charts pulled from a registry
+    required: false
     type: string
   values: 
     description: values to inject from command line
@@ -40,7 +44,8 @@ runs:
         values=`echo ${{ inputs.value-files }} | tr -s ' ' ','`;
         set=`echo ${{ inputs.values }} | tr -s ' ' ','`;
         set_file=`echo ${{ inputs.files }} | tr -s ' ' ','`;
-        helm upgrade ${{ inputs.release }} ${{ inputs.chart }} \
+        version=""; if [ -n "${{ inputs.version }}" ]; then version="--version=${{ inputs.version }}"; fi;
+        helm upgrade ${{ inputs.release }} ${{ inputs.chart }} $version \
           --namespace ${{ inputs.namespace }} --create-namespace \
           --install --wait --atomic --values=$values --set=$set \
           --set-file=$set_file --set-json secretsJson='${{ inputs.secrets }}' &> /dev/null

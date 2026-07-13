@@ -33,6 +33,11 @@ on:
         required: false
         type: string
         default: helm/charts/generic_service
+      helm_chart_version:
+        description: chart version, for charts pulled from a registry
+        required: false
+        type: string
+        default: ""
       docker_build_files:
         required: false
         type: string
@@ -150,6 +155,7 @@ jobs:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
         chart: '${{ inputs.helm_chart }}'
+        version: '${{ inputs.helm_chart_version }}'
         values: >-
          ciRepository=${{ inputs.registry }}/${{ inputs.image_name }}
          ciTag=${{ inputs.tag }}

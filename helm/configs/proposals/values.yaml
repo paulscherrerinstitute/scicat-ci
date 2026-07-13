@@ -26,3 +26,7 @@ volumeMounts:
 
 cronjob:
   ttlSecondsAfterFinished: 691200 # 8 days (7+1 of buffer)
+
+# Keep the pre-rename chart name so selectors and resource names still match
+# releases installed from the vendored charts (Deployment selectors are immutable).
+nameOverride: proposals-cronjob-chart

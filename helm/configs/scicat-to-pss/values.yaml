@@ -10,3 +10,7 @@ env:
     value: "{{ .Values.scicatBaseUrl }}"
   - name: PSS_BASE_URL
     value: "{{ .Values.pssBaseUrl }}"
+
+# Keep the pre-rename chart name so selectors and resource names still match
+# releases installed from the vendored charts (Deployment selectors are immutable).
+nameOverride: cron-chart
