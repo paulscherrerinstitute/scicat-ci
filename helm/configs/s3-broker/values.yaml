@@ -63,3 +63,7 @@ volumeMounts:
   - name: secrets-volume
     mountPath: /env/credentials
     subPath: credentials
+
+# Keep the pre-rename chart name so selectors and resource names still match
+# releases installed from the vendored charts (Deployment selectors are immutable).
+nameOverride: generic-service-chart
