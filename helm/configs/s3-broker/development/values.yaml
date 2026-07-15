@@ -4,6 +4,9 @@ scicat:
   backend_url: http://backend-next.scicat-development
   job_manager_username: jobManager
 
+upload_bucket: psi-upload-dev
+retrieve_bucket: psi-retrieve-dev
+
 ingress:
   annotations:
     b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"

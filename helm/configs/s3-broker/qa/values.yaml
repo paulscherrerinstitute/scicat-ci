@@ -4,5 +4,8 @@ scicat:
   backend_url: http://backend-next.scicat-qa
   job_manager_username: jobManager
 
+upload_bucket: psi-upload-qa
+retrieve_bucket: psi-retrieve-qa
+
 ingress:
   enabled: false

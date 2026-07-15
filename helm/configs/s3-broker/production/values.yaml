@@ -4,5 +4,8 @@ scicat:
   backend_url: http://backend-next.scicat-production
   job_manager_username: jobManager
 
+upload_bucket: psi-upload
+retrieve_bucket: psi-retrieve
+
 ingress:
   enabled: false
