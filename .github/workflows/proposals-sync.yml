@@ -41,7 +41,7 @@ jobs:
 
       - name: Helm template
         run: | 
-          helm template proposals --debug ../helm/charts/duo_facility_proposals --values=../helm/configs/proposals/values.yaml --values=../helm/configs/proposals/development/values.yaml > /dev/null
+          helm template proposals --debug oci://ghcr.io/paulscherrerinstitute/dc-charts/proposals-cronjob --version=0.1.1 --values=../helm/configs/proposals/values.yaml --values=../helm/configs/proposals/development/values.yaml > /dev/null
 
       - name: Build
         run: |
@@ -80,7 +80,8 @@ jobs:
       release_name: proposals
       tag: ${{ needs.set_env.outputs.tag }}
       environment: ${{ needs.set_env.outputs.environment }}
-      helm_chart: helm/charts/duo_facility_proposals
+      helm_chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/proposals-cronjob
+      helm_chart_version: 0.1.1
       commit: ${{ needs.set_env.outputs.commit }}
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}

@@ -26,3 +26,7 @@ volumeMounts:
 
 cronjob:
   ttlSecondsAfterFinished: 691200 # 8 days (7+1 of buffer)
+
+# Keep the pre-rename chart name so resource names stay stable for the
+# release installed from the vendored duo_facility_proposals chart.
+nameOverride: proposals-cronjob-chart
