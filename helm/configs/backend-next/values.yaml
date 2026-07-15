@@ -124,3 +124,7 @@ jobContainers:
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
 
+
+# Keep the pre-rename chart name so selectors and resource names still match
+# releases installed from the vendored charts (Deployment selectors are immutable).
+nameOverride: generic-service-chart
