@@ -47,6 +47,10 @@ env:
       secretKeyRef:
         name: "{{ .Release.Name }}-s"
         key: job_manager_password
+  - name: UPLOAD_BUCKET
+    value: "{{ .Values.upload_bucket }}"
+  - name: RETRIEVE_BUCKET
+    value: "{{ .Values.retrieve_bucket }}"
 
 volumes:
   - name: secrets-volume
