@@ -42,7 +42,8 @@ jobs:
         with:
           release: "${{ env.RELEASE_NAME }}"
           namespace: "${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}"
-          chart: helm/charts/generic_service
+          chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+          version: 1.0.0
           value-files: >-
             helm/configs/${{ env.RELEASE_NAME }}/values.yaml
             helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml
