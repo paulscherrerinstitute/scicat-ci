@@ -40,7 +40,8 @@ jobs:
       with:
         release: '${{ env.RELEASE_NAME }}'
         namespace: '${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}'
-        chart: helm/charts/cron
+        chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/cron
+        version: 1.0.0
         value-files: >-
           helm/configs/${{ env.RELEASE_NAME }}/values.yaml
           helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml

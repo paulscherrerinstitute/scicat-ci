@@ -40,3 +40,7 @@ volumeMounts:
   - name: config-volume
     mountPath: /updateMatViews.js
     subPath: updateMatViews.js
+
+# Keep the pre-rename chart name so resource names stay stable for the
+# release installed from the vendored cron-chart.
+nameOverride: cron-chart
