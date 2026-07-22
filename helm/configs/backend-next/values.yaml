@@ -28,6 +28,7 @@ configMaps:
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
     ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
+    opensearchConfig.json: "{{ .Values.OPENSEARCH_CONFIG }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
@@ -65,6 +66,8 @@ ingresses:
           - path: /api/v3/auth/login
             pathType: Exact
 
+opensearchEnabled: no
+
 env:
   - name: DOI_PREFIX
     value: "{{ .Values.doiPrefix }}"
@@ -78,6 +81,14 @@ env:
     value: /home/node/app/jobConfig.yaml
   - name: AJV_CUSTOM_DEFINITIONS_FILE
     value: /home/node/app/ajvCustomDefinitions.js
+  - name: OPENSEARCH_ENABLED
+    value: "{{ .Values.opensearchEnabled }}"
+  - name: OPENSEARCH_HOST
+    value: https://opensearch-cluster.opensearch.svc.cluster.local:9200
+  - name: OPENSEARCH_CONFIG_FILE
+    value: /home/node/app/opensearchConfig.json
+  - name: OPENSEARCH_DEFAULT_INDEX
+    value: "dataset-{{ .Values.envValue }}"
 
 volumeMounts:
   - name: secrets-volume
@@ -98,6 +109,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/ajvCustomDefinitions.js
     subPath: ajvCustomDefinitions.js
+  - name: config-volume
+    mountPath: /home/node/app/opensearchConfig.json
+    subPath: opensearchConfig.json
 
 migrateCommand: "echo 'No migration command specified.'"
 
