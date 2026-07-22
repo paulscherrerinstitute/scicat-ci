@@ -66,6 +66,8 @@ ingresses:
           - path: /api/v3/auth/login
             pathType: Exact
 
+opensearchEnabled: no
+
 env:
   - name: DOI_PREFIX
     value: "{{ .Values.doiPrefix }}"
@@ -80,7 +82,7 @@ env:
   - name: AJV_CUSTOM_DEFINITIONS_FILE
     value: /home/node/app/ajvCustomDefinitions.js
   - name: OPENSEARCH_ENABLED
-    value: "yes"
+    value: "{{ .Values.opensearchEnabled }}"
   - name: OPENSEARCH_HOST
     value: https://opensearch-cluster.opensearch.svc.cluster.local:9200
   - name: OPENSEARCH_CONFIG_FILE

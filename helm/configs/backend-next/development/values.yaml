@@ -25,3 +25,5 @@ ingresses:
         secretName: "scicat-be-next-certificate"
 
 migrateCommand: npm run migrate:db:up
+
+opensearchEnabled: yes
