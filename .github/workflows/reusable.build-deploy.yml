@@ -30,9 +30,9 @@ on:
         type: string
         default: scicat-
       helm_chart:
-        required: false
+        description: chart reference, local path or OCI URL
+        required: true
         type: string
-        default: helm/charts/generic_service
       helm_chart_version:
         description: chart version, for charts pulled from a registry
         required: false
