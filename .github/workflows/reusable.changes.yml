@@ -53,7 +53,7 @@ jobs:
           git checkout $current_commit && git submodule update --recursive;
 
       - if: ${{ inputs.submodule_commit }}
-        uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
+        uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@b4da1ca8afb1aac8b95bff96f98e70ae1f83aa35
         with:
           submodule_commit: ${{ inputs.submodule_commit }}
           commit: ${{ inputs.commit }}

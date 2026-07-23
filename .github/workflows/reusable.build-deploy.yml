@@ -91,7 +91,7 @@ jobs:
         ref: ${{ inputs.commit }}
 
     - if: ${{ inputs.submodule_commit }}
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@b4da1ca8afb1aac8b95bff96f98e70ae1f83aa35
       with: 
         submodule_commit: ${{ inputs.submodule_commit }}
         commit: ${{ inputs.commit }}
@@ -143,14 +143,14 @@ jobs:
         ref: ${{ inputs.commit }}
 
     - name: Open ssh tunnel
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@b4da1ca8afb1aac8b95bff96f98e70ae1f83aa35
       with: 
         bastion_user: '${{ secrets.BASTION_USER }}'
         bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
 
     - name: Deploy to k8s using helm
       id: helm-deploy
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@b4da1ca8afb1aac8b95bff96f98e70ae1f83aa35
       with:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
