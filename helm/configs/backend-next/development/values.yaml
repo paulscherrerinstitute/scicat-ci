@@ -26,4 +26,4 @@ ingresses:
 
 migrateCommand: npm run migrate:db:up
 
-opensearchEnabled: yes
+opensearchEnabled: "yes"
