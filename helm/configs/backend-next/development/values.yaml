@@ -27,3 +27,4 @@ ingresses:
 migrateCommand: npm run migrate:db:up
 
 opensearchEnabled: "yes"
+opensearchSyncCommand: node /home/node/app/opensearch-sync.js

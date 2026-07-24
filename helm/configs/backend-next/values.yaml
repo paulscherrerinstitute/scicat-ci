@@ -32,6 +32,7 @@ configMaps:
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
+    opensearch-sync.js: "{{ .Values.OPENSEARCH_SYNC_JS }}"
 
 secrets:
   "{{ .Release.Name }}-s":
@@ -48,12 +49,12 @@ ingresses:
       nginx.ingress.kubernetes.io/proxy-body-size: 50m
     hosts:
       - host: "{{ .Values.host }}"
-        paths: 
+        paths:
           - path: "/"
             pathType: Prefix
     tls:
       - hosts:
-        - "{{ .Values.host }}"
+          - "{{ .Values.host }}"
         secretName: "scicat-be-next-certificate"
   - enabled: true
     name: backend-next-login
@@ -114,6 +115,7 @@ volumeMounts:
     subPath: opensearchConfig.json
 
 migrateCommand: "echo 'No migration command specified.'"
+opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"
 
 jobContainers:
   - name: migrate
@@ -126,7 +128,13 @@ jobContainers:
       - >-
         npm run migrate:db:status &&
         {{ .Values.migrateCommand }} &&
-        npm run migrate:db:status
+        npm run migrate:db:status &&
+        {{ .Values.opensearchSyncCommand }}
+    env:
+      - name: SCICAT_HOST
+        value: http://backend-next.scicat-{{ .Values.envValue }}
+      - name: OPENSEARCH_INDEX
+        value: "dataset-{{ .Values.envValue }}"
     volumeMounts:
       - name: secrets-volume
         mountPath: /home/node/app/.env
@@ -137,7 +145,12 @@ jobContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
-
+      - name: migrations-volume
+        mountPath: /home/node/app/opensearch-sync.js
+        subPath: opensearch-sync.js
+      - name: secrets-volume
+        mountPath: /home/node/app/functionalAccounts.json
+        subPath: functionalAccounts.json
 
 # Keep the pre-rename chart name so selectors and resource names still match
 # releases installed from the vendored charts (Deployment selectors are immutable).

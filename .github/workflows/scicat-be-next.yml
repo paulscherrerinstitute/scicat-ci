@@ -67,6 +67,7 @@ jobs:
         AJV_CUSTOM_DEFINITIONS=helm/configs/backend-next/ajvCustomDefinitions.js
         MIGRATE_BROKEN_HISTORY=helm/configs/backend-next/migrate-broken-legacy-history.js
         OPENSEARCH_CONFIG=helm/configs/backend-next/opensearchConfig.json
+        OPENSEARCH_SYNC_JS=helm/configs/backend-next/opensearch-sync.js
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
