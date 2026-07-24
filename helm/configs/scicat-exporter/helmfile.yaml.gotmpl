@@ -1,0 +1,14 @@
+bases:
+  - ../../helmfile-common.yaml
+---
+releases:
+  - name: scicat-exporter
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 1.0.0
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      {{ if env "SECRETS" }}
+      - secretsJson: {{ env "SECRETS" | fromJson | toYaml | nindent 10 }}
+      {{ end }}

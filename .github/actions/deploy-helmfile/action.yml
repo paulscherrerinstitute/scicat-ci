@@ -1,0 +1,56 @@
+name: deploy-helmfile
+description: "Deploy a component through its helmfile state"
+
+inputs:
+  file:
+    description: path to the component's helmfile state
+    required: true
+  environment:
+    description: helmfile environment to select
+    required: true
+  kubeconfig:
+    description: base64 kubeconfig for the target cluster
+    required: true
+  ci_repository:
+    description: image repository, set only when the component builds
+    required: false
+    default: ""
+  ci_tag:
+    description: image tag, set only when the component builds
+    required: false
+    default: ""
+  secrets:
+    description: JSON blob exposed to the helmfile template as env SECRETS
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+
+        curl -fsSL -o "$RUNNER_TEMP/helmfile.tar.gz" \
+          "https://github.com/helmfile/helmfile/releases/download/v${VERSION}/helmfile_${VERSION}_linux_amd64.tar.gz"
+        echo "${SHA256}  $RUNNER_TEMP/helmfile.tar.gz" | sha256sum -c --quiet
+        sudo tar xzf "$RUNNER_TEMP/helmfile.tar.gz" -C /usr/local/bin helmfile
+
+        export KUBECONFIG="$RUNNER_TEMP/kubeconfig"
+        printf '%s' "$KUBECONFIG_FILE" | base64 -d > "$KUBECONFIG"
+
+        # helm dumps the fully rendered template on failure, credentials
+        # included, so its output stays hidden while secrets still reach it.
+        if ! helmfile --file "$FILE" --environment "$ENVIRONMENT" sync &> /dev/null; then
+          echo "::error::helmfile sync failed for $FILE (environment: $ENVIRONMENT)"
+          exit 1
+        fi
+      env:
+        VERSION: 1.7.1
+        SHA256: d84a8e5ffdbfd66f1bfb4b11967b9d2981d8515c7d6e312ee0cd89b613c8b352
+        FILE: ${{ inputs.file }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        KUBECONFIG_FILE: ${{ inputs.kubeconfig }}
+        CI_REPOSITORY: ${{ inputs.ci_repository }}
+        CI_TAG: ${{ inputs.ci_tag }}
+        SECRETS: ${{ inputs.secrets }}
