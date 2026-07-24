@@ -6,12 +6,18 @@ on:
     branches: [main]
     paths:
       - .github/workflows/scicat-exporter.yml
+      - .github/actions/deploy-helmfile/**
+      - helm/helmfile-common.yaml
+      - helm/configs/scicat-exporter/helmfile.yaml.gotmpl
       - helm/configs/scicat-exporter/development/**
       - helm/configs/scicat-exporter/values.yaml
   push:
     branches: [main]
     paths:
       - .github/workflows/scicat-exporter.yml
+      - .github/actions/deploy-helmfile/**
+      - helm/helmfile-common.yaml
+      - helm/configs/scicat-exporter/helmfile.yaml.gotmpl
       - helm/configs/scicat-exporter/qa/**
       - helm/configs/scicat-exporter/values.yaml
   release:
@@ -38,18 +44,9 @@ jobs:
           bastion_ssh_key: "${{ secrets.BASTION_SSH_KEY }}"
 
       - name: deploy
-        uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+        uses: ./.github/actions/deploy-helmfile
         with:
-          release: "${{ env.RELEASE_NAME }}"
-          namespace: "${{ env.NAMESPACE_PREFIX }}${{ env.ENVIRONMENT }}"
-          chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
-          version: 1.0.0
-          value-files: >-
-            helm/configs/${{ env.RELEASE_NAME }}/values.yaml
-            helm/configs/${{ env.RELEASE_NAME }}/${{ env.ENVIRONMENT }}/values.yaml
-          secrets:  ${{ toJSON(secrets) }}
-        env:
-          KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
-          RELEASE_NAME: scicat-exporter
-          ENVIRONMENT: "${{ needs.set_env.outputs.environment }}"
-          NAMESPACE_PREFIX: scicat-
+          file: helm/configs/scicat-exporter/helmfile.yaml.gotmpl
+          environment: "${{ needs.set_env.outputs.environment }}"
+          kubeconfig: "${{ secrets.KUBECONFIG }}"
+          secrets: ${{ format('{{"EXPORTER_WHITELIST_IPS":"{0}"}}', secrets.EXPORTER_WHITELIST_IPS) }}
