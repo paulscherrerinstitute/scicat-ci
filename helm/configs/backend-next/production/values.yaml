@@ -7,3 +7,5 @@ registerDoiUri: https://api.datacite.org/dois
 host: dacat.psi.ch
 
 migrateCommand: npm run migrate:db:up
+
+opensearchSyncCommand: node /home/node/app/opensearch-sync.js
