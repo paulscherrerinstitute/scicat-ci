@@ -1,0 +1,9 @@
+environments:
+  development:
+  qa:
+  production:
+
+helmDefaults:
+  atomic: true
+  wait: true
+  createNamespace: true
