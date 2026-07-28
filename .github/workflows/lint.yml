@@ -1,0 +1,99 @@
+name: lint
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/lint.yml
+      - helm/**
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      states: ${{ steps.states.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Get changed helmfile base
+        id: base
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            helm/helmfile-common.yaml
+            .github/workflows/lint.yml
+
+      - name: Get changed component directories
+        id: components
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: helm/configs/**
+          dir_names: true
+          dir_names_max_depth: 3
+          json: true
+
+      - name: Select helmfile states to render
+        id: states
+        run: |
+          set -euo pipefail
+
+          # a change to the shared base, or to this workflow, can affect every state
+          if [ "$BASE_CHANGED" = "true" ]; then
+            candidates=$(find helm/configs -name helmfile.yaml.gotmpl)
+          else
+            candidates=$(jq -r '.[] + "/helmfile.yaml.gotmpl"' <<< "$COMPONENTS")
+          fi
+
+          # Components not yet migrated to helmfile have no helmfile.yaml.gotmpl and are
+          # silently skipped here (not rendered/linted by this job).
+          matrix=$(printf '%s\n' "$candidates" | while read -r state; do
+            if [ -f "$state" ]; then echo "$state"; fi
+          done | jq -R . | jq -sc .)
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_CHANGED: ${{ steps.base.outputs.any_changed }}
+          COMPONENTS: ${{ steps.components.outputs.all_changed_files }}
+
+  helmfile:
+    needs: changes
+    if: needs.changes.outputs.states != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        state: ${{ fromJSON(needs.changes.outputs.states) }}
+        environment: [development, qa, production]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build placeholder secrets
+        run: |
+          set -euo pipefail
+
+          # Configs dereference .Values.secretsJson.<KEY> unconditionally, so a render
+          # needs every key present, and the chart b64-decodes them.
+          grep -rhoE 'secretsJson\.[A-Za-z0-9_]+' helm/configs \
+            | cut -d. -f2 | sort -u | jq -R . \
+            | jq -s '{secrets: (map({key: ., value: "ZHVtbXk="}) | from_entries)}' \
+            > "$RUNNER_TEMP/placeholder-secrets.json"
+
+      - name: Render state
+        uses: helmfile/helmfile-action@1f44bcb43e5fb17ecb2685d8b6081ec5f6aa5fcf # v2.4.7
+        with:
+          helmfile-args: >-
+            --file ${{ matrix.state }}
+            --environment ${{ matrix.environment }}
+            --state-values-file ${{ runner.temp }}/placeholder-secrets.json
+            template
+          helmfile-version: v1.7.1
+          helm-version: v4.2.2
+          # a template run needs no plugin, the action installs helm-diff by default
+          helm-plugins: ''
