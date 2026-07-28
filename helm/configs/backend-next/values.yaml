@@ -67,7 +67,7 @@ ingresses:
           - path: /api/v3/auth/login
             pathType: Exact
 
-opensearchEnabled: "no"
+opensearchEnabled: "yes"
 
 env:
   - name: DOI_PREFIX
