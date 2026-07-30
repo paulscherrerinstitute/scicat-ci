@@ -1,0 +1,27 @@
+name: actionlint
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/**
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint workflows
+        uses: reviewdog/action-actionlint@50842263c20a7c46bd0065b9e624d3c569db061e # v1.73.0
+        with:
+          reporter: github-pr-review
+          # the older workflows are not actionlint-clean
+          filter_mode: file
+          # without this nothing fails, and "error" would skip shellcheck's info findings
+          fail_level: any
