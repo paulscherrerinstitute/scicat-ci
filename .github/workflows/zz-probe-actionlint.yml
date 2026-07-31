@@ -1,0 +1,16 @@
+name: zz-probe-actionlint
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shellcheck finding, unquoted expansion
+        run: |
+          target=/tmp/probe file
+          echo $target
+
+      - name: Actionlint finding, undefined context property
+        run: echo "${{ github.evnt.number }}"
