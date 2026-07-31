@@ -1,0 +1,36 @@
+name: zz-probe-mask
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/zz-probe-mask.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      # dummies shaped like the real values, trailing newline, "/" and "=" inside
+      SECRETS: '{"DUMMY":"MjAzLjAuMTEzLjAvMjQsMTk4LjUxLjEwMC4wLzI0Cg==","DUMMY_MULTILINE":"cHJvYmUtbGluZS1vbmU9PQpwcm9iZS1saW5lLXR3by8vCg=="}'
+    steps:
+      - name: Register the decoded values
+        run: |
+          set -euo pipefail
+
+          jq -r '.[]? // empty' <<< "$SECRETS" | while IFS= read -r encoded; do
+            { base64 -d <<< "$encoded" 2>/dev/null || true; } \
+              | while IFS= read -r line || [ -n "$line" ]; do
+                  if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+                done
+          done
+
+      - name: Echo the decoded values
+        run: |
+          set -euo pipefail
+
+          jq -r '.[]? // empty' <<< "$SECRETS" | while IFS= read -r encoded; do
+            echo "BEGIN[$(base64 -d <<< "$encoded")]END"
+          done
