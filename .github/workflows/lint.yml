@@ -36,7 +36,7 @@ jobs:
           files: helm/configs/**
           dir_names: true
           dir_names_max_depth: 3
-          json: true
+          matrix: true
 
       - name: Select helmfile states to render
         id: states
