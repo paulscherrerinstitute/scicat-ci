@@ -50,10 +50,8 @@ runs:
           state_values=(--state-values-file "$RUNNER_TEMP/state-values.yaml")
         fi
 
-        # helm dumps the fully rendered template on failure, credentials
-        # included, so its output stays hidden while secrets still reach it.
         if ! helmfile --file "$FILE" --environment "$ENVIRONMENT" \
-             "${state_values[@]}" sync &> /dev/null; then
+             "${state_values[@]}" sync; then
           echo "::error::helmfile sync failed for $FILE (environment: $ENVIRONMENT)"
           exit 1
         fi
