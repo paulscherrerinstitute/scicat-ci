@@ -50,4 +50,4 @@ jobs:
           environment: "${{ needs.set_env.outputs.environment }}"
           kubeconfig: "${{ secrets.KUBECONFIG }}"
           # toJSON quotes and escapes the value, secrets often carry a trailing newline
-          secrets: ${{ format('{{"EXPORTER_WHITELIST_IPS":{0}}}', toJSON(secrets.EXPORTER_WHITELIST_IPS)) }}
+          secrets: ${{ format('{{"EXPORTER_WHITELIST_CIDRS":{0}}}', toJSON(secrets.EXPORTER_WHITELIST_CIDRS)) }}

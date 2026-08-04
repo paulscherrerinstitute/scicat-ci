@@ -79,7 +79,8 @@ jobs:
           set -euo pipefail
 
           # Configs dereference .Values.secretsJson.<KEY> unconditionally, so a render
-          # needs every key present, and the chart b64-decodes them.
+          # needs every key present. The value is base64 because a `secrets:` block
+          # feeds a k8s Secret, which rejects anything else.
           grep -rhoE 'secretsJson\.[A-Za-z0-9_]+' helm/configs \
             | cut -d. -f2 | sort -u | jq -R . \
             | jq -s '{secrets: (map({key: ., value: "ZHVtbXk="}) | from_entries)}' \
