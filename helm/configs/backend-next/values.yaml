@@ -29,6 +29,7 @@ configMaps:
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
     ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
     opensearchConfig.json: "{{ .Values.OPENSEARCH_CONFIG }}"
+    datasetTypes.json: "{{ .Values.DATASET_TYPES }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
@@ -113,6 +114,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/opensearchConfig.json
     subPath: opensearchConfig.json
+  - name: config-volume
+    mountPath: /home/node/app/datasetTypes.json
+    subPath: datasetTypes.json
 
 migrateCommand: "echo 'No migration command specified.'"
 opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"

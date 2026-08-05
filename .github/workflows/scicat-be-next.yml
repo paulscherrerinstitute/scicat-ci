@@ -68,6 +68,7 @@ jobs:
         MIGRATE_BROKEN_HISTORY=helm/configs/backend-next/migrate-broken-legacy-history.js
         OPENSEARCH_CONFIG=helm/configs/backend-next/opensearchConfig.json
         OPENSEARCH_SYNC_JS=helm/configs/backend-next/opensearch-sync.js
+        DATASET_TYPES=helm/configs/backend-next/datasetTypes.json
     secrets:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
       JSON_SECRETS: ${{ toJSON(secrets) }}
