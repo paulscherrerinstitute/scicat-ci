@@ -30,5 +30,5 @@ facilities:
     name: EMPA
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
   - <<: *openemFacility
-    name: LBEM
+    name: EPFL-LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
