@@ -2,14 +2,12 @@ name: ssh-tunnel
 description: "Open ssh tunnel"
 
 inputs:
-  bastion_user: 
+  bastion_user:
     description: username@host for the ssh tunnel
     required: true
-    type: string
-  bastion_ssh_key: 
+  bastion_ssh_key:
     description: private ssh key content
     required: true
-    type: string
 
 runs:
   using: "composite"
