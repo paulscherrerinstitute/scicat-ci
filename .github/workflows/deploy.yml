@@ -1,0 +1,151 @@
+name: deploy
+
+# Deploys every component that owns a helm/configs/<component>/helmfile.yaml.gotmpl.
+# That config holds the chart, the values, and the secrets the chart receives.
+#
+# Add the config and delete the component's own workflow in the same commit.
+# Otherwise both run helm upgrade on the same release.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy.yml
+      - helm/**
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy.yml
+      - helm/**
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+
+  set_env:
+    uses: ./.github/workflows/reusable.environment.yml
+
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.select.outputs.components }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A change here can change what every config renders.
+      - name: Get changed shared files
+        id: shared
+        if: github.event_name != 'release'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            helm/helmfile-common.yaml
+            .github/workflows/deploy.yml
+
+      # path makes dir_names report the component name alone.
+      - name: Get changed components
+        id: changed
+        if: github.event_name != 'release'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          path: helm/configs
+          dir_names: true
+          dir_names_max_depth: 1
+          matrix: true
+
+      - name: Select the components to deploy
+        id: select
+        run: |
+          set -euo pipefail
+
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            # A tag names its component, <component>-vX.Y.Z.
+            candidates=${TAG%-v*}
+          elif [ "$SHARED_CHANGED" = "true" ]; then
+            candidates=$(ls helm/configs)
+          else
+            candidates=$(jq -r '.[]' <<< "$CHANGED" | sort)
+          fi
+
+          # A component without a helmfile config deploys from its own workflow.
+          components=$(printf '%s\n' "$candidates" | while read -r name; do
+            if [ -f "helm/configs/$name/helmfile.yaml.gotmpl" ]; then echo "$name"; fi
+          done | jq -ncR '[inputs]')
+
+          echo "components=$components" >> "$GITHUB_OUTPUT"
+          echo "to deploy: $components"
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          SHARED_CHANGED: ${{ steps.shared.outputs.any_changed }}
+          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+  deploy:
+    needs:
+      - set_env
+      - discover
+    # An empty list in strategy is an error, not an empty run.
+    if: needs.discover.outputs.components != '[]'
+    name: deploy ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    # Every secret of this repository is scoped to an environment.
+    environment: ${{ needs.set_env.outputs.environment }}
+    strategy:
+      fail-fast: false
+      # Every deploy opens an ssh tunnel to the same bastion.
+      max-parallel: 6
+      matrix:
+        component: ${{ fromJSON(needs.discover.outputs.components) }}
+    concurrency:
+      group: deploy-${{ matrix.component }}-${{ needs.set_env.outputs.environment }}
+      cancel-in-progress: false
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Open ssh tunnel
+        uses: ./.github/actions/open-ssh-tunnel
+        with:
+          bastion_user: ${{ secrets.BASTION_USER }}
+          bastion_ssh_key: ${{ secrets.BASTION_SSH_KEY }}
+
+      - name: Write the kubeconfig
+        run: |
+          set -euo pipefail
+
+          umask 077
+          printf '%s' "$KUBECONFIG_FILE" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+        env:
+          KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
+
+      # A file, not --state-values-set. The command line is readable from /proc,
+      # and that flag splits a value on its commas.
+      - name: Write the secrets file
+        run: |
+          set -euo pipefail
+
+          umask 077
+          printf '{"secrets":%s}' "$SECRETS" > "$RUNNER_TEMP/state-values.yaml"
+        env:
+          SECRETS: ${{ toJSON(secrets) }}
+
+      # One sync per component, so a broken sibling cannot fail this one.
+      - name: Deploy
+        uses: helmfile/helmfile-action@1f44bcb43e5fb17ecb2685d8b6081ec5f6aa5fcf # v2.4.7
+        with:
+          helmfile-args: >-
+            --file helm/configs/${{ matrix.component }}/helmfile.yaml.gotmpl
+            --environment ${{ needs.set_env.outputs.environment }}
+            --state-values-file ${{ runner.temp }}/state-values.yaml
+            sync
+          helmfile-version: v1.7.1
+          helm-version: v4.2.2
