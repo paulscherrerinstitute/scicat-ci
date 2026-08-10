@@ -6,6 +6,3 @@ scicat:
 
 upload_bucket: psi-upload
 retrieve_bucket: psi-retrieve
-
-ingress:
-  enabled: false
