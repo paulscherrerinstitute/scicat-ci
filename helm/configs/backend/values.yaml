@@ -1,10 +1,10 @@
 replicaCount: 2
 
+# Nobody publishes this component. The tag is the source commit the hook builds.
 image:
-  repository: "{{ .Values.ciRepository }}"
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend
+  tag: 3cf3d27f35b3adabdb6ae375be20122705b944d6
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "{{ .Values.ciTag }}"
 
 run:
   command: 
@@ -61,7 +61,7 @@ ingresses:
     name: backend-login
     annotations:
       kubernetes.io/ingress.class: nginx
-      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
+      nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_CIDRS }}"
     hosts:
       - host: "{{ .Values.host }}"
         paths:
