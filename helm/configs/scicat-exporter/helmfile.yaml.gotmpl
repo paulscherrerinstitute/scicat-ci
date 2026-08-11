@@ -1,25 +1,11 @@
 bases:
   - ../../helmfile-common.yaml
-
-# The state reads the same values the chart does, so sourceRepo can pick the build
-# template. A release values file feeds the chart alone and never reaches the state.
-environments:
-  development:
-    values: [values.yaml, development/values.yaml]
-  qa:
-    values: [values.yaml, qa/values.yaml]
-  production:
-    values: [values.yaml, production/values.yaml]
 ---
 releases:
   - name: scicat-exporter
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
     version: 2.0.0
-    {{ if .Values.sourceRepo }}
-    inherit:
-      - template: build
-    {{ end }}
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
