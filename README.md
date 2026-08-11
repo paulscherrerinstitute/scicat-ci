@@ -87,7 +87,6 @@ Below are the existing components with their prefix, in the format `component: p
 
  - frontend: `fe`
  - backend: `be`
- - pan-ontologies-api: `po`
  - oaipmh: `oa`
  - landing-page-server: `lp`
 
