@@ -1,9 +1,38 @@
+# A component that builds from source overrides sourceRepo in its own state.
 environments:
   development:
+    values: [{sourceRepo: ""}]
   qa:
+    values: [{sourceRepo: ""}]
   production:
+    values: [{sourceRepo: ""}]
 
 helmDefaults:
   atomic: true
   wait: true
   createNamespace: true
+
+# A release whose image has no published tag inherits this template. The hook
+# builds that commit from sourceRepo and pushes it before helm pulls it.
+# A published image always wins, the build only covers what nobody published.
+#
+# The expressions below resolve when the hook runs, not when this file is read.
+templates:
+  build:
+    hooks:
+      - events: ["presync"]
+        showlogs: true
+        command: bash
+        args:
+          - -c
+          - |
+            set -euo pipefail
+            image="{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
+              echo "$image exists, skipping build"
+              exit 0
+            fi
+            docker buildx build --push --tag "$image" \
+              --label "org.opencontainers.image.revision={{ .Values.image.tag }}" \
+              --label "org.opencontainers.image.source={{ .Values.sourceRepo }}" \
+              "{{ .Values.sourceRepo }}.git#{{ .Values.image.tag }}"
