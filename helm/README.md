@@ -107,7 +107,17 @@ the ones its chart receives, one key per line.
 ```
 
 A secret that only one environment defines needs a guard, or the other environments
-stop on the missing key.
+stop on the missing key. Guard the line when the other keys stay.
+
+```gotmpl
+      - secretsJson:
+          BENEXT_ENV: {{ .Values.secrets.BENEXT_ENV | quote }}
+          {{- if eq .Environment.Name "development" }}
+          OPENEM_WHITELISTED_IPS: {{ .Values.secrets.OPENEM_WHITELISTED_IPS | quote }}
+          {{- end }}
+```
+
+Guard the whole entry when every key it holds is for one environment.
 
 ```gotmpl
       {{ if eq .Environment.Name "development" }}
@@ -116,7 +126,7 @@ stop on the missing key.
       {{ end }}
 ```
 
-Keep both forms below the `---`. Helmfile renders the whole `environments:` block
+Keep every form below the `---`. Helmfile renders the whole `environments:` block
 before it selects an environment, so a `.Values.secrets` read up there runs for every
 deploy and stops qa on a key only development defines.
 

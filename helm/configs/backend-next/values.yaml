@@ -1,9 +1,11 @@
 replicaCount: 2
 
+# Nobody publishes this commit, it is on the fast_pub branch. The tag is the source
+# commit the hook builds.
 image:
-  repository: "{{ .Values.ciRepository }}"
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
+  tag: 32365c67652d34632933a0c359e9fde973dbbb2c
   pullPolicy: Always
-  tag: "{{ .Values.ciTag }}"
 
 service:
   type: ClusterIP
@@ -119,7 +121,7 @@ opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"
 
 jobContainers:
   - name: migrate
-    image: "{{ .Values.ciRepository }}:{{ .Values.ciTag }}"
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     imagePullPolicy: Always
     command:
       - "/bin/sh"
