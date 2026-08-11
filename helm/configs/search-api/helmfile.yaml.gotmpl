@@ -1,6 +1,7 @@
 bases:
   - ../../helmfile-common.yaml
 
+# Only development builds. qa and production pull the image development pushed.
 environments:
   development:
     values:
@@ -9,11 +10,9 @@ environments:
   qa:
     values:
       - values.yaml
-      - sourceRepo: https://github.com/SciCatProject/panosc-search-api
   production:
     values:
       - values.yaml
-      - sourceRepo: https://github.com/SciCatProject/panosc-search-api
 ---
 releases:
   - name: search-api
