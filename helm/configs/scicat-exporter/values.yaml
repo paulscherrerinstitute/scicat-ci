@@ -1,5 +1,16 @@
 replicaCount: 1
 
+# An empty sourceRepo pulls a published image.
+# To deploy a commit nobody published, set all three fields.
+# sourceRepo is the git repository to build.
+# ciRepository must be ghcr.io/paulscherrerinstitute/scicat-ci/<release>, the only
+# path the deploy token can push to.
+# ciTag is the commit sha to build, and it becomes the image tag.
+# An environment folder can override the three fields to build for that environment.
+sourceRepo: ""
+ciRepository: ghcr.io/paulscherrerinstitute/scicat-rocrate
+ciTag: "2.6.0"
+
 image:
   repository: "{{ .Values.ciRepository }}"
   tag: "{{ .Values.ciTag }}"

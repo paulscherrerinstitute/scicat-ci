@@ -11,8 +11,8 @@ helmDefaults:
   wait: true
   createNamespace: true
 
-# Inherited by a release whose ciTag has no published image. The hook builds that
-# commit from sourceRepo and pushes it before helm pulls it.
+# A release whose ciTag has no published image inherits this template. The hook
+# builds that commit from sourceRepo and pushes it before helm pulls it.
 # A published image always wins, the build only covers what nobody published.
 #
 # The expressions below resolve when the hook runs, not when this file is read.

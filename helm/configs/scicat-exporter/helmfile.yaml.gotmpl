@@ -1,16 +1,15 @@
 bases:
   - ../../helmfile-common.yaml
 
-# source.yaml is read twice. Here the state reads it, to pick the build template.
-# Below the chart reads it, to pull the image. A release values file never reaches
-# the state, so both entries are needed.
+# The state reads the same values the chart does, so sourceRepo can pick the build
+# template. A release values file feeds the chart alone and never reaches the state.
 environments:
   development:
-    values: [source.yaml]
+    values: [values.yaml, development/values.yaml]
   qa:
-    values: [source.yaml]
+    values: [values.yaml, qa/values.yaml]
   production:
-    values: [source.yaml]
+    values: [values.yaml, production/values.yaml]
 ---
 releases:
   - name: scicat-exporter
@@ -23,7 +22,6 @@ releases:
     {{ end }}
     values:
       - values.yaml
-      - source.yaml
       - {{ .Environment.Name }}/values.yaml
       # The deploy passes every secret of the environment. This release reads one.
       {{ if hasKey .Values "secrets" }}
