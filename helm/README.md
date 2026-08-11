@@ -41,13 +41,16 @@ alone.
 
 ### Deploy a commit that nobody published
 
-Set the source repository and the image to build. Set only the environments that
-build, because the others keep the pinned image.
+Set the source repository, and point `image` in `values.yaml` at the commit to
+build. The state loads `values.yaml` as well, because the hook reads `image` from
+there. Set only the environments that build, because the others keep the pinned
+image.
 
 ```gotmpl
 environments:
   development:
     values:
+      - values.yaml
       - sourceRepo: https://github.com/SciCatProject/backend
 ---
 releases:
@@ -120,8 +123,8 @@ them. Put a value in the wrong one and it is silently ignored.
 | `values.yaml` and `<env>/values.yaml` | helm     | what the manifest says |
 
 A file under a release `values:` never reaches helmfile. A key under `environments:`
-never reaches helm. A value that both need must be written once and forwarded, which
-is what the image block in the recipe does.
+never reaches helm. A file that both need is listed twice, which is what the recipe
+above does with `values.yaml`.
 
 Chart values files are rendered by the chart, so `{{ .Values.host }}` works in them.
 Helmfile never templates them.
