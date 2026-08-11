@@ -1,14 +1,36 @@
 bases:
   - ../../helmfile-common.yaml
+
+environments:
+  development:
+    values: [source.yaml]
+  qa:
+    values: [source.yaml]
+  production:
+    values: [source.yaml]
 ---
+{{ $name := "scicat-exporter" }}
+{{ $source := .Values | get "source" dict }}
 releases:
-  - name: scicat-exporter
+  - name: {{ $name }}
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
     version: 2.0.0
+    # A source commit replaces the published image pinned in values.yaml.
+    {{ if $source.repo }}
+    inherit:
+      - template: build
+    {{ end }}
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
+      # Must name the image the build template pushes, which is keyed on the
+      # release name.
+      {{ if $source.repo }}
+      - image:
+          repository: ghcr.io/paulscherrerinstitute/scicat-ci/{{ $name }}
+          tag: {{ $source.ref | quote }}
+      {{ end }}
       # The deploy passes every secret of the environment. This release reads one.
       {{ if hasKey .Values "secrets" }}
       - secretsJson:

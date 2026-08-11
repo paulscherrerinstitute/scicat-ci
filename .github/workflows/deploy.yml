@@ -96,6 +96,10 @@ jobs:
     runs-on: ubuntu-latest
     # Every secret of this repository is scoped to an environment.
     environment: ${{ needs.set_env.outputs.environment }}
+    permissions:
+      contents: read
+      # A state that names a source commit pushes the image it builds.
+      packages: write
     strategy:
       fail-fast: false
       # Every deploy opens an ssh tunnel to the same bastion.
@@ -126,3 +130,4 @@ jobs:
           environment: "${{ needs.set_env.outputs.environment }}"
           kubeconfig: "${{ secrets.KUBECONFIG }}"
           secrets: ${{ toJSON(secrets) }}
+          registry_token: "${{ secrets.GITHUB_TOKEN }}"
