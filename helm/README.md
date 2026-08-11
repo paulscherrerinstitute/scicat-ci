@@ -49,9 +49,6 @@ environments:
   development:
     values:
       - sourceRepo: https://github.com/SciCatProject/backend
-        image:
-          repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
-          tag: "75e46d24ed272a30dcc9c09705f0c1f10a04958b"
 ---
 releases:
   - name: backend-next
@@ -63,9 +60,6 @@ releases:
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
-      {{ if .Values.sourceRepo }}
-      - image: {{ .Values.image | toYaml | nindent 10 }}
-      {{ end }}
 ```
 
 Four rules that nothing enforces. Read them before you set `sourceRepo`.
@@ -89,15 +83,15 @@ Four rules that nothing enforces. Read them before you set `sourceRepo`.
 
 ## What a config can set
 
-| Field | Behaviour |
-| --- | --- |
-| `name` | the helm release name, must match the folder name |
-| `namespace` | always `scicat-{{ .Environment.Name }}` |
-| `chart` and `version` | the OCI chart to pull |
-| `values:` | chart values files and inline maps, the last entry wins |
-| `set: [{name, file}]` | becomes `--set-file`, paths resolve next to the config |
-| `inherit: [{template: build}]` | adds the build hook |
-| `sourceRepo` | starts the build, see the recipe above |
+| Field                          | Behaviour                                               |
+| ------------------------------ | ------------------------------------------------------- |
+| `name`                         | the helm release name, must match the folder name       |
+| `namespace`                    | always `scicat-{{ .Environment.Name }}`                 |
+| `chart` and `version`          | the OCI chart to pull                                   |
+| `values:`                      | chart values files and inline maps, the last entry wins |
+| `set: [{name, file}]`          | becomes `--set-file`, paths resolve next to the config  |
+| `inherit: [{template: build}]` | adds the build hook                                     |
+| `sourceRepo`                   | starts the build, see the recipe above                  |
 
 ### Secrets
 
@@ -120,10 +114,10 @@ anywhere else, such as an ingress annotation, is plain text.
 Helmfile and helm read different files, and only a command line crosses between
 them. Put a value in the wrong one and it is silently ignored.
 
-| File | Read by | Holds |
-| --- | --- | --- |
-| the `environments:` block | helmfile | what to run |
-| `values.yaml` and `<env>/values.yaml` | helm | what the manifest says |
+| File                                  | Read by  | Holds                  |
+| ------------------------------------- | -------- | ---------------------- |
+| the `environments:` block             | helmfile | what to run            |
+| `values.yaml` and `<env>/values.yaml` | helm     | what the manifest says |
 
 A file under a release `values:` never reaches helmfile. A key under `environments:`
 never reaches helm. A value that both need must be written once and forwarded, which
