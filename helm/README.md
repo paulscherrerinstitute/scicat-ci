@@ -135,7 +135,7 @@ Helmfile never templates them.
 3. If ghcr does not have it, the hook builds `<sourceRepo>.git#<image.tag>` and
    pushes it.
 
-The hook runs on every sync, so step 1 is what stops a rebuild each time. A non-zero
+The hook runs on every sync so it would stops a rebuild each time. A non-zero
 exit stops the release before helm starts, so a failed build leaves the running
 release unchanged. The hook runs on `sync` and `apply` only, so a render builds
 nothing and needs no network.
