@@ -2,4 +2,4 @@ host: discovery.development.psi.ch
 
 ingress:
   annotations: 
-    b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_IPS }}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_CIDRS }}"

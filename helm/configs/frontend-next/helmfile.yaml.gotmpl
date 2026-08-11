@@ -1,0 +1,31 @@
+bases:
+  - ../../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+# frontend builds the same repository at another commit, into another image.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/SciCatProject/frontend
+---
+releases:
+  - name: frontend-next
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      {{ if eq .Environment.Name "development" }}
+      - secretsJson:
+          OPENEM_WHITELISTED_CIDRS: {{ .Values.secrets.OPENEM_WHITELISTED_CIDRS | quote }}
+      {{ end }}
+    set:
+      - name: KEYCLOAK_ICON
+        file: keycloak_icon_256px.svg
+      - name: ENVIRONMENT
+        file: {{ .Environment.Name }}/config.json

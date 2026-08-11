@@ -1,10 +1,10 @@
 replicaCount: 1
 
+# Nobody publishes this component. The tag is the source commit the hook builds.
 image:
-  repository: "{{ .Values.ciRepository }}"
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/frontend-next
+  tag: 65c2a3ca5a04206d0a4ef4cbecb0ed88f5a2d338
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "{{ .Values.ciTag }}"
 
 service:
   type: ClusterIP
