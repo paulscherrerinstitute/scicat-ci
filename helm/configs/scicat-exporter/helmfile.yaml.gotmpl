@@ -1,6 +1,9 @@
 bases:
   - ../../helmfile-common.yaml
 
+# source.yaml is read twice. Here the state reads it, to pick the build template.
+# Below the chart reads it, to pull the image. A release values file never reaches
+# the state, so both entries are needed.
 environments:
   development:
     values: [source.yaml]
@@ -9,28 +12,19 @@ environments:
   production:
     values: [source.yaml]
 ---
-{{ $name := "scicat-exporter" }}
-{{ $source := .Values | get "source" dict }}
 releases:
-  - name: {{ $name }}
+  - name: scicat-exporter
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
     version: 2.0.0
-    # A source commit replaces the published image pinned in values.yaml.
-    {{ if $source.repo }}
+    {{ if .Values.sourceRepo }}
     inherit:
       - template: build
     {{ end }}
     values:
       - values.yaml
+      - source.yaml
       - {{ .Environment.Name }}/values.yaml
-      # Must name the image the build template pushes, which is keyed on the
-      # release name.
-      {{ if $source.repo }}
-      - image:
-          repository: ghcr.io/paulscherrerinstitute/scicat-ci/{{ $name }}
-          tag: {{ $source.ref | quote }}
-      {{ end }}
       # The deploy passes every secret of the environment. This release reads one.
       {{ if hasKey .Values "secrets" }}
       - secretsJson:

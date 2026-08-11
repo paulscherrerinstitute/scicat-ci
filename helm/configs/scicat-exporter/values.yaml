@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
-  tag: 2.6.0
+  repository: "{{ .Values.ciRepository }}"
+  tag: "{{ .Values.ciTag }}"
   pullPolicy: Always
 
 service:

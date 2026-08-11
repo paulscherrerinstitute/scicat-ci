@@ -1,18 +1,18 @@
 environments:
   development:
-    values: [{source: {repo: "", ref: ""}}]
+    values: [{sourceRepo: "", ciRepository: "", ciTag: ""}]
   qa:
-    values: [{source: {repo: "", ref: ""}}]
+    values: [{sourceRepo: "", ciRepository: "", ciTag: ""}]
   production:
-    values: [{source: {repo: "", ref: ""}}]
+    values: [{sourceRepo: "", ciRepository: "", ciTag: ""}]
 
 helmDefaults:
   atomic: true
   wait: true
   createNamespace: true
 
-# Inherited by a release whose source commit has no published image. The hook builds
-# that commit from git and pushes it before helm pulls it.
+# Inherited by a release whose ciTag has no published image. The hook builds that
+# commit from sourceRepo and pushes it before helm pulls it.
 # A published image always wins, the build only covers what nobody published.
 #
 # The expressions below resolve when the hook runs, not when this file is read.
@@ -26,12 +26,12 @@ templates:
           - -c
           - |
             set -euo pipefail
-            image="ghcr.io/paulscherrerinstitute/scicat-ci/{{ .Release.Name }}:{{ .Values.source.ref }}"
+            image="{{ .Values.ciRepository }}:{{ .Values.ciTag }}"
             if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
               echo "$image exists, skipping build"
               exit 0
             fi
             docker buildx build --push --tag "$image" \
-              --label "org.opencontainers.image.revision={{ .Values.source.ref }}" \
-              --label "org.opencontainers.image.source={{ .Values.source.repo }}" \
-              "{{ .Values.source.repo }}.git#{{ .Values.source.ref }}"
+              --label "org.opencontainers.image.revision={{ .Values.ciTag }}" \
+              --label "org.opencontainers.image.source={{ .Values.sourceRepo }}" \
+              "{{ .Values.sourceRepo }}.git#{{ .Values.ciTag }}"

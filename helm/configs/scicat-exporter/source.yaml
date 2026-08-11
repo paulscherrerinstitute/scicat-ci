@@ -1,6 +1,9 @@
-# Empty means deploy the image pinned in values.yaml.
-# Set both to build a ref that has no published image. Use a commit sha or a tag,
-# because the ref becomes the image tag and a branch name would never rebuild.
-source:
-  repo: ""
-  ref: ""
+# The image this release pulls.
+#
+# An empty sourceRepo pulls a published image. To deploy a commit nobody published,
+# the three fields move together: sourceRepo names the git repository to build,
+# ciRepository becomes ghcr.io/paulscherrerinstitute/scicat-ci/<release>, the only
+# path the deploy token can push to, and ciTag becomes the commit sha to build.
+sourceRepo: ""
+ciRepository: ghcr.io/paulscherrerinstitute/scicat-rocrate
+ciTag: "2.6.0"
