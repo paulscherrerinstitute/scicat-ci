@@ -1,0 +1,27 @@
+bases:
+  - ../../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - values.yaml
+      - sourceRepo: https://github.com/SciCatProject/panosc-search-api
+---
+releases:
+  - name: search-api
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+    set:
+      - name: CONFIG
+        file: config.json
+      - name: COMPONENT_CONFIG
+        file: component-config.json
