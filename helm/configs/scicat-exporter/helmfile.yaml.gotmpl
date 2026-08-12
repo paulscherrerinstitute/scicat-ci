@@ -9,8 +9,8 @@ releases:
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
-      # The deploy passes every secret of the environment. This release reads one.
-      {{ if hasKey .Values "secrets" }}
+      # Only development restricts the exporter by source range.
+      {{ if eq .Environment.Name "development" }}
       - secretsJson:
           EXPORTER_WHITELIST_CIDRS: {{ .Values.secrets.EXPORTER_WHITELIST_CIDRS | quote }}
       {{ end }}
