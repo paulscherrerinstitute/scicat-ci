@@ -98,15 +98,31 @@ Four rules that nothing enforces. Read them before you set `sourceRepo`.
 
 ### Secrets
 
-`deploy.yml` passes every secret of the environment to the state. A release lists
-the secrets its chart receives.
+`deploy.yml` passes every secret of the environment to the state. A release names
+the ones its chart receives, one key per line.
 
 ```gotmpl
-      {{ if hasKey .Values "secrets" }}
+      - secretsJson:
+          COMPONENT_CONFIG: {{ .Values.secrets.COMPONENT_CONFIG | quote }}
+          DATASOURCES: {{ .Values.secrets.DATASOURCES | quote }}
+```
+
+A secret that only one environment defines needs a guard, or the other environments
+stop on the missing key.
+
+```gotmpl
+      {{ if eq .Environment.Name "development" }}
       - secretsJson:
           EXPORTER_WHITELIST_CIDRS: {{ .Values.secrets.EXPORTER_WHITELIST_CIDRS | quote }}
       {{ end }}
 ```
+
+Keep both forms below the `---`. Helmfile renders the whole `environments:` block
+before it selects an environment, so a `.Values.secrets` read up there runs for every
+deploy and stops qa on a key only development defines.
+
+A missing key always stops the render. That is the wanted behaviour, an empty
+whitelist annotation opens the ingress.
 
 The encoding depends on where the value lands. A value in the chart's `secrets:`
 block must be base64, and the chart stops the render if it is not. A value used
