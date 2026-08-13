@@ -17,6 +17,7 @@ facilities:
   - <<: *openemFacility
     name: UNIBAS
     collection: d35e9477-400d-4069-b571-d678847373f1
+    sourcePath: "/collection_test/{{ .RelativeSourceFolder }}"
   - <<: *openemFacility
     name: UNIGE
     collection: d22fab58-5f80-47f1-a9a0-da36478ca41e
