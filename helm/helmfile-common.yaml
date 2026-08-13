@@ -17,6 +17,10 @@ helmDefaults:
 # A published image always wins, the build only covers what nobody published.
 #
 # The expressions below resolve when the hook runs, not when this file is read.
+#
+# The hook reads the same two values files the release does, in the same order, so
+# a state does not have to load them a second time under `environments:`. A path is
+# relative to the state file, and a missing one stops the render.
 templates:
   build:
     hooks:
@@ -27,12 +31,15 @@ templates:
           - -c
           - |
             set -euo pipefail
-            image="{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            {{- $base := readFile "values.yaml" | fromYaml }}
+            {{- $overlay := readFile (printf "%s/values.yaml" .Environment.Name) | fromYaml }}
+            {{- $values := mergeOverwrite $base $overlay }}
+            image="{{ $values.image.repository }}:{{ $values.image.tag }}"
             if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
               echo "$image exists, skipping build"
               exit 0
             fi
             docker buildx build --push --tag "$image" \
-              --label "org.opencontainers.image.revision={{ .Values.image.tag }}" \
+              --label "org.opencontainers.image.revision={{ $values.image.tag }}" \
               --label "org.opencontainers.image.source={{ .Values.sourceRepo }}" \
-              "{{ .Values.sourceRepo }}.git#{{ .Values.image.tag }}"
+              "{{ .Values.sourceRepo }}.git#{{ $values.image.tag }}"

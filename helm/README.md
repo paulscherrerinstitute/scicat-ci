@@ -42,15 +42,14 @@ alone.
 ### Deploy a commit that nobody published
 
 Set the source repository, and point `image` in `values.yaml` at the commit to
-build. The state loads `values.yaml` as well, because the hook reads `image` from
-there. Set only the environments that build, because the others keep the pinned
-image.
+build. The hook reads `image` out of the same values files the release lists, so the
+state names the source repository alone. Set only the environments that build,
+because the others keep the pinned image.
 
 ```gotmpl
 environments:
   development:
     values:
-      - values.yaml
       - sourceRepo: https://github.com/SciCatProject/backend
 ---
 releases:
