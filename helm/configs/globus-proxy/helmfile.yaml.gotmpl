@@ -1,0 +1,19 @@
+bases:
+  - ../../helmfile-common.yaml
+---
+releases:
+  - name: globus-proxy
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 1.0.0
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          GLOBUS_PROXY_ENV: {{ .Values.secrets.GLOBUS_PROXY_ENV | quote }}
+          {{- if eq .Environment.Name "development" }}
+          OPENEM_WHITELISTED_IPS: {{ .Values.secrets.OPENEM_WHITELISTED_IPS | quote }}
+          {{- end }}
+    set:
+      - name: CONFIG
+        file: {{ .Environment.Name }}/config.yaml
