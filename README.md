@@ -85,7 +85,6 @@ The deployment on `production` is managed by using a naming convention on tags n
 
 Below are the existing components with their prefix, in the format `component: prefix`:
 
- - frontend: `fe`
  - backend: `be`
  - pan-ontologies-api: `po`
  - landing-page-server: `lp`
