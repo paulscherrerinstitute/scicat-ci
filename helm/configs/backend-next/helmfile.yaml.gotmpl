@@ -11,7 +11,7 @@ releases:
   - name: backend-next
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
-    version: 1.0.0
+    version: 2.0.0
     {{ if .Values.sourceRepo }}
     inherit:
       - template: build
