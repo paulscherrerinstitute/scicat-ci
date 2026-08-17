@@ -1,0 +1,21 @@
+bases:
+  - ../../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/SciCatProject/oai-provider-service
+---
+releases:
+  - name: oaipmh
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
