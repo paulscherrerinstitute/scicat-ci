@@ -107,8 +107,8 @@ jobs:
       matrix:
         component: ${{ fromJSON(needs.discover.outputs.components) }}
     concurrency:
-      group: deploy-${{ matrix.component }}-${{ needs.set_env.outputs.environment }}
-      cancel-in-progress: false
+      group: deploy-${{ matrix.component }}-${{ needs.set_env.outputs.environment }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
 
     steps:
 
