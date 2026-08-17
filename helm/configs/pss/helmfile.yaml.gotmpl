@@ -1,0 +1,15 @@
+bases:
+  - ../../helmfile-common.yaml
+---
+releases:
+  - name: pss
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 1.0.0
+    values:
+      - values.yaml
+      - secretsJson:
+          PSS_MONGODB_URL: {{ .Values.secrets.PSS_MONGODB_URL | quote }}
+    set:
+      - name: db
+        value: pss-{{ .Environment.Name }}
