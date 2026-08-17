@@ -9,4 +9,4 @@ retrieve_bucket: psi-retrieve-dev
 
 ingress:
   annotations:
-    b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_IPS }}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.EXPORTER_WHITELIST_CIDRS }}"
