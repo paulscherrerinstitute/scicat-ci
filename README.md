@@ -88,7 +88,6 @@ Below are the existing components with their prefix, in the format `component: p
  - frontend: `fe`
  - backend: `be`
  - pan-ontologies-api: `po`
- - oaipmh: `oa`
 
 A component deployed by `deploy.yml` has no prefix. Its release tag is
 `<component>-vX.Y.Z`, see [helm/README.md](helm/README.md).
