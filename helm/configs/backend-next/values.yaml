@@ -62,7 +62,7 @@ ingresses:
     name: backend-next-login
     annotations:
       kubernetes.io/ingress.class: nginx
-      b64/nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_IPS }}"
+      nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.WHITELISTED_CIDRS }}"
     hosts:
       - host: "{{ .Values.host }}"
         paths:
