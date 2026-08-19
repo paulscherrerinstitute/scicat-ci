@@ -4,7 +4,8 @@ replicaCount: 2
 # commit the hook builds.
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
-  tag: 32365c67652d34632933a0c359e9fde973dbbb2c
+  # latest [psi_local](https://github.com/SciCatProject/backend/commits/psi_local/) branch
+  tag: 032220c053977505df14a3b563a6fe1194b67bb6
   pullPolicy: Always
 
 service:
