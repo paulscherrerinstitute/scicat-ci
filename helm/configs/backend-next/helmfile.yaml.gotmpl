@@ -11,7 +11,7 @@ releases:
   - name: backend-next
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
-    version: 1.0.0
+    version: 2.0.0
     {{ if .Values.sourceRepo }}
     inherit:
       - template: build
@@ -22,10 +22,10 @@ releases:
       - secretsJson:
           BENEXT_ENV: {{ .Values.secrets.BENEXT_ENV | quote }}
           BENEXT_FUNCTIONAL_ACCOUNTS: {{ .Values.secrets.BENEXT_FUNCTIONAL_ACCOUNTS | quote }}
-          WHITELISTED_IPS: {{ .Values.secrets.WHITELISTED_IPS | quote }}
+          WHITELISTED_CIDRS: {{ .Values.secrets.WHITELISTED_CIDRS | quote }}
           # Only development restricts the OpenEM route by source range.
           {{- if eq .Environment.Name "development" }}
-          OPENEM_WHITELISTED_IPS: {{ .Values.secrets.OPENEM_WHITELISTED_IPS | quote }}
+          OPENEM_WHITELISTED_CIDRS: {{ .Values.secrets.OPENEM_WHITELISTED_CIDRS | quote }}
           {{- end }}
     set:
       - name: JOB_TEMPLATE
