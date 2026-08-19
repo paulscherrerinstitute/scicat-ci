@@ -1,0 +1,50 @@
+name: proposals-test
+
+# lint.yml renders the helm state. This covers the python source the hook builds.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/proposals-test.yml
+      - proposals/**
+
+permissions:
+  contents: read
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: proposals
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build
+        run: |
+          cp docker-compose.dev.yml docker-compose.yml
+          docker compose up -d --build
+
+      - name: Test
+        run: docker compose exec -T app pytest
+
+      - name: Black
+        run: docker compose exec -T app black --check --diff --no-color ./src
+
+      - name: Isort
+        run: docker compose exec -T app isort --check --diff ./src
+
+      - name: Pylint
+        run: docker compose exec -T app pylint ./src
+        continue-on-error: true
+
+      - name: Build prod
+        run: docker build -t prod .
+
+      - name: Cleanup
+        if: ${{ always() }}
+        run: docker compose down

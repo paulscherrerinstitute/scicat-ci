@@ -1,6 +1,6 @@
 image:
-  repository: "{{ .Values.ciRepository }}"
-  tag: "{{ .Values.ciTag }}"
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/proposals
+  tag: 5d24d1350945d0630691a59eebd841d93f5c56ce
 
 env:
   - name: SCICAT_ENDPOINT
