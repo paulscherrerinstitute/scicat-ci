@@ -1,0 +1,22 @@
+bases:
+  - ../../helmfile-common.yaml
+---
+releases:
+  # Legacy, development is the only environment it ever ran in.
+  - name: ingestor
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    installed: {{ eq .Environment.Name "development" }}
+    values:
+      - values.yaml
+      {{ if eq .Environment.Name "development" }}
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          OPENEM_WHITELISTED_CIDRS: {{ .Values.secrets.OPENEM_WHITELISTED_CIDRS | quote }}
+      {{ end }}
+    {{ if eq .Environment.Name "development" }}
+    set:
+      - name: CONFIG
+        file: {{ .Environment.Name }}/config.yaml
+    {{ end }}
