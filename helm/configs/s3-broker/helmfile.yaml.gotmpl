@@ -5,7 +5,7 @@ releases:
   - name: s3-broker
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
-    version: 1.0.0
+    version: 2.0.0
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
@@ -13,7 +13,7 @@ releases:
           JOB_MANAGER_PASSWORD: {{ .Values.secrets.JOB_MANAGER_PASSWORD | quote }}
           S3_BROKER_CREDENTIALS: {{ .Values.secrets.S3_BROKER_CREDENTIALS | quote }}
           {{- if eq .Environment.Name "development" }}
-          EXPORTER_WHITELIST_IPS: {{ .Values.secrets.EXPORTER_WHITELIST_IPS | quote }}
+          EXPORTER_WHITELIST_CIDRS: {{ .Values.secrets.EXPORTER_WHITELIST_CIDRS | quote }}
           {{- end }}
     set:
       - name: AWS_CONFIG
