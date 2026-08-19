@@ -4,9 +4,6 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/SciCatProject/frontend.git
-[submodule "oaipmh"]
-	path = oaipmh
-	url = https://github.com/SciCatProject/oai-provider-service.git
 [submodule "landing-page-server"]
 	path = landing-page-server
 	url = https://github.com/SciCatProject/LandingPageServer.git
