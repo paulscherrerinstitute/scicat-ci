@@ -85,10 +85,7 @@ The deployment on `production` is managed by using a naming convention on tags n
 
 Below are the existing components with their prefix, in the format `component: prefix`:
 
- - frontend: `fe`
  - backend: `be`
- - oaipmh: `oa`
- - landing-page-server: `lp`
 
 A component deployed by `deploy.yml` has no prefix. Its release tag is
 `<component>-vX.Y.Z`, see [helm/README.md](helm/README.md).
