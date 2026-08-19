@@ -1,0 +1,20 @@
+bases:
+  - ../../helmfile-common.yaml
+---
+releases:
+  # Legacy, qa never ran this component.
+  - name: materialised-view
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/cron
+    version: 1.0.0
+    installed: {{ ne .Environment.Name "qa" }}
+    values:
+      - values.yaml
+      {{ if ne .Environment.Name "qa" }}
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          MV_MONGO_URI: {{ .Values.secrets.MV_MONGO_URI | quote }}
+      {{ end }}
+    set:
+      - name: MATERIALISE
+        file: updateMatViews.js

@@ -4,9 +4,3 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/SciCatProject/frontend.git
-[submodule "pan-ontologies-api"]
-	path = pan-ontologies-api
-	url = https://github.com/ExPaNDS-eu/pan-ontologies-api.git
-[submodule "oaipmh"]
-	path = oaipmh
-	url = https://github.com/SciCatProject/oai-provider-service.git
