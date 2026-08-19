@@ -94,6 +94,23 @@ Four rules that nothing enforces. Read them before you set `sourceRepo`.
 | `set: [{name, file}]`          | becomes `--set-file`, paths resolve next to the config  |
 | `inherit: [{template: build}]` | adds the build hook                                     |
 | `sourceRepo`                   | starts the build, see the recipe above                  |
+| `installed`                    | whether the release belongs in this environment         |
+
+### Environments
+
+`deploy.yml` runs a component on all three environments. Name the ones it belongs in.
+
+```gotmpl
+    installed: {{ eq .Environment.Name "development" }}
+```
+
+**This uninstalls, it does not skip.** A release marked `installed: false` that exists
+on the cluster is removed on the next sync. Use it for a retired component, not to
+pause a deploy.
+
+Guard the environment values file and the `set:` block the same way when the other
+environments have no config to read. A guarded environment renders empty, so
+`lint.yml` stops checking its configs.
 
 ### Secrets
 
