@@ -4,6 +4,3 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/SciCatProject/frontend.git
-[submodule "landing-page-server"]
-	path = landing-page-server
-	url = https://github.com/SciCatProject/LandingPageServer.git
