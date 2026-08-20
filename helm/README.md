@@ -64,15 +64,27 @@ releases:
       - {{ .Environment.Name }}/values.yaml
 ```
 
-Four rules that nothing enforces. Read them before you set `sourceRepo`.
+Five rules that nothing enforces. Read them before you set `sourceRepo`.
 
 - **`image.tag` must be a commit sha.** With a branch name, ghcr always has the
   image, so the hook never rebuilds. The deploy then keeps an old image and still
   reports success.
 - **`image.repository` must start with `ghcr.io/paulscherrerinstitute/scicat-ci/`.**
   The deploy token writes only packages that this repository owns.
-- **The source repository needs a Dockerfile at its root.** buildx uses the
-  repository root as the build context.
+- **The source repository needs a Dockerfile at the context root.** That is the
+  repository root, or `sourceDir` when the state sets it. Add `sourceDir` next to
+  `sourceRepo` when the Dockerfile sits in a folder, including a folder of this
+  repository.
+  ```gotmpl
+      - sourceRepo: https://github.com/paulscherrerinstitute/scicat-ci
+        sourceDir: proposals
+  ```
+  `sourceDir` is a path from the repository root, separated by `/`. It goes as deep
+  as you need, `services/sync/docker` is valid, and the case must match. It becomes
+  the build context, so the Dockerfile sits at the bottom of that path and reads
+  nothing above it.
+- **The source repository must be public.** The hook passes no git credential, so
+  buildx cannot fetch a private repository.
 - A helm rollback does not delete a pushed image.
 
 ### Move a component onto deploy.yml
@@ -93,7 +105,8 @@ Four rules that nothing enforces. Read them before you set `sourceRepo`.
 | `values:`                      | chart values files and inline maps, the last entry wins |
 | `set: [{name, file}]`          | becomes `--set-file`, paths resolve next to the config  |
 | `inherit: [{template: build}]` | adds the build hook                                     |
-| `sourceRepo`                   | starts the build, see the recipe above                  |
+| `sourceRepo`                   | the repository to build, see the recipe above           |
+| `sourceDir`                    | the folder to build, `sourceRepo` root when unset       |
 
 ### Secrets
 
@@ -160,8 +173,8 @@ Helmfile never templates them.
 
 1. It asks ghcr for `<image.repository>:<image.tag>`.
 2. If ghcr has the image, it prints a message and stops. Nothing is built.
-3. If ghcr does not have it, the hook builds `<sourceRepo>.git#<image.tag>` and
-   pushes it.
+3. If ghcr does not have it, the hook builds `<sourceRepo>.git#<image.tag>`, with
+   `:<sourceDir>` appended when the state sets one, and pushes it.
 
 The hook runs on every sync so it would stops a rebuild each time. A non-zero
 exit stops the release before helm starts, so a failed build leaves the running

@@ -1,11 +1,12 @@
-# A component that builds from source overrides sourceRepo in its own state.
+# A component that builds from source names its repository in sourceRepo, and the
+# folder holding the Dockerfile in sourceDir when it is not the repository root.
 environments:
   development:
-    values: [{sourceRepo: ""}]
+    values: [{sourceRepo: "", sourceDir: ""}]
   qa:
-    values: [{sourceRepo: ""}]
+    values: [{sourceRepo: "", sourceDir: ""}]
   production:
-    values: [{sourceRepo: ""}]
+    values: [{sourceRepo: "", sourceDir: ""}]
 
 helmDefaults:
   atomic: true
@@ -42,4 +43,4 @@ templates:
             docker buildx build --push --tag "$image" \
               --label "org.opencontainers.image.revision={{ $values.image.tag }}" \
               --label "org.opencontainers.image.source={{ .Values.sourceRepo }}" \
-              "{{ .Values.sourceRepo }}.git#{{ $values.image.tag }}"
+              "{{ .Values.sourceRepo }}.git#{{ $values.image.tag }}{{ if .Values.sourceDir }}:{{ .Values.sourceDir }}{{ end }}"
