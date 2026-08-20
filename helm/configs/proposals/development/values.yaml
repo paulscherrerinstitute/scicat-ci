@@ -11,11 +11,3 @@ duo_facilities:
    schedule: 30 3 * * 3
  - name: sinq
    schedule: 0 4 * * 3
-
-# the following 3 variables are for template rendering
-# they are not used in the development environment
-secretsJson:
-  PROPOSAL_ENV: YWJjCg==
-
-ciRepository: busybox
-ciTag: latest
