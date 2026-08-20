@@ -10,10 +10,12 @@ environments:
       - sourceRepo: https://github.com/SciCatProject/frontend
 ---
 releases:
+  # Legacy, frontend-next replaced it on qa and production.
   - name: frontend
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
     version: 2.0.0
+    installed: {{ eq .Environment.Name "development" }}
     {{ if .Values.sourceRepo }}
     inherit:
       - template: build
