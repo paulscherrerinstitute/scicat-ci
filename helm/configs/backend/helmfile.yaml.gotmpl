@@ -1,0 +1,44 @@
+bases:
+  - ../../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/SciCatProject/backend-v3
+---
+releases:
+  # Legacy, backend-next replaced it on qa and production.
+  - name: backend
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    installed: {{ eq .Environment.Name "development" }}
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          COMPONENT_CONFIG: {{ .Values.secrets.COMPONENT_CONFIG | quote }}
+          DATASOURCES: {{ .Values.secrets.DATASOURCES | quote }}
+          EXPRESS_SESSION_SECRET: {{ .Values.secrets.EXPRESS_SESSION_SECRET | quote }}
+          FUNCTIONAL_ACCOUNTS: {{ .Values.secrets.FUNCTIONAL_ACCOUNTS | quote }}
+          MAIL_AUTH: {{ .Values.secrets.MAIL_AUTH | quote }}
+          PROVIDERS: {{ .Values.secrets.PROVIDERS | quote }}
+          WHITELISTED_CIDRS: {{ .Values.secrets.WHITELISTED_CIDRS | quote }}
+    set:
+      - name: CONFIG_LOCAL
+        file: config.local.js
+      - name: LOGIN_CALLBACKS
+        file: login-callbacks.js
+      - name: MIDDLEWARE
+        file: {{ .Environment.Name }}/middleware.json
+      - name: EMAIL_TEMPLATE
+        file: job-template.html
+      - name: HIDE_EMAIL
+        file: hideEmail.js
+      - name: AUTHORIZED_JOBS
+        file: authorizedJobs.js

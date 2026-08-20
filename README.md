@@ -83,10 +83,6 @@ Once the merge request CI is successful, the user can merge on the `main` branch
 
 The deployment on `production` is managed by using a naming convention on tags names on release. Whenever the user creates a new release, the CI checks the prefix of the tag and, independently of the changes, deploys the corresponding component on `production`, i.e. on the `qaprod` cluster, using the `scicat-production` namespace. 
 
-Below are the existing components with their prefix, in the format `component: prefix`:
-
- - backend: `be`
-
 A component deployed by `deploy.yml` has no prefix. Its release tag is
 `<component>-vX.Y.Z`, see [helm/README.md](helm/README.md).
 
