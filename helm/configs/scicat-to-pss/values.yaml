@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: "{{ .Values.ciRepository }}"
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/scicat-to-pss
   pullPolicy: Always
-  tag: "{{ .Values.ciTag }}"
+  tag: 5d24d1350945d0630691a59eebd841d93f5c56ce
 
 env:
   - name: SCICAT_BASE_URL

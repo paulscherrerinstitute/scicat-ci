@@ -1,0 +1,24 @@
+bases:
+  - ../../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/paulscherrerinstitute/scicat-ci
+        sourceDir: proposals
+---
+releases:
+  - name: proposals
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/proposals-cronjob
+    version: 0.1.1
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          PROPOSAL_ENV: {{ .Values.secrets.PROPOSAL_ENV | quote }}

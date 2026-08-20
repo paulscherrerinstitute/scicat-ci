@@ -103,7 +103,7 @@ jobs:
     strategy:
       fail-fast: false
       # Every deploy opens an ssh tunnel to the same bastion.
-      max-parallel: 6
+      max-parallel: 3
       matrix:
         component: ${{ fromJSON(needs.discover.outputs.components) }}
     concurrency:
