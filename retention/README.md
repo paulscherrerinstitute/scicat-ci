@@ -21,9 +21,11 @@
    every `markedForDeletion` job whose `datasetList` isn't empty and whose
    `lastVerifiedAt` is at least one retention step old — those conditions
    are `where` clauses in the query itself, not a check done after
-   fetching. The query is paginated 100 jobs at a time (`limits.skip`/
-   `limits.limit`), walking pages until an empty one comes back, with a
-   safety cap on the number of pages fetched in one run. For each job
+   fetching, and only the fields this service actually reads (`id`,
+   `datasetList`, `jobResultObject`, `creationTime`) are requested. The
+   query is paginated 100 jobs at a time (`limits.skip`/`limits.limit`),
+   walking pages until an empty one comes back, with a safety cap on the
+   number of pages fetched in one run. For each job
    returned, it records the check-in as `jobResultObject.lastVerifiedAt`
    (the only kind of field the v3 API lets be patched after creation,
    alongside `jobStatusMessage`). If the job's full `retentionTime` grace
