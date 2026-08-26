@@ -160,6 +160,7 @@ class MarkedForDeletionJobsRepository:
             "where": {
                 "type": JOB_TYPE,
                 "jobStatusMessage": {"neq": STATUS_RETENTION_EXPIRED},
+                "datasetList": {"neq": []},
                 f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
                     "lte": (now - _RETENTION_STEP_DELTA).isoformat()
                 },

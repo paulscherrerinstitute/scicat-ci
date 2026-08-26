@@ -179,6 +179,7 @@ class TestMarkedForDeletionJobsRepository:
             "where": {
                 "type": "markedForDeletion",
                 "jobStatusMessage": {"neq": "retentionExpired"},
+                "datasetList": {"neq": []},
                 "jobResultObject.lastVerifiedAt": {
                     "lte": (now - relativedelta(months=1)).isoformat()
                 },
