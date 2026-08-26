@@ -40,6 +40,11 @@ check against `creationTime + retentionTime` on every check-in.
   `delete` for its remaining datasets — with one final safety check that
   filters out any dataset whose status isn't `markedForDeletion` — instead
   of just flagging the job as `retentionExpired`.
+- Paginating `due_jobs()`. The jobs endpoint caps a single response at 100
+  results, so once there are more due jobs than that in one run, this
+  service silently only sees the first page. It needs a `skip`/`limit`
+  iterator over the loopback filter's `limits`, yielding page by page (with
+  a max-iterations safety cap) until an empty page comes back.
 
 This first version simply lets every due job run its grace period out
 unconditionally.
