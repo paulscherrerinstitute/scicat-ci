@@ -28,3 +28,13 @@ class FixturesJobs:
             ),
             creation_time=creation_time or FixturesJobs.creation_time,
         )
+
+
+class FixturesDatasets:
+
+    @staticmethod
+    def dataset(pid="pid1", archive_status_message="markedForDeletion"):
+        return Mock(
+            pid=pid,
+            datasetlifecycle=Mock(archive_status_message=archive_status_message),
+        )
