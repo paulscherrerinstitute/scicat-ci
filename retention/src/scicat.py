@@ -151,6 +151,9 @@ class MarkedForDeletionJob:
 class MarkedForDeletionJobsRepository:
     """Fetches SciCat "markedForDeletion" jobs whose next check-in is due."""
 
+    page_limit = 100
+    max_iterations = 1000
+
     @staticmethod
     def _due_jobs_filter(now):
         # lastVerifiedAt is written by the marking agent at job creation (as
@@ -167,10 +170,23 @@ class MarkedForDeletionJobsRepository:
             }
         }
 
-    def due_jobs(self, now):
-        """Returns markedForDeletion jobs due for a check-in, as MarkedForDeletionJob."""
-        log.info("Fetching markedForDeletion jobs due for a check-in")
-        jobs = JobsApi().jobs_controller_find_all_v3(
-            filter=json.dumps(self._due_jobs_filter(now))
+    def _due_jobs_batches(self, now):
+        """Yields pages of due jobs, walking `limits.skip` until a page is empty."""
+        filter_ = self._due_jobs_filter(now)
+        filter_["limits"] = {"skip": 0, "limit": self.page_limit}
+        for _ in range(self.max_iterations):
+            batch = JobsApi().jobs_controller_find_all_v3(filter=json.dumps(filter_))
+            if not batch:
+                return
+            yield batch
+            filter_["limits"]["skip"] += self.page_limit
+        raise RuntimeError(
+            "Exceeded maximum pages while fetching due markedForDeletion jobs"
         )
-        return [MarkedForDeletionJob(job) for job in jobs]
+
+    def due_jobs(self, now):
+        """Yields markedForDeletion jobs due for a check-in, as MarkedForDeletionJob."""
+        log.info("Fetching markedForDeletion jobs due for a check-in")
+        for batch in self._due_jobs_batches(now):
+            for job in batch:
+                yield MarkedForDeletionJob(job)
