@@ -154,8 +154,9 @@ class MarkedForDeletionJobsRepository:
     page_limit = 100
     max_iterations = 1000
 
-    @staticmethod
-    def _due_jobs_filter(now):
+    fields = ["id", "datasetList", "jobResultObject", "creationTime"]
+
+    def _due_jobs_filter(self, now):
         # lastVerifiedAt is written by the marking agent at job creation (as
         # well as by this service on every check-in), so a due job is simply
         # one whose last check-in is at least one retention step old.
@@ -167,7 +168,8 @@ class MarkedForDeletionJobsRepository:
                 f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
                     "lte": (now - _RETENTION_STEP_DELTA).isoformat()
                 },
-            }
+            },
+            "fields": self.fields,
         }
 
     def _due_jobs_batches(self, now):

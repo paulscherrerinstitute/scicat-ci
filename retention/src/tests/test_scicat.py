@@ -184,6 +184,7 @@ class TestMarkedForDeletionJobsRepository:
                     "lte": (now - relativedelta(months=1)).isoformat()
                 },
             },
+            "fields": ["id", "datasetList", "jobResultObject", "creationTime"],
             "limits": {"skip": 0, "limit": 100},
         }
 
