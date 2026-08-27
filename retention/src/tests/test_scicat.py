@@ -165,16 +165,16 @@ class TestMarkedForDeletionJobsRepository:
     @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
     def test_due_jobs(self, mock_find_all):
         raw_job = FixturesJobs.raw_job()
-        mock_find_all.return_value = [raw_job]
+        mock_find_all.side_effect = [[raw_job], []]
         now = FixturesJobs.creation_time + relativedelta(months=2)
 
-        jobs = scicat.MarkedForDeletionJobsRepository().due_jobs(now)
+        jobs = list(scicat.MarkedForDeletionJobsRepository().due_jobs(now))
 
         assert len(jobs) == 1
         assert isinstance(jobs[0], scicat.MarkedForDeletionJob)
         assert jobs[0].id == FixturesJobs.job_id
 
-        _, kwargs = mock_find_all.call_args
+        _, kwargs = mock_find_all.call_args_list[0]
         assert json.loads(kwargs["filter"]) == {
             "where": {
                 "type": "markedForDeletion",
@@ -183,5 +183,62 @@ class TestMarkedForDeletionJobsRepository:
                 "jobResultObject.lastVerifiedAt": {
                     "lte": (now - relativedelta(months=1)).isoformat()
                 },
-            }
+            },
+            "fields": ["id", "datasetList", "jobResultObject", "creationTime"],
+            "limits": {"skip": 0, "limit": 100},
         }
+
+    @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
+    def test_due_jobs_paginates_across_multiple_pages(self, mock_find_all):
+        page1 = [
+            FixturesJobs.raw_job(job_id="job1"),
+            FixturesJobs.raw_job(job_id="job2"),
+        ]
+        page2 = [FixturesJobs.raw_job(job_id="job3")]
+        mock_find_all.side_effect = [page1, page2, []]
+        now = FixturesJobs.creation_time + relativedelta(months=2)
+
+        repository = scicat.MarkedForDeletionJobsRepository()
+        repository.page_limit = 2
+        jobs = repository.due_jobs(now)
+
+        assert [job.id for job in jobs] == ["job1", "job2", "job3"]
+        assert mock_find_all.call_count == 3
+        skips = [
+            json.loads(kwargs["filter"])["limits"]["skip"]
+            for _, kwargs in mock_find_all.call_args_list
+        ]
+        assert skips == [0, 2, 4]
+
+    @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
+    def test_due_jobs_fetches_pages_lazily(self, mock_find_all):
+        page1 = [
+            FixturesJobs.raw_job(job_id="job1"),
+            FixturesJobs.raw_job(job_id="job2"),
+        ]
+        page2 = [FixturesJobs.raw_job(job_id="job3")]
+        mock_find_all.side_effect = [page1, page2, []]
+        now = FixturesJobs.creation_time + relativedelta(months=2)
+
+        repository = scicat.MarkedForDeletionJobsRepository()
+        repository.page_limit = 2
+        jobs = repository.due_jobs(now)
+
+        assert next(jobs).id == "job1"
+        assert mock_find_all.call_count == 1
+        assert next(jobs).id == "job2"
+        assert mock_find_all.call_count == 1
+        assert next(jobs).id == "job3"
+        assert mock_find_all.call_count == 2
+
+    @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
+    def test_due_jobs_raises_after_max_iterations(self, mock_find_all):
+        mock_find_all.return_value = [FixturesJobs.raw_job()]
+        now = FixturesJobs.creation_time + relativedelta(months=2)
+
+        repository = scicat.MarkedForDeletionJobsRepository()
+        repository.max_iterations = 3
+
+        with pytest.raises(RuntimeError):
+            list(repository.due_jobs(now))
+        assert mock_find_all.call_count == 3

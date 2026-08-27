@@ -22,11 +22,12 @@ class RetentionOrchestrator:
         log.info(f"Connecting to scicat on {self.scicat_instance.url}")
         self.scicat_instance.authenticate()
         now = datetime.now(timezone.utc)
-        due_jobs = self.jobs.due_jobs(now)
-        log.info(f"{len(due_jobs)} job(s) due for a check-in")
-        for job in due_jobs:
+        processed = 0
+        for job in self.jobs.due_jobs(now):
+            processed += 1
             try:
                 job.advance(now)
             except Exception as e:
                 log.error(f"Failed to process job {job.id}: {e}")
+        log.info(f"{processed} job(s) due for a check-in")
         log.info("==== Retention check finished ====")
