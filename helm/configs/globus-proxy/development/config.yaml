@@ -2,25 +2,21 @@ scicatUrl: "http://backend-next.scicat-development/"
 port: 8080
 
 defaults:
-  - &psiFacility
-    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
-    accessPath: profile.oidcClaims.realm_access.roles
-    accessValue: globus-proxy-user
-
   - &openemFacility
     direction: SRC
     accessPath: profile.oidcClaims.resource_access.openem-ingestor-{{.Name | lower}}.roles
     accessValue: ingestor-write
 
 facilities:
-  - <<: *psiFacility
-    name: PSI_DEV
+  - name: PSI_DEV
     collection: deda66cc-9e42-49fc-a997-18a02abb7903
     direction: DST
+    destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
+    accessPath: profile.oidcClaims.realm_access.roles
+    accessValue: globus-proxy-user
 
   # Use QA as a source for some test transfers
-  - <<: *psiFacility
-    name: DEMO
+  - name: DEMO
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
     direction: SRC
     accessPath: profile.oidcClaims.resource_access.openem-ingestor-demo.roles
@@ -42,8 +38,8 @@ facilities:
   - <<: *openemFacility
     name: EMPA
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
-  - <<: *openemFacility
-    name: EPFL-LBEM
+  - name: EPFL-LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
+    direction: SRC
     accessPath: profile.oidcClaims.resource_access.openem-ingestor-lbem.roles
     accessValue: ingestor-write
