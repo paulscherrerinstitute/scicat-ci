@@ -4,12 +4,13 @@ port: 8080
 defaults:
   - &psiFacility
     destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
-    accessPath: profile.realmAccess.roles
+    accessPath: profile.oidcClaims.realm_access.roles
     accessValue: globus-proxy-user
 
   - &openemFacility
     direction: SRC
-    accessValue: "{{.Name}}"
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-{{.Name | lower}}.roles
+    accessValue: ingestor-write
 
 facilities:
   - <<: *psiFacility
@@ -19,9 +20,11 @@ facilities:
 
   # Use QA as a source for some test transfers
   - <<: *psiFacility
-    name: PSI_QA
+    name: DEMO
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
     direction: SRC
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-demo.roles
+    accessValue: ingestor-write
 
   - <<: *openemFacility
     name: UNIBAS
@@ -42,3 +45,5 @@ facilities:
   - <<: *openemFacility
     name: EPFL-LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-lbem.roles
+    accessValue: ingestor-write
