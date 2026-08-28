@@ -5,7 +5,7 @@ Transfer:
   StorageLocation: PSI
   Method: ExtGlobus
   ExtGlobus:
-    TransferServiceUrl: "http://globus-proxy.scicat-qa/globus/service"
+    TransferServiceUrl: "http://globus-proxy.scicat-qa"
     # Relies on the PSI_QA:/test2/demo directory being sync'd to /data
     SrcFacility: "PSI_QA"
     DstFacility: "PSI_QA"
