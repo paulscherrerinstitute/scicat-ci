@@ -7,7 +7,7 @@ Transfer:
   ExtGlobus:
     TransferServiceUrl: "http://globus-proxy.scicat-development"
     # Relies on the PSI_QA:/test2/demo directory being sync'd to /data
-    SrcFacility: "PSI_QA"
+    SrcFacility: "DEMO"
     DstFacility: "PSI_DEV"
     CollectionRootPath: "/test2/demo"
 
