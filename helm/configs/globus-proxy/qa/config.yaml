@@ -14,10 +14,11 @@ facilities:
     accessPath: profile.realmAccess.roles
     accessValue: globus-proxy-user
 
-  - <<: *openemFacility
-    name: UNIBAS
-    collection: d35e9477-400d-4069-b571-d678847373f1
-    sourcePath: "/collection_test/{{ .RelativeSourceFolder }}"
+  # Disabled until they grant the service user access
+  # - <<: *openemFacility
+  #   name: UNIBAS
+  #   collection: ab30321a-6f8f-488b-bf0a-f5afdd56398d
+  #   sourcePath: "/collection_test/{{ .RelativeSourceFolder }}"
   - <<: *openemFacility
     name: UNIGE
     collection: d22fab58-5f80-47f1-a9a0-da36478ca41e
