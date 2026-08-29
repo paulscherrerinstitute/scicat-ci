@@ -4,7 +4,8 @@ port: 8080
 defaults:
   - &openemFacility
     direction: SRC
-    accessPath: profile.oidcClaims.resource_access.openem-ingestor-{{.Name | lower}}.roles
+    # TODO: no 'lower' function in 1.5.3; feature request that would simplify the config
+    #accessPath: profile.oidcClaims.resource_access.openem-ingestor-{{ lower .Name}}.roles
     accessValue: ingestor-write
 
 facilities:
@@ -30,15 +31,19 @@ facilities:
   - <<: *openemFacility
     name: UNIGE
     collection: d22fab58-5f80-47f1-a9a0-da36478ca41e
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-unige.roles
   - <<: *openemFacility
     name: UNIBE
     collection: 44e61e98-8dba-43ec-a862-c1fe82ac23d6
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-unibe.roles
   - <<: *openemFacility
     name: DCIL
     collection: b3807ed3-db5e-4e6f-9831-fd8d72dfff8a
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-dcil.roles
   - <<: *openemFacility
     name: EMPA
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-empa.roles
   - name: EPFL-LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
     direction: SRC
