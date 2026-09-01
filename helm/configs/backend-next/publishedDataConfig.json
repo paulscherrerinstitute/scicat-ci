@@ -490,7 +490,7 @@
                   "title": "Relation Type",
                   "$dataciteRequired": true,
                   "default": "IsSupplementTo",
-                  "enum": [ "IsSupplementTo" ]
+                  "enum": [ "IsSupplementTo", "IsIdenticalTo" ]
                 },
                 "relatedMetadataScheme": {
                   "type": "string",
