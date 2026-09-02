@@ -5,7 +5,7 @@ replicaCount: 2
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
   # latest [psi_local](https://github.com/SciCatProject/backend/commits/psi_local/) branch
-  tag: 032220c053977505df14a3b563a6fe1194b67bb6
+  tag: bcfed77f4615e9bbdeed3f47bc6d8bc7fcf03364
   pullPolicy: Always
 
 service:
@@ -32,6 +32,7 @@ configMaps:
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
     ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
     opensearchConfig.json: "{{ .Values.OPENSEARCH_CONFIG }}"
+    datasetTypes.json: "{{ .Values.DATASET_TYPES }}"
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
@@ -116,6 +117,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/opensearchConfig.json
     subPath: opensearchConfig.json
+  - name: config-volume
+    mountPath: /home/node/app/datasetTypes.json
+    subPath: datasetTypes.json
 
 migrateCommand: "echo 'No migration command specified.'"
 opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"
