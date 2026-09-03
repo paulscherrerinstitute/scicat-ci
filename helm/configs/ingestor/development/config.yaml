@@ -92,4 +92,4 @@ WebServer:
     Port: 8080
     LogLevel: Debug
     SecureCookies: true
-    DisableServiceAccountCheck: true
+    DisableServiceAccountCheck: false
