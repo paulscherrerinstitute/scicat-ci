@@ -72,7 +72,7 @@
     "shareEnabled": true,
     "shoppingCartEnabled": true,
     "shoppingCartOnHeader": true,
-    "statusBannerMessage": "Archiving and retrieving datasets is currently unavailable due to technical issues with the tape library (CSCS).",
+    "statusBannerMessage": "Retrieving datasets is currently unavailable due to technical issues with the tape library (CSCS).",
     "statusBannerCode": "WARN", 
     "tableSciDataEnabled": false,
     "defaultDatasetsListSettings": {
