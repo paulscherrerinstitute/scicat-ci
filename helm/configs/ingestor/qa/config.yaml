@@ -1,14 +1,14 @@
 Scicat:
   # Backend URL from within the container
-  Host: http://backend-next.scicat-development/api/v3
+  Host: "http://backend-next.scicat-qa/api/v3"
 Transfer:
   StorageLocation: PSI
   Method: ExtGlobus
   ExtGlobus:
-    TransferServiceUrl: "http://globus-proxy.scicat-development"
+    TransferServiceUrl: "http://globus-proxy.scicat-qa"
     # Relies on the PSI_QA:/test2/demo directory being sync'd to /data
     SrcFacility: "DEMO"
-    DstFacility: "PSI_DEV"
+    DstFacility: "PSI_QA"
     CollectionRootPath: "/"
 
 MetadataExtractors:
