@@ -4,7 +4,8 @@ port: 8080
 defaults:
   - &openemFacility
     direction: SRC
-    accessValue: "{{.Name}}"
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-{{ toLower .Name}}.roles
+    accessValue: ingestor-write
 
 facilities:
   - name: PSI
@@ -16,8 +17,8 @@ facilities:
 
   - <<: *openemFacility
     name: UNIBAS
-    collection: d35e9477-400d-4069-b571-d678847373f1
-    sourcePath: "/collection_test/{{ .RelativeSourceFolder }}"
+    collection: ab30321a-6f8f-488b-bf0a-f5afdd56398d
+    #sourcePath: "/collection_test/{{ .RelativeSourceFolder }}"
   - <<: *openemFacility
     name: UNIGE
     collection: d22fab58-5f80-47f1-a9a0-da36478ca41e
@@ -30,6 +31,8 @@ facilities:
   - <<: *openemFacility
     name: EMPA
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
-  - <<: *openemFacility
-    name: EPFL-LBEM
+  - name: EPFL-LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
+    direction: SRC
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-lbem.roles
+    accessValue: ingestor-write
