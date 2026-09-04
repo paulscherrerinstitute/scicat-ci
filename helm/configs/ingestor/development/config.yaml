@@ -84,7 +84,6 @@ WebServer:
   Paths:
     CollectionLocations:
       demo: "/test2/demo"
-      tmp_test: "/test2/bliven_s"
   MetadataExtJobs:
     ConcurrencyLimit: 4
     QueueSize: 200

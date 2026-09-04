@@ -9,7 +9,7 @@ Transfer:
     # Relies on the PSI_QA:/test2/demo directory being sync'd to /data
     SrcFacility: "DEMO"
     DstFacility: "PSI_QA"
-    CollectionRootPath: "/test2/demo"
+    CollectionRootPath: "/"
 
 MetadataExtractors:
   InstallationPath: ./extractors/
