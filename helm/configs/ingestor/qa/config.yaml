@@ -31,7 +31,7 @@ MetadataExtractors:
       - gain_flip_rotate="None"
       # - epu="xmls/"
       Methods:
-        - Name: Single Particle
+        - Name: Single Particle - Use this for the tutorial
           Schema: oscem_schemas_spa.schema.json
           Url: https://w3id.org/oscem-schemas/latest/spa/jsonschema/oscem_schemas_spa.schema.json
         - Name: Cellular Tomography
