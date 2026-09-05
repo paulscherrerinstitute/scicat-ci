@@ -12,8 +12,15 @@ facilities:
     collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
     direction: DST
     destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
-    accessPath: profile.realmAccess.roles
+    accessPath: profile.oidcClaims.realm_access.roles
     accessValue: globus-proxy-user
+
+  # Use QA as a source for some test transfers
+  - name: DEMO
+    collection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
+    direction: SRC
+    accessPath: profile.oidcClaims.resource_access.openem-ingestor-demo.roles
+    accessValue: ingestor-write
 
   - <<: *openemFacility
     name: UNIBAS

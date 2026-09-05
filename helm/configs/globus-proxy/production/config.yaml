@@ -12,7 +12,7 @@ facilities:
     collection: 7a50c4b9-651d-4fba-a8f9-0557f1b4b7ed
     direction: DST
     destinationPath: '/archive/{{ replace .Pid "." "-" }}/{{ .SourceFolder }}'
-    accessPath: profile.realmAccess.roles
+    accessPath: profile.oidcClaims.realm_access.roles
     accessValue: globus-proxy-user
 
   - <<: *openemFacility
