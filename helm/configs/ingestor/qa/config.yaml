@@ -63,18 +63,18 @@ WebServer:
     SessionDuration: 28800
     Frontend:
       # User-facing frontend URL
-      Origin: https://discovery.development.psi.ch
+      Origin: https://discovery-qa.psi.ch
       RedirectPath: "/ingestor"
     OAuth2:
       ClientID: "openem-ingestor-demo"
-      RedirectURL: "https://ingestor.development.psi.ch/callback"
+      RedirectURL: "https://ingestor.qa.psi.ch/callback"
       Scopes:
         - email
     OIDC:
-      IssuerURL: "https://kc.development.psi.ch/realms/awi"
+      IssuerURL: "https://kc.psi.ch/realms/awi"
     JWT:
       UseJWKS: true
-      JwksURL: "https://kc.development.psi.ch/realms/awi/protocol/openid-connect/certs"
+      JwksURL: "https://kc.psi.ch/realms/awi/protocol/openid-connect/certs"
       JwksSignatureMethods:
         - RS256
     RBAC:
@@ -88,7 +88,7 @@ WebServer:
     ConcurrencyLimit: 4
     QueueSize: 200
   Other:
-    BackendAddress: https://ingestor.development.psi.ch
+    BackendAddress: https://ingestor.qa.psi.ch
     Port: 8080
     LogLevel: Debug
     SecureCookies: true
