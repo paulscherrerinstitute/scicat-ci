@@ -38,8 +38,6 @@ facilities:
   - <<: *openemFacility
     name: EMPA
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
-  - name: EPFL-LBEM
+  - <<: *openemFacility
+    name: LBEM
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
-    direction: SRC
-    accessPath: profile.oidcClaims.resource_access.openem-ingestor-lbem.roles
-    accessValue: ingestor-write
