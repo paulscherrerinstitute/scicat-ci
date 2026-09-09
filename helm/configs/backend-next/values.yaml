@@ -5,7 +5,7 @@ replicaCount: 2
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
   # latest [psi_local](https://github.com/SciCatProject/backend/commits/psi_local/) branch
-  tag: bcfed77f4615e9bbdeed3f47bc6d8bc7fcf03364
+  tag: 8b1b30b0f2149bc6d96739218b65a7c9295cb8b4
   pullPolicy: Always
 
 service:
