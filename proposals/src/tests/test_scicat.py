@@ -160,13 +160,34 @@ class TestSciCatProposalFromDuo:
         )
 
     @pytest.mark.parametrize(
-        "measurement_periods, expected",
+        "existing_owner_group, existing_access_groups, measurement_periods, expected_patch",
         [
             [
+                "test_group",
+                ["slsmx"],
                 FixturesFromSciCatAPI.measurement_periods,
-                FixturesFromSciCatAPI.expected_measurement_periods,
+                {
+                    "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods
+                },
             ],
-            [FixturesFromSciCatAPI.same_proposals_measurement_periods, False],
+            [
+                "test_group",
+                ["slsmx"],
+                FixturesFromSciCatAPI.same_proposals_measurement_periods,
+                None,
+            ],
+            [
+                "old_group",
+                ["slsmx"],
+                FixturesFromSciCatAPI.same_proposals_measurement_periods,
+                {"ownerGroup": "test_group"},
+            ],
+            [
+                "test_group",
+                ["old_access_group"],
+                FixturesFromSciCatAPI.same_proposals_measurement_periods,
+                {"accessGroups": ["slsmx"]},
+            ],
         ],
     )
     @patch("scicat.ProposalsApi.proposals_controller_update_v3", autospec=True)
@@ -175,22 +196,28 @@ class TestSciCatProposalFromDuo:
         autospec=True,
     )
     def test__update(
-        self, mock_proposal_find, mock_proposal_patch, measurement_periods, expected
+        self,
+        mock_proposal_find,
+        mock_proposal_patch,
+        existing_owner_group,
+        existing_access_groups,
+        measurement_periods,
+        expected_patch,
     ):
         mock_proposal_find.return_value = Mock(
-            measurement_period_list=measurement_periods
+            measurement_period_list=measurement_periods,
+            owner_group=existing_owner_group,
+            access_groups=existing_access_groups,
         )
         self.scicat_proposal._update()
         mock_proposal_find.assert_called_once_with(ANY, self.proposalId)
-        if not expected:
+        if expected_patch is None:
             mock_proposal_patch.assert_not_called()
             return
         mock_proposal_patch.assert_called_once_with(
             ANY,
             self.proposalId,
-            {
-                "MeasurementPeriodList": expected,
-            },
+            expected_patch,
         )
 
     @pytest.mark.parametrize(
