@@ -279,15 +279,20 @@ class SciCatProposalFromDuo(
         log.info("Proposal created")
 
     def _update(self):
-        """Updates an existing SciCat proposal by appending new measurement periods."""
+        """Updates an existing SciCat proposal, re-syncing owner/access groups and measurement periods."""
         proposal = self.compose()
         pid = proposal["proposalId"]
         log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
-        existing_measurements = existing_proposal.measurement_period_list
-        if self.is_same_measurements(existing_measurements):
+        patch = {}
+        if existing_proposal.owner_group != proposal["ownerGroup"]:
+            patch["ownerGroup"] = proposal["ownerGroup"]
+        if existing_proposal.access_groups != proposal["accessGroups"]:
+            patch["accessGroups"] = proposal["accessGroups"]
+        if not self.is_same_measurements(existing_proposal.measurement_period_list):
+            patch["MeasurementPeriodList"] = proposal["MeasurementPeriodList"]
+        if not patch:
             return
-        patch = {"MeasurementPeriodList": proposal["MeasurementPeriodList"]}
         log.info(f"Modifying proposal, patch object: {patch}")
         ProposalsApi().proposals_controller_update_v3(pid, patch)
         log.info("Proposal modified")

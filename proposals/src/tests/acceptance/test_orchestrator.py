@@ -31,12 +31,14 @@ class TestDuoSciCatOrchestratorFromFacility:
 
         measurement_period_list = FixturesFromSciCatAPI.measurement_periods
 
-        def __init__(self, exists=True):
+        def __init__(self, exists=True, owner_group=None, access_groups=None):
             find_by_id_result = [
                 {"side_effect": NotFoundException},
                 {
                     "return_value": Mock(
-                        measurement_period_list=self.measurement_period_list
+                        measurement_period_list=self.measurement_period_list,
+                        owner_group=owner_group,
+                        access_groups=access_groups,
                     )
                 },
             ]
@@ -78,12 +80,32 @@ class TestDuoSciCatOrchestratorFromFacility:
             mock_policy_create.assert_called_once_with(ANY, self.fixture_class.policy)
 
     def test_update_proposals_from_duo_to_scicat(self):
+        mock_proposal = self.MockProposalApi(
+            owner_group=self.fixture_class.expected_scicat_proposal["ownerGroup"],
+            access_groups=self.fixture_class.expected_scicat_proposal["accessGroups"],
+        )
+        with patch("scicat.ProposalsApi", return_value=mock_proposal, autospec=True):
+            self.orchestrator.orchestrate()
+            mock_proposal.proposals_controller_update_v3.assert_called_once_with(
+                self.fixture_class.scicat_proposal["proposalId"],
+                {
+                    "MeasurementPeriodList": self.fixture_class.expected_measurement_periods,
+                },
+            )
+
+    def test_update_proposals_resyncs_owner_and_access_groups(self):
         mock_proposal = self.MockProposalApi()
         with patch("scicat.ProposalsApi", return_value=mock_proposal, autospec=True):
             self.orchestrator.orchestrate()
             mock_proposal.proposals_controller_update_v3.assert_called_once_with(
                 self.fixture_class.scicat_proposal["proposalId"],
                 {
+                    "ownerGroup": self.fixture_class.expected_scicat_proposal[
+                        "ownerGroup"
+                    ],
+                    "accessGroups": self.fixture_class.expected_scicat_proposal[
+                        "accessGroups"
+                    ],
                     "MeasurementPeriodList": self.fixture_class.expected_measurement_periods,
                 },
             )
