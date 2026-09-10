@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# git stuff
+.git/
+.gitignore
+
+# helm stuff
+helm/
+
+# docker stuff
+docker-compose.dev.yml
+Dockerfile
+
+README.md
