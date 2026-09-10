@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 import scicat
 
-from .fixtures.mocked_data import FixturesJobs
+from .fixtures.mocked_data import FixturesDatasets, FixturesJobs
 
 
 class TestSciCatAuth:
@@ -138,8 +138,17 @@ class TestMarkedForDeletionJob:
             },
         )
 
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.DatasetsApi.datasets_controller_find_all_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
-    def test_advance_expires(self, mock_update):
+    def test_advance_expires(self, mock_update, mock_find_datasets, mock_create):
+        mock_find_datasets.side_effect = [
+            [
+                FixturesDatasets.dataset(pid="pid1"),
+                FixturesDatasets.dataset(pid="pid2"),
+            ],
+            [],
+        ]
         job = scicat.MarkedForDeletionJob(
             FixturesJobs.raw_job(
                 job_result_object={"retentionTime": {"value": 3, "unit": "M"}}
@@ -158,6 +167,87 @@ class TestMarkedForDeletionJob:
                 "jobStatusMessage": "retentionExpired",
             },
         )
+        mock_create.assert_called_once_with(
+            ANY,
+            {
+                "type": "delete",
+                "datasetList": [
+                    {"pid": "pid1", "files": []},
+                    {"pid": "pid2", "files": []},
+                ],
+            },
+        )
+        _, kwargs = mock_find_datasets.call_args_list[0]
+        assert json.loads(kwargs["filter"]) == {
+            "where": {
+                "pid": {"inq": ["pid1", "pid2"]},
+                "datasetlifecycle.archiveStatusMessage": "markedForDeletion",
+            },
+            "fields": ["pid"],
+            "limits": {"skip": 0, "limit": 100},
+        }
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.DatasetsApi.datasets_controller_find_all_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    def test_advance_expires_only_includes_datasets_the_query_returns(
+        self, _, mock_find_datasets, mock_create
+    ):
+        # pid1 is missing from the results — whether because it's no longer
+        # markedForDeletion (restored) or gone entirely (deleted), the query
+        # already excludes it; this service has no opinion on why.
+        mock_find_datasets.side_effect = [[FixturesDatasets.dataset(pid="pid2")], []]
+        job = scicat.MarkedForDeletionJob(
+            FixturesJobs.raw_job(
+                job_result_object={"retentionTime": {"value": 3, "unit": "M"}}
+            )
+        )
+        now = FixturesJobs.creation_time + relativedelta(months=3)
+        job.advance(now)
+        mock_create.assert_called_once_with(
+            ANY,
+            {"type": "delete", "datasetList": [{"pid": "pid2", "files": []}]},
+        )
+
+    @patch("scicat.PAGE_LIMIT", 2)
+    @patch("scicat.DatasetsApi.datasets_controller_find_all_v3", autospec=True)
+    def test_still_marked_pids_paginates_across_multiple_pages(
+        self, mock_find_datasets
+    ):
+        page1 = [
+            FixturesDatasets.dataset(pid="pid1"),
+            FixturesDatasets.dataset(pid="pid2"),
+        ]
+        page2 = [FixturesDatasets.dataset(pid="pid3")]
+        mock_find_datasets.side_effect = [page1, page2, []]
+        job = scicat.MarkedForDeletionJob(
+            FixturesJobs.raw_job(dataset_pids=["pid1", "pid2", "pid3"])
+        )
+
+        assert job._still_marked_pids() == ["pid1", "pid2", "pid3"]
+        assert mock_find_datasets.call_count == 3
+        skips = [
+            json.loads(kwargs["filter"])["limits"]["skip"]
+            for _, kwargs in mock_find_datasets.call_args_list
+        ]
+        assert skips == [0, 2, 4]
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.DatasetsApi.datasets_controller_find_all_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    def test_advance_expires_skips_delete_job_when_none_still_marked(
+        self, mock_update, mock_find_datasets, mock_create
+    ):
+        mock_find_datasets.return_value = []
+        job = scicat.MarkedForDeletionJob(
+            FixturesJobs.raw_job(
+                job_result_object={"retentionTime": {"value": 3, "unit": "M"}}
+            )
+        )
+        now = FixturesJobs.creation_time + relativedelta(months=3)
+        job.advance(now)
+        mock_create.assert_not_called()
+        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
 
 
 class TestMarkedForDeletionJobsRepository:
@@ -188,6 +278,7 @@ class TestMarkedForDeletionJobsRepository:
             "limits": {"skip": 0, "limit": 100},
         }
 
+    @patch("scicat.PAGE_LIMIT", 2)
     @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
     def test_due_jobs_paginates_across_multiple_pages(self, mock_find_all):
         page1 = [
@@ -199,7 +290,6 @@ class TestMarkedForDeletionJobsRepository:
         now = FixturesJobs.creation_time + relativedelta(months=2)
 
         repository = scicat.MarkedForDeletionJobsRepository()
-        repository.page_limit = 2
         jobs = repository.due_jobs(now)
 
         assert [job.id for job in jobs] == ["job1", "job2", "job3"]
@@ -210,6 +300,7 @@ class TestMarkedForDeletionJobsRepository:
         ]
         assert skips == [0, 2, 4]
 
+    @patch("scicat.PAGE_LIMIT", 2)
     @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
     def test_due_jobs_fetches_pages_lazily(self, mock_find_all):
         page1 = [
@@ -221,7 +312,6 @@ class TestMarkedForDeletionJobsRepository:
         now = FixturesJobs.creation_time + relativedelta(months=2)
 
         repository = scicat.MarkedForDeletionJobsRepository()
-        repository.page_limit = 2
         jobs = repository.due_jobs(now)
 
         assert next(jobs).id == "job1"
@@ -231,13 +321,13 @@ class TestMarkedForDeletionJobsRepository:
         assert next(jobs).id == "job3"
         assert mock_find_all.call_count == 2
 
+    @patch("scicat.MAX_ITERATIONS", 3)
     @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
     def test_due_jobs_raises_after_max_iterations(self, mock_find_all):
         mock_find_all.return_value = [FixturesJobs.raw_job()]
         now = FixturesJobs.creation_time + relativedelta(months=2)
 
         repository = scicat.MarkedForDeletionJobsRepository()
-        repository.max_iterations = 3
 
         with pytest.raises(RuntimeError):
             list(repository.due_jobs(now))
