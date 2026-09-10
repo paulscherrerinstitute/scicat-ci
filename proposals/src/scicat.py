@@ -287,9 +287,7 @@ class SciCatProposalFromDuo(
         needs_update = (
             existing_proposal.owner_group != proposal["ownerGroup"]
             or existing_proposal.access_groups != proposal["accessGroups"]
-            or not self.is_same_measurements(
-                existing_proposal.measurement_period_list
-            )
+            or not self.is_same_measurements(existing_proposal.measurement_period_list)
         )
         if not needs_update:
             return
