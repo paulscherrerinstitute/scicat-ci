@@ -159,6 +159,15 @@ class TestSciCatProposalFromDuo:
             ANY, FixturesFromDuo.expected_scicat_proposal
         )
 
+    # SciCat's update endpoint wipes MeasurementPeriodList to [] whenever it's
+    # omitted from the patch, so it must always be sent alongside any other
+    # change, even when it hasn't itself changed.
+    full_patch = {
+        "ownerGroup": "test_group",
+        "accessGroups": ["slsmx"],
+        "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods,
+    }
+
     @pytest.mark.parametrize(
         "existing_owner_group, existing_access_groups, measurement_periods, expected_patch",
         [
@@ -166,9 +175,7 @@ class TestSciCatProposalFromDuo:
                 "test_group",
                 ["slsmx"],
                 FixturesFromSciCatAPI.measurement_periods,
-                {
-                    "MeasurementPeriodList": FixturesFromSciCatAPI.expected_measurement_periods
-                },
+                full_patch,
             ],
             [
                 "test_group",
@@ -180,13 +187,13 @@ class TestSciCatProposalFromDuo:
                 "old_group",
                 ["slsmx"],
                 FixturesFromSciCatAPI.same_proposals_measurement_periods,
-                {"ownerGroup": "test_group"},
+                full_patch,
             ],
             [
                 "test_group",
                 ["old_access_group"],
                 FixturesFromSciCatAPI.same_proposals_measurement_periods,
-                {"accessGroups": ["slsmx"]},
+                full_patch,
             ],
         ],
     )
