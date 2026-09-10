@@ -284,15 +284,23 @@ class SciCatProposalFromDuo(
         pid = proposal["proposalId"]
         log.info(f"Checking if proposal {pid} exists in SciCat")
         existing_proposal = ProposalsApi().proposals_controller_find_by_id_v3(pid)
-        patch = {}
-        if existing_proposal.owner_group != proposal["ownerGroup"]:
-            patch["ownerGroup"] = proposal["ownerGroup"]
-        if existing_proposal.access_groups != proposal["accessGroups"]:
-            patch["accessGroups"] = proposal["accessGroups"]
-        if not self.is_same_measurements(existing_proposal.measurement_period_list):
-            patch["MeasurementPeriodList"] = proposal["MeasurementPeriodList"]
-        if not patch:
+        needs_update = (
+            existing_proposal.owner_group != proposal["ownerGroup"]
+            or existing_proposal.access_groups != proposal["accessGroups"]
+            or not self.is_same_measurements(
+                existing_proposal.measurement_period_list
+            )
+        )
+        if not needs_update:
             return
+        # SciCat's update endpoint replaces MeasurementPeriodList with an empty
+        # list whenever it's omitted from the patch, instead of leaving it
+        # untouched, so it must always be included alongside any other change.
+        patch = {
+            "ownerGroup": proposal["ownerGroup"],
+            "accessGroups": proposal["accessGroups"],
+            "MeasurementPeriodList": proposal["MeasurementPeriodList"],
+        }
         log.info(f"Modifying proposal, patch object: {patch}")
         ProposalsApi().proposals_controller_update_v3(pid, patch)
         log.info("Proposal modified")

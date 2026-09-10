@@ -80,6 +80,9 @@ class TestDuoSciCatOrchestratorFromFacility:
             mock_policy_create.assert_called_once_with(ANY, self.fixture_class.policy)
 
     def test_update_proposals_from_duo_to_scicat(self):
+        # owner_group/access_groups already match, only measurement periods
+        # differ - but the patch must still include all three, since SciCat
+        # wipes MeasurementPeriodList to [] whenever it's omitted.
         mock_proposal = self.MockProposalApi(
             owner_group=self.fixture_class.expected_scicat_proposal["ownerGroup"],
             access_groups=self.fixture_class.expected_scicat_proposal["accessGroups"],
@@ -89,6 +92,12 @@ class TestDuoSciCatOrchestratorFromFacility:
             mock_proposal.proposals_controller_update_v3.assert_called_once_with(
                 self.fixture_class.scicat_proposal["proposalId"],
                 {
+                    "ownerGroup": self.fixture_class.expected_scicat_proposal[
+                        "ownerGroup"
+                    ],
+                    "accessGroups": self.fixture_class.expected_scicat_proposal[
+                        "accessGroups"
+                    ],
                     "MeasurementPeriodList": self.fixture_class.expected_measurement_periods,
                 },
             )
