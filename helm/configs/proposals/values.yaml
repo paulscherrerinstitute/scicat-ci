@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/proposals
-  tag: 7cbd4a9f256ea55d4bebcce5e800fa74f60ad3ac
+  tag: 8650a583ea21e0bd573202bac521372654a0a545
 
 env:
   - name: SCICAT_ENDPOINT
