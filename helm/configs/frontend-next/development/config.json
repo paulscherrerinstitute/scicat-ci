@@ -5,7 +5,7 @@
     "datasetReduceEnabled": false,
     "datasetRelationshipsEnabled": true,
     "datasetOneDepIntegration": true,
-    "datafilesActionsEnabled": false,
+    "datafilesActionsEnabled": true,
     "editDatasetSampleEnabled": false,
     "editMetadataEnabled": false,
     "editPublishedData": true,
