@@ -3,6 +3,7 @@
     "addSampleEnabled": false,
     "archiveWorkflowEnabled": true,
     "datasetReduceEnabled": false,
+    "datasetRelationshipsEnabled": true,
     "datasetOneDepIntegration": true,
     "datafilesActionsEnabled": false,
     "editDatasetSampleEnabled": false,
