@@ -72,6 +72,8 @@
     "shareEnabled": true,
     "shoppingCartEnabled": true,
     "shoppingCartOnHeader": true,
+    "statusBannerMessage": "Retrieving and archiving datasets is currently unavailable due to technical issues.",
+    "statusBannerCode": "WARN", 
     "tableSciDataEnabled": false,
     "defaultDatasetsListSettings": {
         "columns": [
@@ -273,5 +275,12 @@
             "enabled": true
           }
         ]
-    }
+    },
+    "datasetPageSizeOptions": [
+        5,
+        10,
+        25,
+        100,
+        1000
+    ]
 }
