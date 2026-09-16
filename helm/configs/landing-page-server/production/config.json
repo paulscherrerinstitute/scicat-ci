@@ -16,6 +16,6 @@
     "confirmMessage": "Are you sure you want to continue?"
   },
   "statusCode": "WARN",
-  "statusMessage": "Retrieving data to URLs is currently unavailable due to technical issues with the tape library (CSCS).",
+  "statusMessage": "Retrieving data to URLs is currently unavailable due to technical issues.",
   "contactEmail": "scicat-help@lists.psi.ch"
 }
