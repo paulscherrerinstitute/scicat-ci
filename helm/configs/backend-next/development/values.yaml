@@ -14,9 +14,14 @@ ingresses:
       nginx.ingress.kubernetes.io/proxy-body-size: 50m
       nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_CIDRS }}"
+      nginx.ingress.kubernetes.io/configuration-snippet: |-
+        if ($http_origin ~* (^https://www\.openem\.ch$)) {
+          more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+        }
+
     hosts:
       - host: "{{ .Values.host }}"
-        paths: 
+        paths:
           - path: "/"
             pathType: Prefix
     tls:
