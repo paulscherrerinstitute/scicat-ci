@@ -1,4 +1,4 @@
-# A cronjob re-confirming datasets marked for deletion until their retention period expires
+# A cronjob that expires and submits deletion for datasets marked for deletion
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -7,47 +7,29 @@
 1. In the frontend, a user selects datasets and clicks "mark for deletion".
    This creates a SciCat job with `type`: `markedForDeletion` and
    `datasetList`: the selected datasets.
-2. A RabbitMQ listener picks up the job on creation: it patches each dataset,
-   setting `datasetlifecycle.archiveStatusMessage` to `markedForDeletion`,
-   and writes onto the job itself both the grace period as
-   `jobResultObject.retentionTime`, e.g. `{"value": 3, "unit": "M"}` for 3
-   months (`unit` follows the same calendar (uppercase `Y`/`M`) vs. clock
-   (lowercase `d`/`h`/`m`/`s`) convention ISO 8601 durations use), and an
-   initial `jobResultObject.lastVerifiedAt` timestamp, the baseline the first
-   check-in is measured from. Until `lastVerifiedAt` is set, this service's
-   query simply never selects the job — not an error, just a job the
-   listener hasn't processed yet.
-3. This service runs periodically (e.g. daily, via a cronjob) and fetches
-   every `markedForDeletion` job whose `datasetList` isn't empty and whose
-   `lastVerifiedAt` is at least one retention step old — those conditions
-   are `where` clauses in the query itself, not a check done after
-   fetching, and only the fields this service actually reads (`id`,
-   `datasetList`, `jobResultObject`, `creationTime`) are requested. The
-   query is paginated 100 jobs at a time (`limits.skip`/`limits.limit`),
-   walking pages until an empty one comes back, with a safety cap on the
-   number of pages fetched in one run. For each job
-   returned, it records the check-in as `jobResultObject.lastVerifiedAt`
-   (the only kind of field the v3 API lets be patched after creation,
-   alongside `jobStatusMessage`). If the job's full `retentionTime` grace
-   period has elapsed since `creationTime`, its `jobStatusMessage` is set
-   to `retentionExpired` — the signal for whichever downstream process
-   performs the actual deletion.
+2. A RabbitMQ listener picks up the job on creation: it flags each dataset
+   as `markedForDeletion`, and records on the job itself the grace period
+   (e.g. 3 months) and an initial check-in timestamp — the baseline the
+   first check-in is measured from. Until that's recorded, the job simply
+   isn't ready yet; that isn't treated as an error.
+3. This service runs periodically (e.g. daily) and re-confirms every
+   `markedForDeletion` job whose next check-in is due — once every
+   retention step (currently 1 month), regardless of the job's own grace
+   period: a job with a 1-year grace period is still re-checked monthly
+   throughout the year, not just once at the end.
+4. Once a job's full grace period has elapsed, it checks which of its
+   datasets are still marked for deletion — a dataset may have been
+   restored in the meantime (e.g. by a future `revertDeletion` job type).
+   Whatever is still marked gets submitted as a new `delete` job. Either
+   way, the original job is marked expired so it's never picked up again —
+   even if nothing ended up marked, meaning no `delete` job was submitted.
 
-Check-ins happen once every retention step (currently 1 month), independently
-of `retentionTime`'s own unit — a job with `retentionTime`
-`{"value": 1, "unit": "Y"}` is still re-checked monthly throughout the year,
-not just once at the end. Whether the job has actually expired is a separate
-check against `creationTime + retentionTime` on every check-in.
-
-**Not yet implemented:**
-
-- Once a job's retention period has passed, submitting a new job of type
-  `delete` for its remaining datasets — with one final safety check that
-  filters out any dataset whose status isn't `markedForDeletion` — instead
-  of just flagging the job as `retentionExpired`.
-
-This first version simply lets every due job run its grace period out
-unconditionally.
+`datasetList` is never modified once a job is created — it's a snapshot of
+what was originally marked. Whether a dataset is still eligible for deletion
+is decided fresh, right before submitting the `delete` job, rather than
+tracked on the job over time. That keeps a future `revertDeletion` simple
+too: restoring a dataset only ever touches the dataset itself, never any
+`markedForDeletion` job.
 
 ## Getting started
 

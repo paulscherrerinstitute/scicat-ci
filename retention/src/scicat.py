@@ -3,11 +3,13 @@ from os import environ
 
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
-from scicat_sdk_py import AuthApi, Configuration, JobsApi
+from scicat_sdk_py import AuthApi, Configuration, DatasetsApi, JobsApi
 
 from utils import log
 
-JOB_TYPE = "markedForDeletion"
+JOB_TYPE_MARKED_FOR_DELETION = "markedForDeletion"
+JOB_TYPE_DELETE = "delete"
+ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
 
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
@@ -45,6 +47,23 @@ _RETENTION_STEP = {"value": 1, "unit": "M"}
 _RETENTION_STEP_DELTA = relativedelta(
     **{_RELATIVEDELTA_KWARG_BY_UNIT[_RETENTION_STEP["unit"]]: _RETENTION_STEP["value"]}
 )
+
+PAGE_LIMIT = 100
+MAX_ITERATIONS = 1000
+
+
+def _paginate(fetch, filter_):
+    """Yields pages from `fetch(filter=...)`, walking `limits.skip` until a page is empty."""
+    filter_ = {**filter_, "limits": {"skip": 0, "limit": PAGE_LIMIT}}
+    for _ in range(MAX_ITERATIONS):
+        batch = fetch(filter=json.dumps(filter_))
+        if not batch:
+            return
+        yield batch
+        filter_["limits"]["skip"] += PAGE_LIMIT
+    raise RuntimeError(
+        f"Exceeded {MAX_ITERATIONS} pages while paginating {fetch.__name__}"
+    )
 
 
 class SciCatAuth:
@@ -132,6 +151,39 @@ class MarkedForDeletionJob:
             **{self._retention_unit: self.retention_amount}
         )
 
+    def _still_marked_pids(self):
+        """Returns dataset pids from datasetList still archiveStatusMessage=markedForDeletion."""
+        pids = self.dataset_pids
+        if not pids:
+            return []
+        filter_ = {
+            "where": {
+                "pid": {"inq": pids},
+                "datasetlifecycle.archiveStatusMessage": ARCHIVE_STATUS_MARKED_FOR_DELETION,
+            },
+            "fields": ["pid"],
+        }
+        batches = _paginate(DatasetsApi().datasets_controller_find_all_v3, filter_)
+        return [dataset.pid for batch in batches for dataset in batch]
+
+    def _submit_delete_job(self):
+        """Submits a "delete" job for datasets still marked for deletion, if any."""
+        pids = self._still_marked_pids()
+        if not pids:
+            log.info(
+                f"Job {self.id} expired with no datasets still marked, nothing to delete"
+            )
+            return
+        JobsApi().jobs_controller_create_v3(
+            {
+                "type": JOB_TYPE_DELETE,
+                "datasetList": [{"pid": pid, "files": []} for pid in pids],
+            }
+        )
+        log.info(
+            f"Job {self.id} expired, submitted delete job for {len(pids)} dataset(s)"
+        )
+
     def advance(self, now):
         """Updates the job's verification time and checks whether its grace period has elapsed."""
         patch = {
@@ -141,6 +193,7 @@ class MarkedForDeletionJob:
             }
         }
         if now >= self.expiry_date:
+            self._submit_delete_job()
             patch["jobStatusMessage"] = STATUS_RETENTION_EXPIRED
             log.info(f"Job {self.id} retention expired, ready for deletion")
         else:
@@ -151,9 +204,6 @@ class MarkedForDeletionJob:
 class MarkedForDeletionJobsRepository:
     """Fetches SciCat "markedForDeletion" jobs whose next check-in is due."""
 
-    page_limit = 100
-    max_iterations = 1000
-
     fields = ["id", "datasetList", "jobResultObject", "creationTime"]
 
     def _due_jobs_filter(self, now):
@@ -162,7 +212,7 @@ class MarkedForDeletionJobsRepository:
         # one whose last check-in is at least one retention step old.
         return {
             "where": {
-                "type": JOB_TYPE,
+                "type": JOB_TYPE_MARKED_FOR_DELETION,
                 "jobStatusMessage": {"neq": STATUS_RETENTION_EXPIRED},
                 "datasetList": {"neq": []},
                 f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
@@ -174,16 +224,8 @@ class MarkedForDeletionJobsRepository:
 
     def _due_jobs_batches(self, now):
         """Yields pages of due jobs, walking `limits.skip` until a page is empty."""
-        filter_ = self._due_jobs_filter(now)
-        filter_["limits"] = {"skip": 0, "limit": self.page_limit}
-        for _ in range(self.max_iterations):
-            batch = JobsApi().jobs_controller_find_all_v3(filter=json.dumps(filter_))
-            if not batch:
-                return
-            yield batch
-            filter_["limits"]["skip"] += self.page_limit
-        raise RuntimeError(
-            "Exceeded maximum pages while fetching due markedForDeletion jobs"
+        return _paginate(
+            JobsApi().jobs_controller_find_all_v3, self._due_jobs_filter(now)
         )
 
     def due_jobs(self, now):
