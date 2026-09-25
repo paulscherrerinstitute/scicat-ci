@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-rocrate
-  tag: 2.6.11
+  tag: 2.6.12
   pullPolicy: Always
 
 service:
