@@ -947,67 +947,76 @@
   },
 
   "uiSchema": {
-    "type": "Categorization",
-    "options": {
-      "variant": "stepper",
-      "showNavButtons": true
-    },
+    "type": "VerticalLayout",
     "elements": [
       {
-        "type": "Category",
-        "label": "Creators*",
+        "type": "Label",
+        "text": "Need help filling in this form? See the publishing guide at https://data-catalog-services.pages.psi.ch/ingestorManual/#publish"
+      },
+      {
+        "type": "Categorization",
+        "options": {
+          "variant": "stepper",
+          "showNavButtons": true
+        },
         "elements": [
           {
-            "type": "ListWithDetail",
-            "scope": "#/properties/creators",
-            "options": {
-              "detail": {
-                "type": "VerticalLayout",
-                "elements": [
-                  {
+            "type": "Category",
+            "label": "Creators*",
+            "elements": [
+              {
+                "type": "ListWithDetail",
+                "scope": "#/properties/creators",
+                "options": {
+                  "detail": {
                     "type": "VerticalLayout",
                     "elements": [
                       {
-                        "type": "Control",
-                        "scope": "#/properties/nameType",
-                        "label": "Name type"
-                      },
-                      {
-                        "type": "HorizontalLayout",
+                        "type": "VerticalLayout",
                         "elements": [
                           {
                             "type": "Control",
-                            "scope": "#/properties/givenName",
-                            "label": "First Name"
+                            "scope": "#/properties/nameType",
+                            "label": "Name type"
                           },
                           {
-                            "type": "Control",
-                            "scope": "#/properties/familyName",
-                            "label": "Last Name"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                          {
-                            "type": "Group",
-                            "label": "Affiliations",
+                            "type": "HorizontalLayout",
                             "elements": [
                               {
-                                "type": "ListWithDetail",
-                                "scope": "#/properties/affiliation"
+                                "type": "Control",
+                                "scope": "#/properties/givenName",
+                                "label": "First Name"
+                              },
+                              {
+                                "type": "Control",
+                                "scope": "#/properties/familyName",
+                                "label": "Last Name"
                               }
                             ]
                           },
                           {
-                            "type": "Group",
-                            "label": "Personal Identifiers",
+                            "type": "HorizontalLayout",
                             "elements": [
                               {
-                                "type": "ListWithDetail",
-                                "scope": "#/properties/nameIdentifiers",
-                                "label": "Affiliations"
+                                "type": "Group",
+                                "label": "Affiliations",
+                                "elements": [
+                                  {
+                                    "type": "ListWithDetail",
+                                    "scope": "#/properties/affiliation"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Group",
+                                "label": "Personal Identifiers",
+                                "elements": [
+                                  {
+                                    "type": "ListWithDetail",
+                                    "scope": "#/properties/nameIdentifiers",
+                                    "label": "Affiliations"
+                                  }
+                                ]
                               }
                             ]
                           }
@@ -1015,218 +1024,218 @@
                       }
                     ]
                   }
-                ]
+                }
               }
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Contributors",
-        "elements": [
+            ]
+          },
           {
-            "type": "ListWithDetail",
-            "scope": "#/properties/contributors",
-            "options": {
-              "detail": {
-                "type": "VerticalLayout",
-                "elements": [
-                  {
+            "type": "Category",
+            "label": "Contributors",
+            "elements": [
+              {
+                "type": "ListWithDetail",
+                "scope": "#/properties/contributors",
+                "options": {
+                  "detail": {
+                    "type": "VerticalLayout",
+                    "elements": [
+                      {
+                        "type": "VerticalLayout",
+                        "elements": [
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/nameType",
+                            "label": "Name type",
+                            "options": {
+                              "readOnly": true
+                            }
+                          },
+                          {
+                            "type": "Control",
+                            "scope": "#/properties/contributorType",
+                            "label": "Contributor type"
+                          },
+                          {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                              {
+                                "type": "Control",
+                                "scope": "#/properties/givenName",
+                                "label": "First Name"
+                              },
+                              {
+                                "type": "Control",
+                                "scope": "#/properties/familyName",
+                                "label": "Last Name"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                              {
+                                "type": "Group",
+                                "label": "Affiliations",
+                                "elements": [
+                                  {
+                                    "type": "ListWithDetail",
+                                    "scope": "#/properties/affiliation"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Group",
+                                "label": "Personal Identifiers",
+                                "elements": [
+                                  {
+                                    "type": "ListWithDetail",
+                                    "scope": "#/properties/nameIdentifiers",
+                                    "label": "Affiliations"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Descriptions",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/descriptions",
+                "options": {
+                  "detail": {
                     "type": "VerticalLayout",
                     "elements": [
                       {
                         "type": "Control",
-                        "scope": "#/properties/nameType",
-                        "label": "Name type",
+                        "scope": "#/properties/descriptionType",
+                        "label": "Type"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/description",
+                        "label": "Description",
                         "options": {
+                          "multi": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "Category",
+            "label": "Keywords",
+            "elements": [
+              {
+                "type": "ListWithDetail",
+                "scope": "#/properties/subjects",
+                "options": {
+                  "detail": {
+                    "type": "VerticalLayout",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/subject"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/lang",
+                        "option": {
                           "readOnly": true
                         }
-                      },
-                      {
-                        "type": "Control",
-                        "scope": "#/properties/contributorType",
-                        "label": "Contributor type"
-                      },
-                      {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                          {
-                            "type": "Control",
-                            "scope": "#/properties/givenName",
-                            "label": "First Name"
-                          },
-                          {
-                            "type": "Control",
-                            "scope": "#/properties/familyName",
-                            "label": "Last Name"
-                          }
-                        ]
-                      },
-                      {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                          {
-                            "type": "Group",
-                            "label": "Affiliations",
-                            "elements": [
-                              {
-                                "type": "ListWithDetail",
-                                "scope": "#/properties/affiliation"
-                              }
-                            ]
-                          },
-                          {
-                            "type": "Group",
-                            "label": "Personal Identifiers",
-                            "elements": [
-                              {
-                                "type": "ListWithDetail",
-                                "scope": "#/properties/nameIdentifiers",
-                                "label": "Affiliations"
-                              }
-                            ]
-                          }
-                        ]
                       }
                     ]
                   }
-                ]
+                }
               }
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Descriptions",
-        "elements": [
+            ]
+          },
           {
-            "type": "Control",
-            "scope": "#/properties/descriptions",
-            "options": {
-              "detail": {
-                "type": "VerticalLayout",
-                "elements": [
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/descriptionType",
-                    "label": "Type"
-                  },
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/description",
-                    "label": "Description",
-                    "options": {
-                      "multi": true
-                    }
-                  }
-                ]
+            "type": "Category",
+            "label": "Publisher",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/publisher",
+                "options": {
+                  "readOnly": true
+                }
               }
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Keywords",
-        "elements": [
+            ]
+          },
           {
-            "type": "ListWithDetail",
-            "scope": "#/properties/subjects",
-            "options": {
-              "detail": {
-                "type": "VerticalLayout",
-                "elements": [
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/subject"
-                  },
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/lang",
-                    "option": {
-                      "readOnly": true
-                    }
-                  }
-                ]
+            "type": "Category",
+            "label": "License",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/rightsList",
+                "options": {
+                  "readOnly": true
+                }
               }
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Publisher",
-        "elements": [
+            ]
+          },
           {
-            "type": "Control",
-            "scope": "#/properties/publisher",
-            "options": {
-              "readOnly": true
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "License",
-        "elements": [
+            "type": "Category",
+            "label": "Dates*",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/dates",
+                "label": "Dates",
+                "options": {
+                  "readOnly": true
+                }
+              }
+            ]
+          },
           {
-            "type": "Control",
-            "scope": "#/properties/rightsList",
-            "options": {
-              "readOnly": true
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Dates*",
-        "elements": [
-          {
-            "type": "Control",
-            "scope": "#/properties/dates",
-            "label": "Dates",
-            "options": {
-              "readOnly": true
-            }
-          }
-        ]
-      },
-      {
-        "type": "Category",
-        "label": "Linked Publications",
-        "elements": [
-          {
-            "type": "ListWithDetail",
-            "scope": "#/properties/relatedIdentifiers",
+            "type": "Category",
             "label": "Linked Publications",
-            "options": {
-              "detail": {
-                "type": "VerticalLayout",
-                "elements": [
-                  {
-                    "type": "Control",
-                    "label": "Publication's DOI",
-                    "scope": "#/properties/relatedIdentifier"
-                  },
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/relatedIdentifierType"
-                  },
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/relationType"
-                  },
-                  {
-                    "type": "Control",
-                    "scope": "#/properties/resourceTypeGeneral"
+            "elements": [
+              {
+                "type": "ListWithDetail",
+                "scope": "#/properties/relatedIdentifiers",
+                "label": "Linked Publications",
+                "options": {
+                  "detail": {
+                    "type": "VerticalLayout",
+                    "elements": [
+                      {
+                        "type": "Control",
+                        "label": "Publication's DOI",
+                        "scope": "#/properties/relatedIdentifier"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/relatedIdentifierType"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/relationType"
+                      },
+                      {
+                        "type": "Control",
+                        "scope": "#/properties/resourceTypeGeneral"
+                      }
+                    ]
                   }
-                ]
+                }
               }
-            }
+            ]
           }
         ]
       }
