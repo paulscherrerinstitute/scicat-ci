@@ -363,9 +363,24 @@
             },
             "dialog": {
                 "title": "Really archive?",
-                "fields": []
+                "fields": [
+                    {
+                        "key": "tapeCopies",
+                        "label": "Tape Copies",
+                        "type": "select",
+                        "required": true,
+                        "options": [
+                            {
+                                "option": "1"
+                            },
+                            {
+                                "option": "2"
+                            }
+                        ]
+                    }
+                ]
             },
-            "payload": "{\"jobParams\": {\"username\": \"{{ @username }}\"}, \"emailJobInitiator\": \"{{ @userEmail }}\", \"datasetList\": {{ @datasetList }}, \"type\": \"archive\"}",
+            "payload": "{\"jobParams\": {\"username\": \"{{ @username }}\", \"tapeCopies\": \"{{ @dialog.tapeCopies }}\"}, \"emailJobInitiator\": \"{{ @userEmail }}\", \"datasetList\": {{ @datasetList }}, \"type\": \"archive\"}",
             "hidden": "![undefined, '#currentArchViewMode', 'archivable'].includes(@archiveViewMode)",
             "enabled": "@totalSize > 0"
         },
