@@ -1,5 +1,5 @@
 host: doi.psi.ch
-exporterHost: scicat-exporter.psi.ch
+exporterHost: scicat-rocrate.psi.ch
 
 secrets: 
   "{{ .Release.Name }}-s":
