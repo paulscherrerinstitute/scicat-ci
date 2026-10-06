@@ -9,6 +9,11 @@ name: deploy
 on:
   pull_request:
     branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     paths:
       - .github/workflows/deploy.yml
       - helm/**
@@ -26,9 +31,11 @@ permissions:
 jobs:
 
   set_env:
+    if: ${{ !github.event.pull_request.draft }}
     uses: ./.github/workflows/reusable.environment.yml
 
   discover:
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     outputs:
       components: ${{ steps.select.outputs.components }}
