@@ -12,9 +12,9 @@
     "editSampleEnabled": false,
     "facility": "PSI",
     "siteHeaderLogo": "site-logo.png",
-    "siteTitle" : "SciCat Data Catalog",
-    "siteSciCatLogo" : "scicat-header-logo-full.png",
-    "siteLoginLogo" : "site-logo.png",
+    "siteTitle": "SciCat Data Catalog",
+    "siteSciCatLogo": "scicat-header-logo-full.png",
+    "siteLoginLogo": "site-logo.png",
     "siteLoginBackground": "site.png",
     "loginFacilityEnabled": true,
     "loginFacilityLabel": "Single Sign-On",
@@ -23,12 +23,14 @@
     "loginLocalLabel": "Local",
     "fileColorEnabled": false,
     "fileDownloadEnabled": false,
-    "gettingStarted": "https://data-catalog-services.pages.psi.ch/gettingStarted/",
-    "helpMessages": {
-        "gettingStarted": "gives a brief description on how to get started using the data catalog.",
-        "ingestManual": "provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets."
+    "helpSettings": {
+        "enabled": true,
+        "htmlContent": "<style>.help-card{margin:16px 0;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.2),0 1px 1px rgba(0,0,0,.14);font-family:Roboto,\"Helvetica Neue\",sans-serif;font-size:14px;line-height:1.5}.help-card h3{margin:0 0 12px;font-size:20px;font-weight:500}@media (max-width:599px){.about{max-width:100%}}</style><section class=\"help-card\"><h3>Where is the official documentation?</h3><p>Please visit the <a href=\"https://data-catalog-services.pages.psi.ch/\"rel=\"noopener\"target=\"_blank\">PSI Data Catalog documentation</a>. The <a href=\"https://scicatproject.github.io/\"rel=\"noopener\"target=\"_blank\">SciCat homepage</a> also includes documentation and usage guides.</section><section class=\"help-card\"><h3>How to get started</h3><p>The <a href=\"https://data-catalog-services.pages.psi.ch/gettingStarted/\"rel=\"noopener\"target=\"_blank\">Getting Started Guide</a> gives a brief description on how to get started using the data catalog.</section><section class=\"help-card\"><h3>Where is my data?</h3><p>The data catalog keeps the <em>metadata</em> for your raw and derived datasets. The actual files comprising the datasets are however stored outside the catalog. Often the data will reside initially on disk. The data catalog allows you to archive these files. In this way the files on disk will be copied to tape and can be retrieved later to a location of your choice. Here are the <a href=\"https://scicatproject.github.io/documentation/Users/Jobs.html\"rel=\"noopener\"target=\"_blank\">details on the archive and retrieve workflows</a>.</section><section class=\"help-card\"><h3>How can I publish a dataset?</h3><p>Select datasets in the dataset table and add to <b>Selection</b>. Once in <b>Selection</b>, click <b>Publish</b> and follow instructions.</section><section class=\"help-card\"><h3>Ingest Manual</h3><p>The <a href=\"https://data-catalog-services.pages.psi.ch/ingestorManual/\"rel=\"noopener\"target=\"_blank\">Ingest Manual</a> provides detailed information on how to make your data available to the catalog as well as archiving and retrieval of datasets.</section><section class=\"help-card\"><h3>Where are my proposals?</h3><p>Once logged in, you can see your proposals at <a href=\"/proposals\">Proposals</a>.</section><section class=\"help-card\"><h3>Where are my samples?</h3><p>Once logged in, you can see your samples at <a href=\"/samples\">Samples</a>.</section><section class=\"help-card\"><h3>Questions or issues?</h3><p>If you have any questions or need help, please contact <a href=\"mailto:scicat-help@lists.psi.ch\">scicat-help@lists.psi.ch</a>.</section>"
     },
-    "ingestManual": "https://data-catalog-services.pages.psi.ch/ingestorManual/",
+    "aboutSettings": {
+        "enabled": true,
+        "htmlContent": "<style>.help-card{margin:16px 0;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.2),0 1px 1px rgba(0,0,0,.14);font-family:Roboto,\"Helvetica Neue\",sans-serif;font-size:14px;line-height:1.5}.help-card h3{margin:0 0 12px;font-size:20px;font-weight:500}@media (max-width:599px){.about{max-width:100%}}</style><section class=\"help-card\"><h3>About SciCat</h3><p>SciCat is a metadata catalog. At PSI, SciCat works in conjunction with a petabyte archive and remote access system. Together these components provide users with the ability to store, search and access their data. SciCat is an open source project in collaboration with ESS and MAX IV.<ul><li><a href=\"https://github.com/SciCatProject\"rel=\"noopener\"target=\"_blank\">SciCat GitHub Project</a></ul></section><section class=\"help-card\"><h3>Access Conditions</h3><p>Access to SciCat is granted to users by the Digital User Office.</section><section class=\"help-card\"><h3>Terms of Use</h3><p>The Swiss National Science Foundation describes policy and guidelines on <a href=\"https://www.snf.ch/en/theSNSF/research-policies/open_research_data/Pages/default.aspx#Guidelines%20and%20Regulations\"rel=\"noopener\"target=\"_blank\">Open Research Data</a>.<p>Additionally, PSI defines its own <a href=\"https://www.psi.ch/en/science/psi-data-policy\"rel=\"noopener\"target=\"_blank\">Data Policy</a>.</section>"
+    },
     "supportEmail": "scicat-help@lists.psi.ch",
     "jobsEnabled": true,
     "jsonMetadataEnabled": true,
