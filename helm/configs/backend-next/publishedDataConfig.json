@@ -33,25 +33,21 @@
                 "familyName": {
                   "type": "string",
                   "title": "Family Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
+                  "minLength": 1
                 },
                 "givenName": {
                   "type": "string",
                   "title": "Given Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
+                  "minLength": 1
                 },
                 "name": {
                   "type": "string",
                   "title": "Name",
-                  "minLength": 1,
-                  "$dataciteRequired": true
+                  "minLength": 1
                 },
                 "nameType": {
                   "type": "string",
                   "title": "Name Type",
-                  "$dataciteRequired": false,
                   "enum": [ "Personal", "Organizational" ],
                   "pattern": "Personal",
                   "default": "Personal"
@@ -65,22 +61,19 @@
                       "nameIdentifier": {
                         "type": "string",
                         "title": "ORCID",
-                        "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$",
-                        "$dataciteRequired": false
+                        "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$"
                       },
                       "nameIdentifierScheme": {
                         "type": "string",
                         "title": "Identifier Scheme",
                         "enum": [ "ORCID" ],
-                        "default": "ORCID",
-                        "$dataciteRequired": true
+                        "default": "ORCID"
                       },
                       "schemeUri": {
                         "type": "string",
                         "title": "Scheme URI",
                         "enum": [ "https://orcid.org" ],
-                        "default": "https://orcid.org",
-                        "$dataciteRequired": false
+                        "default": "https://orcid.org"
                       }
                     },
                     "required": [
@@ -88,8 +81,7 @@
                       "nameIdentifierScheme",
                       "schemeUri"
                     ]
-                  },
-                  "$dataciteRequired": false
+                  }
                 },
                 "affiliation": {
                   "type": "array",
@@ -101,26 +93,22 @@
                       "name": {
                         "type": "string",
                         "title": "Affiliation Name",
-                        "minLength": 1,
-                        "$dataciteRequired": true
+                        "minLength": 1
                       },
                       "affiliationIdentifier": {
                         "type": "string",
                         "pattern": "^https://ror.org/0[a-z|0-9]{6}[0-9]{2}$",
-                        "title": "ROR URL",
-                        "$dataciteRequired": false
+                        "title": "ROR URL"
                       },
                       "affiliationIdentifierScheme": {
                         "type": "string",
                         "title": "Affiliation Identifier Scheme",
-                        "enum": [ "ROR" ],
-                        "$dataciteRequired": true
+                        "enum": [ "ROR" ]
                       },
                       "schemeUri": {
                         "type": "string",
                         "title": "Scheme URI",
-                        "enum": [ "https://ror.org" ],
-                        "$dataciteRequired": false
+                        "enum": [ "https://ror.org" ]
                       }
                     },
                     "required": [ "name" ],
@@ -130,8 +118,7 @@
                         "schemeUri"
                       ]
                     }
-                  },
-                  "$dataciteRequired": false
+                  }
                 }
               },
               "required": [
@@ -140,8 +127,7 @@
                 "familyName",
                 "affiliation"
               ]
-            },
-            "$dataciteRequired": true
+            }
           },
           "publisher": {
             "type:": "object",
@@ -151,26 +137,22 @@
               "name": {
                 "type": "string",
                 "title": "Publisher Name",
-                "default": "PSI Open Data Provider",
-                "$dataciteRequired": true
+                "default": "PSI Open Data Provider"
               },
               "publisherIdentifier": {
                 "type": "string",
                 "title": "Publisher Identifier",
-                "default": "https://www.re3data.org/repository/r3d100013504",
-                "$dataciteRequired": false
+                "default": "https://www.re3data.org/repository/r3d100013504"
               },
               "publisherIdentifierScheme": {
                 "type": "string",
                 "title": "Publisher Identifier Scheme",
-                "default": "re3data",
-                "$dataciteRequired": false
+                "default": "re3data"
               },
               "schemeUri": {
                 "type": "string",
                 "title": "Scheme URI",
-                "default": "https://re3data.org/",
-                "$dataciteRequired": false
+                "default": "https://re3data.org/"
               },
               "lang": {
                 "type": "string",
@@ -184,15 +166,13 @@
               "publisherIdentifierScheme",
               "schemeUri",
               "lang"
-            ],
-            "$dataciteRequired": true
+            ]
           },
           "publicationYear": {
             "type": "integer",
             "title": "Publication Year",
             "mininum": 2000,
-            "maximum": 9999,
-            "$dataciteRequired": true
+            "maximum": 9999
           },
           "contributors": {
             "type": "array",
@@ -203,19 +183,16 @@
                 "familyName": {
                   "type": "string",
                   "title": "Family Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
+                  "minLength": 1
                 },
                 "givenName": {
                   "type": "string",
                   "title": "Given Name",
-                  "minLength": 1,
-                  "$dataciteRequired": false
+                  "minLength": 1
                 },
                 "contributorType": {
                   "type": "string",
                   "title": "Contributor Type",
-                  "$dataciteRequired": true,
                   "enum": [
                     "ContactPerson",
                     "DataCollector",
@@ -242,13 +219,11 @@
                 "name": {
                   "type": "string",
                   "title": "Contributor Name",
-                  "minLength": 1,
-                  "$dataciteRequired": true
+                  "minLength": 1
                 },
                 "nameType": {
                   "type": "string",
                   "title": "Name Type",
-                  "$dataciteRequired": false,
                   "enum": [ "Personal" ],
                   "default": "Personal"
                 },
@@ -261,22 +236,19 @@
                       "nameIdentifier": {
                         "type": "string",
                         "title": "ORCID",
-                        "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$",
-                        "$dataciteRequired": false
+                        "pattern": "^https://orcid.org/(\\d{4}-){3}\\d{3}(\\d|X)$"
                       },
                       "nameIdentifierScheme": {
                         "type": "string",
                         "title": "Identifier Scheme",
                         "enum": [ "ORCID" ],
-                        "default": "ORCID",
-                        "$dataciteRequired": true
+                        "default": "ORCID"
                       },
                       "schemeUri": {
                         "type": "string",
                         "title": "Scheme URI",
                         "enum": [ "https://orcid.org" ],
-                        "default": "https://orcid.org",
-                        "$dataciteRequired": false
+                        "default": "https://orcid.org"
                       }
                     },
                     "required": [
@@ -284,8 +256,7 @@
                       "nameIdentifierScheme",
                       "schemeUri"
                     ]
-                  },
-                  "$dataciteRequired": false
+                  }
                 },
                 "affiliation": {
                   "type": "array",
@@ -297,26 +268,22 @@
                       "name": {
                         "type": "string",
                         "title": "Affiliation Name",
-                        "minLength": 1,
-                        "$dataciteRequired": true
+                        "minLength": 1
                       },
                       "affiliationIdentifier": {
                         "type": "string",
                         "pattern": "^https://ror.org/0[a-z|0-9]{6}[0-9]{2}$",
-                        "title": "ROR URL",
-                        "$dataciteRequired": false
+                        "title": "ROR URL"
                       },
                       "affiliationIdentifierScheme": {
                         "type": "string",
                         "title": "Affiliation Identifier Scheme",
-                        "enum": [ "ROR" ],
-                        "$dataciteRequired": true
+                        "enum": [ "ROR" ]
                       },
                       "schemeUri": {
                         "type": "string",
                         "title": "Scheme URI",
-                        "enum": [ "https://ror.org" ],
-                        "$dataciteRequired": false
+                        "enum": [ "https://ror.org" ]
                       }
                     },
                     "required": [ "name" ],
@@ -326,8 +293,7 @@
                         "schemeUri"
                       ]
                     }
-                  },
-                  "$dataciteRequired": false
+                  }
                 }
               },
               "required": [
@@ -336,8 +302,7 @@
                 "givenName",
                 "familyName",
                 "affiliation"
-              ],
-              "$dataciteRequired": false
+              ]
             }
           },
           "subjects": {
@@ -348,38 +313,31 @@
               "properties": {
                 "subject": {
                   "type": "string",
-                  "title": "Keyword",
-                  "$dataciteRequired": false
+                  "title": "Keyword"
                 },
                 "subjectScheme": {
                   "type": "string",
-                  "title": "Subject Scheme",
-                  "$dataciteRequired": false
+                  "title": "Subject Scheme"
                 },
                 "schemeUri": {
                   "type": "string",
-                  "title": "Subject URI",
-                  "$dataciteRequired": false
+                  "title": "Subject URI"
                 },
                 "valueUri": {
                   "type": "string",
-                  "title": "Value URI",
-                  "$dataciteRequired": false
+                  "title": "Value URI"
                 },
                 "lang": {
                   "type": "string",
                   "title": "Language",
                   "enum": [ "en" ],
-                  "default": "en",
-                  "$dataciteRequired": false
+                  "default": "en"
                 },
                 "classificationCode": {
                   "type": "string",
-                  "title": "Classification Code",
-                  "$dataciteRequired": false
+                  "title": "Classification Code"
                 }
-              },
-              "$dataciteRequired": false
+              }
             }
           },
           "dates": {
@@ -395,13 +353,11 @@
                 "date": {
                   "type": "string",
                   "pattern": "^\\d{4}$",
-                  "title": "Date",
-                  "$dataciteRequired": true
+                  "title": "Date"
                 },
                 "dateType": {
                   "type": "string",
                   "title": "Date Type",
-                  "$dataciteRequired": true,
                   "enum": [
                     "Accepted",
                     "Available",
@@ -419,24 +375,20 @@
                 },
                 "dateInformation": {
                   "type": "string",
-                  "title": "Date Information",
-                  "$dataciteRequired": false
+                  "title": "Date Information"
                 }
               }
-            },
-            "$dataciteRequired": false
+            }
           },
           "language": {
             "type": "string",
             "title": "Language",
             "enum": [ "en" ],
-            "default": "en",
-            "$dataciteRequired": false
+            "default": "en"
           },
           "types": {
             "type": "object",
             "title": "Resource Type",
-            "$dataciteRequired": true,
             "properties": {
               "resourceType": {
                 "type": "string"
@@ -454,18 +406,15 @@
               "properties": {
                 "alternateIdentifier": {
                   "type": "string",
-                  "title": "Alternate Identifier",
-                  "$dataciteRequired": true
+                  "title": "Alternate Identifier"
                 },
                 "alternateIdentifierType": {
                   "type": "string",
-                  "title": "Alternate Identifier Type",
-                  "$dataciteRequired": true
+                  "title": "Alternate Identifier Type"
                 }
               },
               "required": [ "alternateIdentifier", "alternateIdentifierType" ]
-            },
-            "$dataciteRequired": false
+            }
           },
           "relatedIdentifiers": {
             "type": "array",
@@ -475,37 +424,31 @@
                 "relatedIdentifier": {
                   "type": "string",
                   "title": "Related Identifier",
-                  "pattern": "^10\\.\\d{4,9}/[-._;()/:a-zA-Z0-9]+$",
-                  "$dataciteRequired": true
+                  "pattern": "^10\\.\\d{4,9}/[-._;()/:a-zA-Z0-9]+$"
                 },
                 "relatedIdentifierType": {
                   "type": "string",
                   "title": "Related Identifier Type",
-                  "$dataciteRequired": true,
                   "default": "DOI",
                   "enum": [ "DOI" ]
                 },
                 "relationType": {
                   "type": "string",
                   "title": "Relation Type",
-                  "$dataciteRequired": true,
                   "default": "IsSupplementTo",
                   "enum": [ "IsSupplementTo", "IsIdenticalTo" ]
                 },
                 "relatedMetadataScheme": {
                   "type": "string",
-                  "title": "Related Metadata Scheme",
-                  "$dataciteRequired": false
+                  "title": "Related Metadata Scheme"
                 },
                 "schemeUri": {
                   "type": "string",
-                  "title": "Scheme URI",
-                  "$dataciteRequired": false
+                  "title": "Scheme URI"
                 },
                 "schemeType": {
                   "type": "string",
                   "title": "Scheme Type",
-                  "$dataciteRequired": false,
                   "enum": [ "DOI", "Handle", "URL", "Other" ]
                 },
                 "resourceTypeGeneral": {
@@ -521,24 +464,20 @@
                 "relationType",
                 "resourceTypeGeneral"
               ]
-            },
-            "$dataciteRequired": false
+            }
           },
           "sizes": {
             "type": "array",
             "items": {
               "type": "string",
-              "title": "Total size in bytes",
-              "$dataciteRequired": false
-            },
-            "$dataciteRequired": false
+              "title": "Total size in bytes"
+            }
           },
           "formats": {
             "type": "array",
             "items": {
               "type": "string",
-              "title": "Format",
-              "$dataciteRequired": false
+              "title": "Format"
             }
           },
           "rightsList": {
@@ -560,32 +499,27 @@
                 "rights": {
                   "type": "string",
                   "title": "Rights",
-                  "default": "Creative Commons Attribution Share Alike 4.0 International",
-                  "$dataciteRequired": false
+                  "default": "Creative Commons Attribution Share Alike 4.0 International"
                 },
                 "rightsUri": {
                   "type": "string",
                   "title": "Rights URI",
-                  "default": "https://creativecommons.org/licenses/by-sa/4.0/",
-                  "$dataciteRequired": false
+                  "default": "https://creativecommons.org/licenses/by-sa/4.0/"
                 },
                 "rightsIdentifier": {
                   "type": "string",
                   "title": "Rights Identifier",
-                  "default": "CC-BY-SA-4.0",
-                  "$dataciteRequired": false
+                  "default": "CC-BY-SA-4.0"
                 },
                 "rightsIdentifierScheme": {
                   "type": "string",
                   "title": "Rights Identifier Scheme",
-                  "default": "SPDX",
-                  "$dataciteRequired": false
+                  "default": "SPDX"
                 },
                 "schemeUri": {
                   "type": "string",
                   "title": "Scheme URI",
-                  "default": "https://spdx.org/licenses/",
-                  "$dataciteRequired": false
+                  "default": "https://spdx.org/licenses/"
                 },
                 "lang": {
                   "type": "string",
@@ -593,8 +527,7 @@
                   "default": "en"
                 }
               }
-            },
-            "$dataciteRequired": false
+            }
           },
           "descriptions": {
             "type": "array",
@@ -603,13 +536,11 @@
               "properties": {
                 "description": {
                   "type": "string",
-                  "title": "Description",
-                  "$dataciteRequired": true
+                  "title": "Description"
                 },
                 "descriptionType": {
                   "type": "string",
                   "title": "Description Type",
-                  "$dataciteRequired": true,
                   "enum": [
                     "Methods",
                     "SeriesInformation",
@@ -625,8 +556,7 @@
                 }
               },
               "required": [ "description", "descriptionType" ]
-            },
-            "$dataciteRequired": false
+            }
           },
           "geoLocations": {
             "type": "array",
@@ -635,8 +565,7 @@
               "properties": {
                 "geoLocationPlace": {
                   "type": "string",
-                  "title": "Geolocation Place",
-                  "$dataciteRequired": false
+                  "title": "Geolocation Place"
                 },
                 "geoLocationPoint": {
                   "type": "object",
@@ -644,20 +573,17 @@
                     "pointLongitude": {
                       "type": "number",
                       "title": "Longitude",
-                      "$dataciteRequired": false,
                       "minimum": -180,
                       "maximum": 180
                     },
                     "pointLatitude": {
                       "type": "number",
                       "title": "Latitude",
-                      "$dataciteRequired": false,
                       "minimum": -90,
                       "maximum": 90
                     }
                   },
-                  "required": [ "pointLongitude", "pointLatitude" ],
-                  "$dataciteRequired": false
+                  "required": [ "pointLongitude", "pointLatitude" ]
                 },
                 "geoLocationBox": {
                   "type": "object",
@@ -665,28 +591,24 @@
                     "westBoundLongitude": {
                       "type": "number",
                       "title": "West Bound Longitude",
-                      "$dataciteRequired": false,
                       "minimum": -180,
                       "maximum": 180
                     },
                     "eastBoundLongitude": {
                       "type": "number",
                       "title": "East Bound Longitude",
-                      "$dataciteRequired": false,
                       "minimum": -180,
                       "maximum": 180
                     },
                     "southBoundLatitude": {
                       "type": "number",
                       "title": "South Bound Latitude",
-                      "$dataciteRequired": false,
                       "minimum": -90,
                       "maximum": 90
                     },
                     "northBoundLatitude": {
                       "type": "number",
                       "title": "North Bound Latitude",
-                      "$dataciteRequired": false,
                       "minimum": -90,
                       "maximum": 90
                     }
@@ -696,11 +618,9 @@
                     "eastBoundLongitude",
                     "southBoundLatitude",
                     "northBoundLatitude"
-                  ],
-                  "$dataciteRequired": false
+                  ]
                 }
-              },
-              "$dataciteRequired": false
+              }
             }
           },
           "fundingReferences": {
@@ -710,38 +630,31 @@
               "properties": {
                 "funderName": {
                   "type": "string",
-                  "title": "Funder Name",
-                  "$dataciteRequired": true
+                  "title": "Funder Name"
                 },
                 "funderIdentifier": {
                   "type": "string",
-                  "title": "Funder Identifier",
-                  "$dataciteRequired": false
+                  "title": "Funder Identifier"
                 },
                 "funderIdentifierType": {
                   "type": "string",
                   "title": "Funder Identifier Type",
-                  "$dataciteRequired": true,
                   "enum": [ "ROR", "GRID", "Crossref Funder ID", "ISNI", "Other" ]
                 },
                 "awardTitle": {
                   "type": "string",
-                  "title": "Award Title",
-                  "$dataciteRequired": false
+                  "title": "Award Title"
                 },
                 "awardNumber": {
                   "type": "string",
-                  "title": "Award Number",
-                  "$dataciteRequired": false
+                  "title": "Award Number"
                 },
                 "awardUri": {
                   "type": "string",
-                  "title": "Award URI",
-                  "$dataciteRequired": false
+                  "title": "Award URI"
                 }
               },
-              "required": [ "funderName", "funderIdentifierType" ],
-              "$dataciteRequired": false
+              "required": [ "funderName", "funderIdentifierType" ]
             }
           },
           "relatedItems": {
@@ -752,7 +665,6 @@
                 "relatedItemType": {
                   "type": "string",
                   "title": "Related Item Type",
-                  "$dataciteRequired": true,
                   "enum": [
                     "Audiovisual",
                     "Award",
@@ -791,7 +703,6 @@
                 "relationType": {
                   "type": "string",
                   "title": "Relation Type",
-                  "$dataciteRequired": true,
                   "enum": [
                     "IsCitedBy",
                     "Cites",
@@ -838,13 +749,11 @@
                   "properties": {
                     "relatedItemIdentifier": {
                       "type": "string",
-                      "title": "Related Item Identifier",
-                      "$dataciteRequired": true
+                      "title": "Related Item Identifier"
                     },
                     "relatedItemIdentifierType": {
                       "type": "string",
                       "title": "Related Item Identifier Type",
-                      "$dataciteRequired": true,
                       "enum": [
                         "ARK",
                         "DOI",
@@ -871,18 +780,15 @@
                     },
                     "relatedMetadataScheme": {
                       "type": "string",
-                      "title": "Related Metadata Scheme",
-                      "$dataciteRequired": false
+                      "title": "Related Metadata Scheme"
                     },
                     "schemeUri": {
                       "type": "string",
-                      "title": "Scheme URI",
-                      "$dataciteRequired": false
+                      "title": "Scheme URI"
                     },
                     "schemeType": {
                       "type": "string",
-                      "title": "Scheme Type",
-                      "$dataciteRequired": false
+                      "title": "Scheme Type"
                     }
                   }
                 },
@@ -893,29 +799,24 @@
                     "properties": {
                       "name": {
                         "type": "string",
-                        "title": "Creator Name",
-                        "$dataciteRequired": true
+                        "title": "Creator Name"
                       },
                       "nameType": {
                         "type": "string",
                         "title": "Name Type",
-                        "$dataciteRequired": false,
                         "enum": [ "Personal", "Organizational" ]
                       },
                       "givenName": {
                         "type": "string",
-                        "title": "Given Name",
-                        "$dataciteRequired": false
+                        "title": "Given Name"
                       },
                       "familyName": {
                         "type": "string",
-                        "title": "Family Name",
-                        "$dataciteRequired": false
+                        "title": "Family Name"
                       }
                     },
                     "required": [ "name" ]
-                  },
-                  "$dataciteRequired": false
+                  }
                 },
                 "titles": {
                   "type": "array",
@@ -925,13 +826,11 @@
                     "properties": {
                       "title": {
                         "type": "string",
-                        "title": "Title",
-                        "$dataciteRequired": true
+                        "title": "Title"
                       },
                       "titleType": {
                         "type": "string",
                         "title": "Title Type",
-                        "$dataciteRequired": false,
                         "enum": [
                           "AlternativeTitle",
                           "Subtitle",
@@ -941,54 +840,44 @@
                       }
                     },
                     "required": [ "title" ]
-                  },
-                  "$dataciteRequired": false
+                  }
                 },
                 "publicationYear": {
                   "type": "string",
-                  "title": "Publication Year",
-                  "$dataciteRequired": false
+                  "title": "Publication Year"
                 },
                 "volume": {
                   "type": "string",
-                  "title": "Volume",
-                  "$dataciteRequired": false
+                  "title": "Volume"
                 },
                 "issue": {
                   "type": "string",
-                  "title": "Issue",
-                  "$dataciteRequired": false
+                  "title": "Issue"
                 },
                 "number": {
                   "type": "string",
-                  "title": "Number",
-                  "$dataciteRequired": false
+                  "title": "Number"
                 },
                 "numberType": {
                   "type": "string",
                   "title": "Number Type",
-                  "$dataciteRequired": false,
                   "enum": [ "Article", "Chapter", "Report", "Other" ]
                 },
                 "firstPage": {
                   "type": "string",
-                  "title": "First Page",
-                  "$dataciteRequired": false
+                  "title": "First Page"
                 },
                 "lastPage": {
                   "type": "string",
-                  "title": "Last Page",
-                  "$dataciteRequired": false
+                  "title": "Last Page"
                 },
                 "publisher": {
                   "type": "string",
-                  "title": "Publisher",
-                  "$dataciteRequired": false
+                  "title": "Publisher"
                 },
                 "edition": {
                   "type": "string",
-                  "title": "Edition",
-                  "$dataciteRequired": false
+                  "title": "Edition"
                 },
                 "contributors": {
                   "type": "array",
@@ -998,7 +887,6 @@
                       "contributorType": {
                         "type": "string",
                         "title": "Contributor Type",
-                        "$dataciteRequired": true,
                         "enum": [
                           "ContactPerson",
                           "DataCollector",
@@ -1026,37 +914,31 @@
                       },
                       "name": {
                         "type": "string",
-                        "title": "Contributor Name",
-                        "$dataciteRequired": true
+                        "title": "Contributor Name"
                       },
                       "nameType": {
                         "type": "string",
                         "title": "Name Type",
-                        "$dataciteRequired": false,
                         "enum": [ "Personal", "Organizational" ]
                       },
                       "givenName": {
                         "type": "string",
-                        "title": "Given Name",
-                        "$dataciteRequired": false
+                        "title": "Given Name"
                       },
                       "familyName": {
                         "type": "string",
-                        "title": "Family Name",
-                        "$dataciteRequired": false
+                        "title": "Family Name"
                       }
                     },
                     "required": [ "name", "contributorType" ]
-                  },
-                  "$dataciteRequired": false
+                  }
                 }
               },
               "required": [
                 "relatedItemType",
                 "relationType",
                 "relatedItemIdentifier"
-              ],
-              "$dataciteRequired": false
+              ]
             }
           }
         }
