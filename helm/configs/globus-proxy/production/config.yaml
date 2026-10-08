@@ -33,4 +33,4 @@ facilities:
     collection: ed650f52-0235-4c40-a573-5f8de55841a6
   - <<: *openemFacility
     name: LBEM
-    collection: fccc97e3-5152-4aef-8e32-965851d58d9c
+    collection: aa31b83d-cae1-4621-a9da-68219bcfaa43
