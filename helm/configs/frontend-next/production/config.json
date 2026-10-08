@@ -50,20 +50,6 @@
     "multipleDownloadAction": null,
     "multipleDownloadEnabled": false,
     "policiesEnabled": true,
-    "retrieveDestinations": [
-        {
-            "option": "PSI",
-            "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
-        },
-        {
-            "option": "PSI-RA",
-            "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
-        },
-        {
-            "option": "URLs",
-            "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
-        }
-    ],
     "riotBaseUrl": null,
     "scienceSearchEnabled": true,
     "scienceSearchUnitsEnabled": false,
