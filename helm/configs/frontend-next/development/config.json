@@ -333,5 +333,108 @@
         25,
         100,
         1000
+    ],
+    "batchActionsEnabled": true,
+    "batchActions": [
+        {
+            "id": "38be2125-cae1-4f47-801d-2b6965a7384c",
+            "description": "Archive selected datasets via the Jobs API.",
+            "order": 1,
+            "label": "Archive",
+            "mat_icon": "archive",
+            "type": "dialog",
+            "onSuccess": "xhr",
+            "method": "POST",
+            "url": "{{ @baseUrl }}/api/v3/jobs",
+            "authorization": [],
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "#tokenBearer"
+            },
+            "variables": {
+                "baseUrl": "#apiBaseUrl",
+                "username": "#user.username",
+                "userEmail": "#user.email",
+                "pids": "#DatasetsPid",
+                "datasetList": "#DatasetsPidEmptyFilesMap",
+                "archiveViewMode": "#currentArchViewMode",
+                "totalSize": "#DatasetsTotalSize",
+                "lifecycles": "#DatasetsField[datasetlifecycle]"
+            },
+            "dialog": {
+                "title": "Really archive?",
+                "fields": [
+                    {
+                        "key": "tapeCopies",
+                        "label": "Tape Copies",
+                        "type": "select",
+                        "required": true,
+                        "options": [
+                            {
+                                "option": "1"
+                            },
+                            {
+                                "option": "2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "payload": "{\"jobParams\": {\"username\": \"{{ @username }}\", \"tapeCopies\": \"{{ @dialog.tapeCopies }}\"}, \"emailJobInitiator\": \"{{ @userEmail }}\", \"datasetList\": {{ @datasetList }}, \"type\": \"archive\"}",
+            "hidden": "![undefined, '#currentArchViewMode', 'archivable'].includes(@archiveViewMode)",
+            "enabled": "@totalSize > 0 && @lifecycles.every(l => l?.archivable === true)"
+        },
+        {
+            "id": "dc10cd56-6d0a-4f0a-899a-f9c6726465bf",
+            "description": "Retrieve archived datasets via the Jobs API.",
+            "order": 2,
+            "label": "Retrieve",
+            "mat_icon": "cloud_download",
+            "type": "dialog",
+            "onSuccess": "xhr",
+            "method": "POST",
+            "url": "{{ @baseUrl }}/api/v3/jobs",
+            "authorization": [],
+            "headers": {
+                "Authorization": "#tokenBearer"
+            },
+            "variables": {
+                "baseUrl": "#apiBaseUrl",
+                "username": "#user.username",
+                "userEmail": "#user.email",
+                "pids": "#DatasetsPid",
+                "datasetList": "#DatasetsPidEmptyFilesMap",
+                "archiveViewMode": "#currentArchViewMode",
+                "totalPackedSize": "#DatasetsTotalPackedSize"
+            },
+            "dialog": {
+                "title": "Retrieve to",
+                "fields": [
+                    {
+                        "key": "retrieveDestination",
+                        "label": "Destination",
+                        "type": "select",
+                        "required": true,
+                        "options": [
+                            {
+                                "option": "PSI",
+                                "tooltip": "Copy the data to the PSI storage buffer. After that, you need to copy it from there to any destination using the datasetRetriever command or using rsync from pb-retrieve.psi.ch"
+                            },
+                            {
+                                "option": "PSI-RA",
+                                "tooltip": "Copy the data directly to the PSI RA cluster destination folder at /das/work/${groupname:0:3}/retrieve/${groupname}/${sourceFolder}/"
+                            },
+                            {
+                                "option": "URLs",
+                                "tooltip": "Get an email with temporary URLs to download the data. Clicking on the URLs will start the download"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "payload": "{\"jobParams\": {\"username\": \"{{ @username }}\", \"retrieveDestination\": \"{{ @dialog.retrieveDestination }}\", \"destinationPath\": \"/archive/retrieve\"}, \"emailJobInitiator\": \"{{ @userEmail }}\", \"datasetList\": {{ @datasetList }}, \"type\": \"retrieve\"}",
+            "hidden": "![undefined, '#currentArchViewMode', 'retrievable'].includes(@archiveViewMode)",
+            "enabled": "@totalPackedSize > 0 && @lifecycles.every(l => l?.retrievable === true)"
+        }
     ]
 }
