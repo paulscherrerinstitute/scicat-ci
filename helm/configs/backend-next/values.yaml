@@ -82,6 +82,8 @@ env:
     value: "{{ .Values.doiPrefix }}"
   - name: REGISTER_DOI_URI
     value: "{{ .Values.registerDoiUri }}"
+  - name: PUBLIC_URL_PREFIX
+    value: "{{ .Values.publicUrlPrefix }}"
   - name: PID_PREFIX
     value: "20.500.11935"
   - name: SITE
