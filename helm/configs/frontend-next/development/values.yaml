@@ -6,4 +6,4 @@ ingress:
 
 image:
   # commit on branch psi_archive_dropdown
-  tag: 5db42bd868cbfbe0bf2c852882ff1bf04616d344
+  tag: d8ef83fbae16f403092cd2f1b0ce6ecaebf0dc6c
