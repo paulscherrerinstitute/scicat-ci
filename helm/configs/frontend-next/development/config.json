@@ -560,10 +560,39 @@
                 }
             },
             {
+                "id": "system error",
+                "label": "System Error",
+                "where": {
+                "$or": [
+                    {
+                    "datasetlifecycle.retrievable": true,
+                    "datasetlifecycle.archivable": true
+                    },
+                    {
+                    "datasetlifecycle.archiveStatusMessage": "scheduleArchiveJobFailed"
+                    },
+                    {
+                    "datasetlifecycle.retrieveStatusMessage": "scheduleRetrieveJobFailed"
+                    }
+                ]
+                }
+            },
+            {
+                "id": "user error",
+                "label": "User Error",
+                "where": {
+                "$or": [
+                    {
+                    "datasetlifecycle.archiveStatusMessage": "missingFilesError"
+                    }
+                ]
+                }
+            },
+            {
                 "id": "malware",
                 "label": "Malware detected",
                 "where": {
-                    "datasetlifecycle.archiveMessage": "malaware"
+                "datasetlifecycle.archiveStatusMessage": "malwareFilesError"
                 }
             }
         ]
