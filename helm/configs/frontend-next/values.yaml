@@ -3,7 +3,8 @@ replicaCount: 1
 # Nobody publishes this component. The tag is the source commit the hook builds.
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/frontend-next
-  tag: 65c2a3ca5a04206d0a4ef4cbecb0ed88f5a2d338
+  # commit on branch psi_retrieve_fix
+  tag: d0b0c9b3825bd6c582dbb812940493a9dc0094b8
   pullPolicy: Always
 
 service:

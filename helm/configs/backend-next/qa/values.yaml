@@ -4,6 +4,8 @@ doiPrefix: "10.83766"
 
 registerDoiUri: https://api.test.datacite.org/dois
 
+publicUrlPrefix: https://oaipmh.qa.psi.ch/detail/
+
 host: dacat-qa.psi.ch
 
 migrateCommand: npm run migrate:db:up
