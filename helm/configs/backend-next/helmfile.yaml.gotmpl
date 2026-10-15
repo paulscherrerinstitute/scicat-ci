@@ -32,8 +32,9 @@ releases:
         file: job-template.html
       - name: NOTIFICATION_TEMPLATE
         file: notification-template.html
+      # development has its own job config to try out new job types
       - name: JOB_CONFIG
-        file: jobConfig.yaml
+        file: {{ if eq .Environment.Name "development" }}development/{{ end }}jobConfig.yaml
       - name: PUBLISHED_DATA_CONFIG
         file: publishedDataConfig.json
       - name: RENAME_MEASUREMENT_ID_JS
