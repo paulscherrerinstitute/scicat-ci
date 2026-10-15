@@ -8,7 +8,7 @@
       actions:
         - actionType: log
         - actionType: validate
-          request:
+          request: &deletionCodeRequest
             # Reason of the deletion:
             # - SUPERSEDED, OBSOLETED: replaced by another entry with
             #   scientifically equivalent (but not necessarily identical) data
@@ -22,7 +22,7 @@
               const: false
     update:
       auth: '@retentionManager'
-      actions:
+      actions: &logUpdate
         - actionType: log
           perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
 
@@ -44,6 +44,27 @@
           bodyTemplateFile: email-templates/notification-template.html
     update:
       auth: '@retentionManager'
+      actions: *logUpdate
+
+  # Created by the retention cronjob when a markedForDeletion job expires, for
+  # its datasets still marked for deletion. Processed by the archive system.
+  - jobType: delete
+    create:
+      auth: '@retentionManager'
       actions:
         - actionType: log
-          perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+        # Deletion cannot be undone: only datasets still marked for deletion
+        # (not restored in the meantime) and never published ones
+        - actionType: validate
+          # Same reason as the markedForDeletion job it comes from
+          request: *deletionCodeRequest
+          datasets:
+            isPublished:
+              const: false
+            "datasetlifecycle.archiveStatusMessage":
+              const: markedForDeletion
+        - *psiStorage
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions: *logUpdate
