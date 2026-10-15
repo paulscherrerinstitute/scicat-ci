@@ -10,6 +10,8 @@ class FixturesJobs:
 
     dataset_pids = ["pid1", "pid2"]
 
+    contact_emails = ["a@psi.ch", "b@psi.ch"]
+
     @staticmethod
     def raw_job(
         job_result_object=None,

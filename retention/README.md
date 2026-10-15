@@ -64,11 +64,13 @@ Variables to be supplied for docker run:
 - SCICAT_ENDPOINT
 - SCICAT_USERNAME
 - SCICAT_PASSWORD
+- NOTIFICATION_CONTACT_EMAILS: comma-separated recipients of every notification email
 
 ```bash
 IMAGE_NAME=<IMAGE_NAME>
 docker build -t $IMAGE_NAME .
 docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
 -e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" \
+-e "NOTIFICATION_CONTACT_EMAILS=<NOTIFICATION_CONTACT_EMAILS>" \
 $IMAGE_NAME python main.py
 ```

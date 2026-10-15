@@ -172,7 +172,7 @@ class MarkedForDeletionJob:
             **{self._retention_unit: self.retention_amount}
         )
 
-    def _notify(self, expired):
+    def _notify(self, expired, contact_emails):
         """Submits one notification job per owner group of the job's datasets."""
         for owner_group, pids in _pids_by_owner_group(self.dataset_pids).items():
             JobsApi().jobs_controller_create_v3(
@@ -181,6 +181,7 @@ class MarkedForDeletionJob:
                     "datasetList": [{"pid": pid, "files": []} for pid in pids],
                     "jobParams": {
                         "ownerGroup": owner_group,
+                        "contactEmails": contact_emails,
                         "markedForDeletionJobId": self.id,
                         "expiryDate": self.expiry_date.isoformat(),
                         "expired": expired,
@@ -191,12 +192,12 @@ class MarkedForDeletionJob:
                 f"Job {self.id} notified {owner_group} about {len(pids)} dataset(s)"
             )
 
-    def advance(self, now):
-        """Notifies the owner groups, then records the check-in and whether the grace period has elapsed."""
+    def advance(self, now, contact_emails):
+        """Notifies contact_emails per owner group, then records the check-in and whether the grace period has elapsed."""
         expired = now >= self.expiry_date
         # Notify first: if it fails, the check-in is not recorded and the job
         # stays due for the next run.
-        self._notify(expired)
+        self._notify(expired, contact_emails)
         now_iso = now.isoformat()
         job_result_object = self._job.job_result_object
         patch = {
