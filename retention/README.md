@@ -21,15 +21,18 @@
    job per owner group of the datasets; Node-RED emails the group members.
 4. Once a job's full grace period has elapsed, it checks which of its
    datasets are still marked for deletion — a dataset may have been
-   restored in the meantime (e.g. by a future `revertDeletion` job type).
-   Whatever is still marked gets submitted as a new `delete` job. Either
-   way, the original job is marked expired so it's never picked up again —
-   even if nothing ended up marked, meaning no `delete` job was submitted.
+   restored in the meantime (by a `revertMarkForDeletion` job).
+   Whatever is still marked gets submitted as a new `delete` job, with the
+   original job's `jobParams.deletionCode` (the reason of the deletion, also
+   shown in every notification). The code is required when the job is
+   created, so a job without one is reported as an error on every run. The
+   original job is then marked expired so it's never picked up again — even
+   if nothing ended up marked, meaning no `delete` job was submitted.
 
 `datasetList` is never modified once a job is created — it's a snapshot of
 what was originally marked. Whether a dataset is still eligible for deletion
 is decided fresh, right before submitting the `delete` job, rather than
-tracked on the job over time. That keeps a future `revertDeletion` simple
+tracked on the job over time. That keeps `revertMarkForDeletion` simple
 too: restoring a dataset only ever touches the dataset itself, never any
 `markedForDeletion` job.
 
