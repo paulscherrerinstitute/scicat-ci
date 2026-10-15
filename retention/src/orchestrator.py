@@ -6,8 +6,8 @@ from utils import log
 
 class RetentionOrchestrator:
     """
-    Updates the verification time of "markedForDeletion" jobs due for a
-    check-in, until their grace period expires.
+    Notifies the owner groups of "markedForDeletion" jobs due for a check-in
+    and records the check-in, until their grace period expires.
 
     Which jobs are due is decided by the database query itself.
     """
