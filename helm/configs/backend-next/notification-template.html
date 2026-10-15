@@ -9,6 +9,7 @@ Job parameters:
 - ownerGroup: owner group of the datasets
 - expiryDate: date at which the retention period expires
 - expired: whether the retention period has already expired
+- deletionCode: optional reason of the deletion, from the markedForDeletion job
 --}}
 <html>
 
@@ -90,6 +91,18 @@ Job parameters:
     <div>
       <p>The following dataset(s) of group <b>{{job.jobParams.ownerGroup}}</b> have been marked for deletion. Their retention period expires on {{job.jobParams.expiryDate}}.</p>
     </div>
+  {{/if}}
+
+  {{#if job.jobParams.deletionCode }}
+    <p><b>Reason:</b>
+    {{#if (or (eq job.jobParams.deletionCode "SUPERSEDED") (eq job.jobParams.deletionCode "OBSOLETED")) }}
+      replaced by another entry with scientifically equivalent (but not necessarily identical) data
+    {{else if (eq job.jobParams.deletionCode "EXPIRED") }}
+      the archive retention time has passed
+    {{else if (eq job.jobParams.deletionCode "REMOVED") }}
+      removed without a replacement
+    {{/if}}
+    ({{job.jobParams.deletionCode}})</p>
   {{/if}}
 
   {{#if datasets}}
