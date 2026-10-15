@@ -125,6 +125,7 @@ class TestMarkedForDeletionJob:
             "datasetList": [{"pid": pid, "files": []} for pid in pids],
             "jobParams": {
                 "ownerGroup": owner_group,
+                "contactEmails": FixturesJobs.contact_emails,
                 "markedForDeletionJobId": FixturesJobs.job_id,
                 "expiryDate": (
                     FixturesJobs.creation_time + relativedelta(months=3)
@@ -143,7 +144,7 @@ class TestMarkedForDeletionJob:
     def test_advance_first_check_in(self, _, mock_update, mock_create):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         now = FixturesJobs.creation_time
-        job.advance(now)
+        job.advance(now, FixturesJobs.contact_emails)
         mock_create.assert_called_once_with(
             ANY, self._notification("group1", ["pid1", "pid2"], expired=False)
         )
@@ -178,7 +179,7 @@ class TestMarkedForDeletionJob:
             )
         )
         now = FixturesJobs.creation_time + relativedelta(months=1)
-        job.advance(now)
+        job.advance(now, FixturesJobs.contact_emails)
         _, kwargs = mock_find_datasets.call_args_list[0]
         assert json.loads(kwargs["filter"]) == {
             "where": {"pid": {"$in": ["pid1", "pid2"]}},
@@ -211,7 +212,7 @@ class TestMarkedForDeletionJob:
     def test_advance_expires(self, _, mock_update, mock_create):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         now = FixturesJobs.creation_time + relativedelta(months=3)
-        job.advance(now)
+        job.advance(now, FixturesJobs.contact_emails)
         mock_create.assert_called_once_with(
             ANY, self._notification("group1", ["pid1", "pid2"], expired=True)
         )
@@ -237,7 +238,7 @@ class TestMarkedForDeletionJob:
     )
     def test_advance_skips_missing_datasets(self, _, mock_update, mock_create):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
-        job.advance(FixturesJobs.creation_time)
+        job.advance(FixturesJobs.creation_time, FixturesJobs.contact_emails)
         mock_create.assert_called_once_with(
             ANY, self._notification("group1", ["pid1"], expired=False)
         )
@@ -256,7 +257,7 @@ class TestMarkedForDeletionJob:
         mock_create.side_effect = Exception("boom")
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         with pytest.raises(Exception):
-            job.advance(FixturesJobs.creation_time)
+            job.advance(FixturesJobs.creation_time, FixturesJobs.contact_emails)
         mock_update.assert_not_called()
 
     @patch("scicat.DATASETS_PAGE_LIMIT", 2)
@@ -275,7 +276,7 @@ class TestMarkedForDeletionJob:
         job = scicat.MarkedForDeletionJob(
             FixturesJobs.raw_job(dataset_pids=["pid1", "pid2", "pid3"])
         )
-        job.advance(FixturesJobs.creation_time)
+        job.advance(FixturesJobs.creation_time, FixturesJobs.contact_emails)
         skips = [
             json.loads(kwargs["filter"])["limits"]["skip"]
             for _, kwargs in mock_find_datasets.call_args_list
@@ -297,7 +298,7 @@ class TestMarkedForDeletionJob:
     def test_advance_raises_after_max_dataset_pages(self, _, mock_update, mock_create):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         with pytest.raises(RuntimeError):
-            job.advance(FixturesJobs.creation_time)
+            job.advance(FixturesJobs.creation_time, FixturesJobs.contact_emails)
         mock_create.assert_not_called()
         mock_update.assert_not_called()
 
