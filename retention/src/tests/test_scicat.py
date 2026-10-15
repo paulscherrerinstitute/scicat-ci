@@ -131,6 +131,7 @@ class TestMarkedForDeletionJob:
                     FixturesJobs.creation_time + relativedelta(months=3)
                 ).isoformat(),
                 "expired": expired,
+                "deletionCode": "EXPIRED",
             },
         }
 
@@ -202,20 +203,41 @@ class TestMarkedForDeletionJob:
             },
         )
 
+    @staticmethod
+    def _delete(pids):
+        return {
+            "type": "delete",
+            "datasetList": [{"pid": pid, "files": []} for pid in pids],
+            "jobParams": {"deletionCode": "EXPIRED"},
+        }
+
+    # At expiry the datasets query runs twice: first for the owner groups to
+    # notify, then for the datasets still marked for deletion.
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
     @patch(
         "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
         autospec=True,
-        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
     )
-    def test_advance_expires(self, _, mock_update, mock_create):
+    def test_advance_expires(self, mock_find_datasets, mock_update, mock_create):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         now = FixturesJobs.creation_time + relativedelta(months=3)
         job.advance(now, FixturesJobs.contact_emails)
-        mock_create.assert_called_once_with(
-            ANY, self._notification("group1", ["pid1", "pid2"], expired=True)
-        )
+        assert mock_create.call_args_list == [
+            call(ANY, self._notification("group1", ["pid1", "pid2"], expired=True)),
+            call(ANY, self._delete(["pid1", "pid2"])),
+        ]
+        _, kwargs = mock_find_datasets.call_args_list[2]
+        assert json.loads(kwargs["filter"]) == {
+            "where": {
+                "pid": {"$in": ["pid1", "pid2"]},
+                "datasetlifecycle.archiveStatusMessage": "markedForDeletion",
+            },
+            "fields": ["pid"],
+            "limits": {"skip": 0, "limit": 100},
+        }
         mock_update.assert_called_once_with(
             ANY,
             FixturesJobs.job_id,
@@ -228,6 +250,90 @@ class TestMarkedForDeletionJob:
                 "jobStatusMessage": "retentionExpired",
             },
         )
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + FixturesJobs.dataset_pages({"pid2": "group1"}),
+    )
+    def test_advance_expires_only_deletes_datasets_the_query_returns(
+        self, _, mock_update, mock_create
+    ):
+        # pid1 is missing from the results — whether because it's no longer
+        # markedForDeletion (restored) or gone entirely (deleted), the query
+        # already excludes it; this service has no opinion on why.
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(
+            FixturesJobs.creation_time + relativedelta(months=3),
+            FixturesJobs.contact_emails,
+        )
+        assert mock_create.call_args_list[-1] == call(ANY, self._delete(["pid2"]))
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + [[]],
+    )
+    def test_advance_expires_skips_delete_job_when_none_still_marked(
+        self, _, mock_update, mock_create
+    ):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(
+            FixturesJobs.creation_time + relativedelta(months=3),
+            FixturesJobs.contact_emails,
+        )
+        assert mock_create.call_args_list == [
+            call(ANY, self._notification("group1", ["pid1", "pid2"], expired=True)),
+        ]
+        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_advance_does_not_record_expiry_if_delete_job_fails(
+        self, _, mock_update, mock_create
+    ):
+        mock_create.side_effect = [Mock(), Exception("boom")]
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        with pytest.raises(Exception):
+            job.advance(
+                FixturesJobs.creation_time + relativedelta(months=3),
+                FixturesJobs.contact_emails,
+            )
+        mock_update.assert_not_called()
+
+    @patch("scicat.DATASETS_PAGE_LIMIT", 2)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages(
+            {"pid1": "group1", "pid2": "group1"}, {"pid3": "group1"}
+        ),
+    )
+    def test_still_marked_pids_paginates_across_multiple_pages(
+        self, mock_find_datasets
+    ):
+        job = scicat.MarkedForDeletionJob(
+            FixturesJobs.raw_job(dataset_pids=["pid1", "pid2", "pid3"])
+        )
+
+        assert job._still_marked_pids() == ["pid1", "pid2", "pid3"]
+        skips = [
+            json.loads(kwargs["filter"])["limits"]["skip"]
+            for _, kwargs in mock_find_datasets.call_args_list
+        ]
+        assert skips == [0, 2, 4]
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
@@ -302,6 +408,42 @@ class TestMarkedForDeletionJob:
         mock_create.assert_not_called()
         mock_update.assert_not_called()
 
+    def test_deletion_code(self):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code="REMOVED"))
+        assert job.deletion_code == "REMOVED"
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_advance_forwards_the_deletion_code(self, _, mock_update, mock_create):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code="REMOVED"))
+        job.advance(
+            FixturesJobs.creation_time + relativedelta(months=3),
+            FixturesJobs.contact_emails,
+        )
+        notification, delete = [args[1] for args, _ in mock_create.call_args_list]
+        assert notification["jobParams"]["deletionCode"] == "REMOVED"
+        assert delete["jobParams"] == {"deletionCode": "REMOVED"}
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_advance_raises_without_deletion_code(self, _, mock_update, mock_create):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code=None))
+        with pytest.raises(KeyError):
+            job.advance(FixturesJobs.creation_time, FixturesJobs.contact_emails)
+        mock_create.assert_not_called()
+        mock_update.assert_not_called()
+
 
 class TestMarkedForDeletionJobsRepository:
 
@@ -332,7 +474,13 @@ class TestMarkedForDeletionJobsRepository:
                     },
                 ],
             },
-            "fields": ["id", "datasetList", "jobResultObject", "creationTime"],
+            "fields": [
+                "id",
+                "datasetList",
+                "jobParams.deletionCode",
+                "jobResultObject",
+                "creationTime",
+            ],
             "limits": {"skip": 0, "limit": 100},
         }
 
