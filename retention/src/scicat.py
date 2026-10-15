@@ -151,8 +151,12 @@ class MarkedForDeletionJob:
 class MarkedForDeletionJobsRepository:
     """Fetches SciCat "markedForDeletion" jobs whose next check-in is due."""
 
-    @staticmethod
-    def _due_jobs_filter(now):
+    page_limit = 100
+    max_iterations = 1000
+
+    fields = ["id", "datasetList", "jobResultObject", "creationTime"]
+
+    def _due_jobs_filter(self, now):
         # lastVerifiedAt is written by the marking agent at job creation (as
         # well as by this service on every check-in), so a due job is simply
         # one whose last check-in is at least one retention step old.
@@ -164,13 +168,27 @@ class MarkedForDeletionJobsRepository:
                 f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
                     "lte": (now - _RETENTION_STEP_DELTA).isoformat()
                 },
-            }
+            },
+            "fields": self.fields,
         }
 
-    def due_jobs(self, now):
-        """Returns markedForDeletion jobs due for a check-in, as MarkedForDeletionJob."""
-        log.info("Fetching markedForDeletion jobs due for a check-in")
-        jobs = JobsApi().jobs_controller_find_all_v3(
-            filter=json.dumps(self._due_jobs_filter(now))
+    def _due_jobs_batches(self, now):
+        """Yields pages of due jobs, walking `limits.skip` until a page is empty."""
+        filter_ = self._due_jobs_filter(now)
+        filter_["limits"] = {"skip": 0, "limit": self.page_limit}
+        for _ in range(self.max_iterations):
+            batch = JobsApi().jobs_controller_find_all_v3(filter=json.dumps(filter_))
+            if not batch:
+                return
+            yield batch
+            filter_["limits"]["skip"] += self.page_limit
+        raise RuntimeError(
+            "Exceeded maximum pages while fetching due markedForDeletion jobs"
         )
-        return [MarkedForDeletionJob(job) for job in jobs]
+
+    def due_jobs(self, now):
+        """Yields markedForDeletion jobs due for a check-in, as MarkedForDeletionJob."""
+        log.info("Fetching markedForDeletion jobs due for a check-in")
+        for batch in self._due_jobs_batches(now):
+            for job in batch:
+                yield MarkedForDeletionJob(job)
