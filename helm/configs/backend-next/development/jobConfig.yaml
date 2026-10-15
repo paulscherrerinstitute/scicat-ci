@@ -20,11 +20,26 @@
           datasets:
             isPublished:
               const: false
-    update:
+    update: &retentionUpdate
       auth: '@retentionManager'
       actions:
         - actionType: log
           perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+
+  # Reverts a markedForDeletion: its datasets are no longer to be deleted.
+  - jobType: revertMarkForDeletion
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        # Only datasets currently marked for deletion can be reverted
+        - actionType: validate
+          datasets: &markedDatasets
+            isPublished:
+              const: false
+            "datasetlifecycle.archiveStatusMessage":
+              const: markedForDeletion
+    update: *retentionUpdate
 
   # Created by the retention cronjob, once per owner group of a
   # markedForDeletion job at every check-in, to email the datasets' contacts.
@@ -55,11 +70,7 @@
         - actionType: validate
           # Same reason as the markedForDeletion job it comes from
           request: *deletionCodeRequest
-          datasets:
-            isPublished:
-              const: false
-            "datasetlifecycle.archiveStatusMessage":
-              const: markedForDeletion
+          datasets: *markedDatasets
         - *psiStorage
         - *rabbitmq
     update:
