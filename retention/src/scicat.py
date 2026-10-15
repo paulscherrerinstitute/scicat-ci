@@ -13,6 +13,8 @@ JOB_TYPE_NOTIFICATION = "notification"
 JOB_TYPE_DELETE = "delete"
 ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
 
+PARAM_DELETION_CODE = "deletionCode"
+
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
 RESULT_VERIFIED_AT = "verifiedAt"
@@ -155,6 +157,11 @@ class MarkedForDeletionJob:
         return [dataset.pid for dataset in self._job.dataset_list]
 
     @property
+    def deletion_code(self):
+        """Reason of the deletion, e.g. EXPIRED. Required on creation by the job config."""
+        return self._job.job_params[PARAM_DELETION_CODE]
+
+    @property
     def retention_time(self):
         return self._job.job_result_object.get(RESULT_RETENTION_TIME)
 
@@ -186,6 +193,7 @@ class MarkedForDeletionJob:
                         "markedForDeletionJobId": self.id,
                         "expiryDate": self.expiry_date.isoformat(),
                         "expired": expired,
+                        PARAM_DELETION_CODE: self.deletion_code,
                     },
                 }
             )
@@ -222,6 +230,7 @@ class MarkedForDeletionJob:
             {
                 "type": JOB_TYPE_DELETE,
                 "datasetList": [{"pid": pid, "files": []} for pid in pids],
+                "jobParams": {PARAM_DELETION_CODE: self.deletion_code},
             }
         )
         log.info(
@@ -262,7 +271,15 @@ class MarkedForDeletionJobsRepository:
     page_limit = 100
     max_iterations = 1000
 
-    fields = ["id", "datasetList", "jobResultObject", "creationTime"]
+    # jobParams.deletionCode rather than jobParams: datasetList maps to
+    # jobParams.datasetList and projecting a path with its parent fails.
+    fields = [
+        "id",
+        "datasetList",
+        f"jobParams.{PARAM_DELETION_CODE}",
+        "jobResultObject",
+        "creationTime",
+    ]
 
     def _due_jobs_filter(self, now):
         # A job is due when this service never checked it in (no verifiedAt
