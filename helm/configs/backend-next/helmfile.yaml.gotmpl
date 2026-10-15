@@ -27,14 +27,17 @@ releases:
           {{- if eq .Environment.Name "development" }}
           OPENEM_WHITELISTED_CIDRS: {{ .Values.secrets.OPENEM_WHITELISTED_CIDRS | quote }}
           {{- end }}
+      # development appends its own job types to the shared job config
+      {{- $jobConfig := readFile "jobConfig.yaml" }}
+      {{- if eq .Environment.Name "development" }}
+      {{- $jobConfig = print $jobConfig (readFile "development/jobConfig.yaml") }}
+      {{- end }}
+      - JOB_CONFIG: {{ $jobConfig | toJson }}
     set:
       - name: JOB_TEMPLATE
         file: job-template.html
       - name: NOTIFICATION_TEMPLATE
         file: notification-template.html
-      # development has its own job config to try out new job types
-      - name: JOB_CONFIG
-        file: {{ if eq .Environment.Name "development" }}development/{{ end }}jobConfig.yaml
       - name: PUBLISHED_DATA_CONFIG
         file: publishedDataConfig.json
       - name: RENAME_MEASUREMENT_ID_JS
