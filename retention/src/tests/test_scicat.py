@@ -130,6 +130,7 @@ class TestMarkedForDeletionJob:
                     FixturesJobs.creation_time + relativedelta(months=3)
                 ).isoformat(),
                 "expired": expired,
+                "deletionCode": "EXPIRED",
             },
         }
 
@@ -206,6 +207,7 @@ class TestMarkedForDeletionJob:
         return {
             "type": "delete",
             "datasetList": [{"pid": pid, "files": []} for pid in pids],
+            "jobParams": {"deletionCode": "EXPIRED"},
         }
 
     # At expiry the datasets query runs twice: first for the owner groups to
@@ -402,6 +404,41 @@ class TestMarkedForDeletionJob:
         mock_create.assert_not_called()
         mock_update.assert_not_called()
 
+    def test_deletion_code(self):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code="REMOVED"))
+        assert job.deletion_code == "REMOVED"
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"})
+        + FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_advance_forwards_the_deletion_code(self, _, mock_update, mock_create):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code="REMOVED"))
+        job.advance(
+            FixturesJobs.creation_time + relativedelta(months=3),
+        )
+        notification, delete = [args[1] for args, _ in mock_create.call_args_list]
+        assert notification["jobParams"]["deletionCode"] == "REMOVED"
+        assert delete["jobParams"] == {"deletionCode": "REMOVED"}
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_advance_raises_without_deletion_code(self, _, mock_update, mock_create):
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code=None))
+        with pytest.raises(KeyError):
+            job.advance(FixturesJobs.creation_time)
+        mock_create.assert_not_called()
+        mock_update.assert_not_called()
+
 
 class TestMarkedForDeletionJobsRepository:
 
@@ -432,7 +469,13 @@ class TestMarkedForDeletionJobsRepository:
                     },
                 ],
             },
-            "fields": ["id", "datasetList", "jobResultObject", "creationTime"],
+            "fields": [
+                "id",
+                "datasetList",
+                "jobParams.deletionCode",
+                "jobResultObject",
+                "creationTime",
+            ],
             "limits": {"skip": 0, "limit": 100},
         }
 
