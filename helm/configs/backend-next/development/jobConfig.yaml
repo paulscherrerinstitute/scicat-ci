@@ -7,8 +7,16 @@
       auth: '@retentionManager'
       actions:
         - actionType: log
-        # Published datasets cannot be deleted
         - actionType: validate
+          request:
+            # Reason of the deletion:
+            # - SUPERSEDED, OBSOLETED: replaced by another entry with
+            #   scientifically equivalent (but not necessarily identical) data
+            # - EXPIRED: deleted after the date archiveRetentionTime
+            # - REMOVED: deleted without a replacement
+            jobParams.deletionCode:
+              enum: [SUPERSEDED, OBSOLETED, EXPIRED, REMOVED]
+          # Published datasets cannot be deleted
           datasets:
             isPublished:
               const: false
