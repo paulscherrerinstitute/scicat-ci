@@ -1,16 +1,19 @@
 import json
+from collections import defaultdict
 from os import environ
 
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
-from scicat_sdk_py import AuthApi, Configuration, JobsApi
+from scicat_sdk_py import AuthApi, Configuration, DatasetsV4Api, JobsApi
 
 from utils import log
 
 JOB_TYPE = "markedForDeletion"
+NOTIFICATION_JOB_TYPE = "notification"
 
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
+RESULT_VERIFIED_AT = "verifiedAt"
 
 STATUS_RETENTION_EXPIRED = "retentionExpired"
 
@@ -45,6 +48,40 @@ _RETENTION_STEP = {"value": 1, "unit": "M"}
 _RETENTION_STEP_DELTA = relativedelta(
     **{_RELATIVEDELTA_KWARG_BY_UNIT[_RETENTION_STEP["unit"]]: _RETENTION_STEP["value"]}
 )
+
+DATASETS_PAGE_LIMIT = 100
+DATASETS_MAX_ITERATIONS = 1000
+
+
+def _paginate(find_all, filter_, page_limit, max_iterations, description):
+    """Yields pages from `find_all`, walking `limits.skip` until a page is empty."""
+    filter_ = {**filter_, "limits": {"skip": 0, "limit": page_limit}}
+    for _ in range(max_iterations):
+        batch = find_all(filter=json.dumps(filter_))
+        if not batch:
+            return
+        yield batch
+        filter_["limits"]["skip"] += page_limit
+    raise RuntimeError(f"Exceeded maximum pages while fetching {description}")
+
+
+def _pids_by_owner_group(pids):
+    """Returns {ownerGroup: [pid, ...]} for the given dataset pids."""
+    batches = _paginate(
+        DatasetsV4Api().datasets_v4_controller_find_all_v4,
+        {"where": {"pid": {"$in": pids}}, "fields": ["pid", "ownerGroup"]},
+        DATASETS_PAGE_LIMIT,
+        DATASETS_MAX_ITERATIONS,
+        "datasets",
+    )
+    by_group = defaultdict(list)
+    for batch in batches:
+        for dataset in batch:
+            by_group[dataset.owner_group].append(dataset.pid)
+    missing = set(pids) - {pid for group in by_group.values() for pid in group}
+    if missing:
+        log.warning(f"Datasets not found, not notified: {sorted(missing)}")
+    return dict(by_group)
 
 
 class SciCatAuth:
@@ -99,6 +136,9 @@ class SciCatAuth:
 class MarkedForDeletionJob:
     """
     Wraps a "markedForDeletion" SciCat job and tracks its retention grace period.
+
+    Every check-in notifies the datasets' owner groups through one
+    "notification" job per group, then records the check-in on this job.
     """
 
     def __init__(self, job):
@@ -132,15 +172,44 @@ class MarkedForDeletionJob:
             **{self._retention_unit: self.retention_amount}
         )
 
+    def _notify(self, expired):
+        """Submits one notification job per owner group of the job's datasets."""
+        for owner_group, pids in _pids_by_owner_group(self.dataset_pids).items():
+            JobsApi().jobs_controller_create_v3(
+                {
+                    "type": NOTIFICATION_JOB_TYPE,
+                    "datasetList": [{"pid": pid, "files": []} for pid in pids],
+                    "jobParams": {
+                        "ownerGroup": owner_group,
+                        "markedForDeletionJobId": self.id,
+                        "expiryDate": self.expiry_date.isoformat(),
+                        "expired": expired,
+                    },
+                }
+            )
+            log.info(
+                f"Job {self.id} notified {owner_group} about {len(pids)} dataset(s)"
+            )
+
     def advance(self, now):
-        """Updates the job's verification time and checks whether its grace period has elapsed."""
+        """Notifies the owner groups, then records the check-in and whether the grace period has elapsed."""
+        expired = now >= self.expiry_date
+        # Notify first: if it fails, the check-in is not recorded and the job
+        # stays due for the next run.
+        self._notify(expired)
+        now_iso = now.isoformat()
+        job_result_object = self._job.job_result_object
         patch = {
             "jobResultObject": {
-                **self._job.job_result_object,
-                RESULT_LAST_VERIFIED_AT: now.isoformat(),
+                **job_result_object,
+                RESULT_LAST_VERIFIED_AT: now_iso,
+                RESULT_VERIFIED_AT: [
+                    *job_result_object.get(RESULT_VERIFIED_AT, []),
+                    now_iso,
+                ],
             }
         }
-        if now >= self.expiry_date:
+        if expired:
             patch["jobStatusMessage"] = STATUS_RETENTION_EXPIRED
             log.info(f"Job {self.id} retention expired, ready for deletion")
         else:
@@ -157,38 +226,36 @@ class MarkedForDeletionJobsRepository:
     fields = ["id", "datasetList", "jobResultObject", "creationTime"]
 
     def _due_jobs_filter(self, now):
-        # lastVerifiedAt is written by the marking agent at job creation (as
-        # well as by this service on every check-in), so a due job is simply
-        # one whose last check-in is at least one retention step old.
+        # A job is due when this service never checked it in (no verifiedAt
+        # list yet, i.e. right after marking) or when its last check-in is at
+        # least one retention step old. A null match also covers missing fields.
         return {
             "where": {
                 "type": JOB_TYPE,
                 "jobStatusMessage": {"neq": STATUS_RETENTION_EXPIRED},
                 "datasetList": {"neq": []},
-                f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
-                    "lte": (now - _RETENTION_STEP_DELTA).isoformat()
-                },
+                "or": [
+                    {f"jobResultObject.{RESULT_VERIFIED_AT}": None},
+                    {
+                        f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": {
+                            "lte": (now - _RETENTION_STEP_DELTA).isoformat()
+                        }
+                    },
+                ],
             },
             "fields": self.fields,
         }
 
-    def _due_jobs_batches(self, now):
-        """Yields pages of due jobs, walking `limits.skip` until a page is empty."""
-        filter_ = self._due_jobs_filter(now)
-        filter_["limits"] = {"skip": 0, "limit": self.page_limit}
-        for _ in range(self.max_iterations):
-            batch = JobsApi().jobs_controller_find_all_v3(filter=json.dumps(filter_))
-            if not batch:
-                return
-            yield batch
-            filter_["limits"]["skip"] += self.page_limit
-        raise RuntimeError(
-            "Exceeded maximum pages while fetching due markedForDeletion jobs"
-        )
-
     def due_jobs(self, now):
         """Yields markedForDeletion jobs due for a check-in, as MarkedForDeletionJob."""
         log.info("Fetching markedForDeletion jobs due for a check-in")
-        for batch in self._due_jobs_batches(now):
+        batches = _paginate(
+            JobsApi().jobs_controller_find_all_v3,
+            self._due_jobs_filter(now),
+            self.page_limit,
+            self.max_iterations,
+            "due markedForDeletion jobs",
+        )
+        for batch in batches:
             for job in batch:
                 yield MarkedForDeletionJob(job)
