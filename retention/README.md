@@ -4,9 +4,12 @@
 
 ## Workflow
 
-1. In the frontend, a user selects datasets and clicks "mark for deletion".
-   This creates a SciCat job with `type`: `markedForDeletion` and
-   `datasetList`: the selected datasets.
+1. A SciCat job with `type`: `markedForDeletion`, `datasetList`: the
+   datasets and `jobParams.deletionCode`: the reason is created, either:
+   - from the frontend or the API, when a user marks datasets, or
+   - by the `mark-expired` command (see [Commands](#commands)), with
+     `deletionCode` `EXPIRED`, for the datasets whose
+     `datasetlifecycle.archiveRetentionTime` has passed.
 2. A RabbitMQ listener picks up the job on creation: it flags each dataset
    as `markedForDeletion`, and records on the job itself the grace period
    (e.g. 3 months) and an initial check-in timestamp — the baseline the
@@ -41,6 +44,19 @@ tracked on the job over time. That keeps `revertMarkForDeletion` simple
 too: restoring a dataset only ever touches the dataset itself, never any
 `markedForDeletion` job.
 
+## Commands
+
+The same image runs two independent commands, each meant as its own cronjob:
+
+- `python main.py retention` (the default): checks in the due
+  `markedForDeletion` jobs (steps 3 and 4) and notifies the
+  `revertMarkForDeletion` jobs (step 5).
+- `python main.py mark-expired`: submits one `markedForDeletion` job per owner
+  group (split above 1000 datasets) for the unpublished datasets whose archive
+  retention time has passed and that are not marked for deletion yet. It only
+  submits the jobs: everything after is the same as for a job from the
+  frontend or the API.
+
 ## Getting started
 
 The easiest way to set up a dev environment is to use the provided compose file.
@@ -62,5 +78,5 @@ IMAGE_NAME=<IMAGE_NAME>
 docker build -t $IMAGE_NAME .
 docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
 -e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" \
-$IMAGE_NAME python main.py
+$IMAGE_NAME python main.py [retention|mark-expired]
 ```
