@@ -11,6 +11,7 @@ from utils import log
 JOB_TYPE_MARKED_FOR_DELETION = "markedForDeletion"
 JOB_TYPE_NOTIFICATION = "notification"
 JOB_TYPE_DELETE = "delete"
+JOB_TYPE_REVERT_MARK_FOR_DELETION = "revertMarkForDeletion"
 ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
 
 PARAM_DELETION_CODE = "deletionCode"
@@ -18,6 +19,7 @@ PARAM_DELETION_CODE = "deletionCode"
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
 RESULT_VERIFIED_AT = "verifiedAt"
+RESULT_NOTIFIED_AT = "notifiedAt"
 
 STATUS_RETENTION_EXPIRED = "retentionExpired"
 
@@ -86,6 +88,25 @@ def _pids_by_owner_group(pids):
     if missing:
         log.warning(f"Datasets not found, not notified: {sorted(missing)}")
     return dict(by_group)
+
+
+def _submit_notifications(job_id, pids, contact_emails, job_params):
+    """Submits one notification job per owner group of the given datasets."""
+    for owner_group, group_pids in _pids_by_owner_group(pids).items():
+        JobsApi().jobs_controller_create_v3(
+            {
+                "type": JOB_TYPE_NOTIFICATION,
+                "datasetList": [{"pid": pid, "files": []} for pid in group_pids],
+                "jobParams": {
+                    "ownerGroup": owner_group,
+                    "contactEmails": contact_emails,
+                    **job_params,
+                },
+            }
+        )
+        log.info(
+            f"Job {job_id} notified {owner_group} about {len(group_pids)} dataset(s)"
+        )
 
 
 class SciCatAuth:
@@ -183,24 +204,17 @@ class MarkedForDeletionJob:
 
     def _notify(self, expired, contact_emails):
         """Submits one notification job per owner group of the job's datasets."""
-        for owner_group, pids in _pids_by_owner_group(self.dataset_pids).items():
-            JobsApi().jobs_controller_create_v3(
-                {
-                    "type": JOB_TYPE_NOTIFICATION,
-                    "datasetList": [{"pid": pid, "files": []} for pid in pids],
-                    "jobParams": {
-                        "ownerGroup": owner_group,
-                        "contactEmails": contact_emails,
-                        "markedForDeletionJobId": self.id,
-                        "expiryDate": self.expiry_date.isoformat(),
-                        "expired": expired,
-                        PARAM_DELETION_CODE: self.deletion_code,
-                    },
-                }
-            )
-            log.info(
-                f"Job {self.id} notified {owner_group} about {len(pids)} dataset(s)"
-            )
+        _submit_notifications(
+            self.id,
+            self.dataset_pids,
+            contact_emails,
+            {
+                "markedForDeletionJobId": self.id,
+                "expiryDate": self.expiry_date.isoformat(),
+                "expired": expired,
+                PARAM_DELETION_CODE: self.deletion_code,
+            },
+        )
 
     def _still_marked_pids(self):
         """Returns the job's dataset pids whose archiveStatusMessage is still markedForDeletion."""
@@ -316,3 +330,74 @@ class MarkedForDeletionJobsRepository:
         for batch in batches:
             for job in batch:
                 yield MarkedForDeletionJob(job)
+
+
+class RevertMarkForDeletionJob:
+    """
+    Wraps a "revertMarkForDeletion" SciCat job, whose datasets are no longer
+    to be deleted. Its owner groups are notified once, then the job records it.
+    """
+
+    def __init__(self, job):
+        self._job = job
+
+    @property
+    def id(self):
+        return self._job.id
+
+    @property
+    def dataset_pids(self):
+        return [dataset.pid for dataset in self._job.dataset_list]
+
+    def notify(self, now, contact_emails):
+        """Notifies contact_emails per owner group, then records the notification on the job."""
+        # Notify first: if it fails, the notification is not recorded and the
+        # job is picked up again on the next run.
+        _submit_notifications(
+            self.id,
+            self.dataset_pids,
+            contact_emails,
+            {"revertMarkForDeletionJobId": self.id, "reverted": True},
+        )
+        patch = {
+            "jobResultObject": {
+                **(self._job.job_result_object or {}),
+                RESULT_NOTIFIED_AT: now.isoformat(),
+            }
+        }
+        JobsApi().jobs_controller_update_v3(self.id, patch)
+        log.info(f"Job {self.id} reverted mark for deletion notified")
+
+
+class RevertMarkForDeletionJobsRepository:
+    """Fetches SciCat "revertMarkForDeletion" jobs whose owner groups were not notified yet."""
+
+    page_limit = 100
+    max_iterations = 1000
+
+    fields = ["id", "datasetList", "jobResultObject"]
+
+    def _unnotified_jobs_filter(self):
+        # A null match also covers jobs without notifiedAt
+        return {
+            "where": {
+                "type": JOB_TYPE_REVERT_MARK_FOR_DELETION,
+                "datasetList": {"neq": []},
+                f"jobResultObject.{RESULT_NOTIFIED_AT}": None,
+            },
+            "fields": self.fields,
+        }
+
+    def unnotified_jobs(self):
+        """Yields revertMarkForDeletion jobs not notified yet, as RevertMarkForDeletionJob."""
+        log.info("Fetching revertMarkForDeletion jobs not notified yet")
+        batches = _paginate(
+            JobsApi().jobs_controller_find_all_v3,
+            self._unnotified_jobs_filter(),
+            self.page_limit,
+            self.max_iterations,
+            "revertMarkForDeletion jobs not notified yet",
+        )
+        for batch in batches:
+            for job in batch:
+                yield RevertMarkForDeletionJob(job)

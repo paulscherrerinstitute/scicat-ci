@@ -538,3 +538,83 @@ class TestMarkedForDeletionJobsRepository:
         with pytest.raises(RuntimeError):
             list(repository.due_jobs(now))
         assert mock_find_all.call_count == 3
+
+
+class TestRevertMarkForDeletionJob:
+
+    @staticmethod
+    def _notification(owner_group, pids):
+        return {
+            "type": "notification",
+            "datasetList": [{"pid": pid, "files": []} for pid in pids],
+            "jobParams": {
+                "ownerGroup": owner_group,
+                "contactEmails": FixturesJobs.contact_emails,
+                "revertMarkForDeletionJobId": FixturesJobs.job_id,
+                "reverted": True,
+            },
+        }
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group2"}),
+    )
+    def test_notify(self, _, mock_update, mock_create):
+        job = scicat.RevertMarkForDeletionJob(
+            FixturesJobs.raw_job(job_result_object={})
+        )
+        now = FixturesJobs.creation_time
+        job.notify(now, FixturesJobs.contact_emails)
+        assert mock_create.call_args_list == [
+            call(ANY, self._notification("group1", ["pid1"])),
+            call(ANY, self._notification("group2", ["pid2"])),
+        ]
+        mock_update.assert_called_once_with(
+            ANY,
+            FixturesJobs.job_id,
+            {"jobResultObject": {"notifiedAt": now.isoformat()}},
+        )
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group1"}),
+    )
+    def test_notify_does_not_record_if_notification_fails(
+        self, _, mock_update, mock_create
+    ):
+        mock_create.side_effect = Exception("boom")
+        job = scicat.RevertMarkForDeletionJob(
+            FixturesJobs.raw_job(job_result_object={})
+        )
+        with pytest.raises(Exception):
+            job.notify(FixturesJobs.creation_time, FixturesJobs.contact_emails)
+        mock_update.assert_not_called()
+
+
+class TestRevertMarkForDeletionJobsRepository:
+
+    @patch("scicat.JobsApi.jobs_controller_find_all_v3", autospec=True)
+    def test_unnotified_jobs(self, mock_find_all):
+        mock_find_all.side_effect = [[FixturesJobs.raw_job()], []]
+
+        jobs = list(scicat.RevertMarkForDeletionJobsRepository().unnotified_jobs())
+
+        assert len(jobs) == 1
+        assert isinstance(jobs[0], scicat.RevertMarkForDeletionJob)
+        assert jobs[0].id == FixturesJobs.job_id
+        _, kwargs = mock_find_all.call_args_list[0]
+        assert json.loads(kwargs["filter"]) == {
+            "where": {
+                "type": "revertMarkForDeletion",
+                "datasetList": {"neq": []},
+                "jobResultObject.notifiedAt": None,
+            },
+            "fields": ["id", "datasetList", "jobResultObject"],
+            "limits": {"skip": 0, "limit": 100},
+        }
