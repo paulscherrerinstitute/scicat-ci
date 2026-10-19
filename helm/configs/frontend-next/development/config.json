@@ -345,10 +345,10 @@
                 "userEmail": "#user.email",
                 "pids": "#DatasetsPid",
                 "datasetList": "#DatasetsPidEmptyFilesMap",
-                "archiveViewMode": "#currentArchViewMode",
-                "addedFrom": "#DatasetsField[addedFrom]",
                 "lifecycles": "#DatasetsField[datasetlifecycle]",
-                "totalSize": "#DatasetsTotalSize"
+                "ownerGroups": "#DatasetsField[ownerGroup]",
+                "accessGroups": "#user.accessGroups",
+                "sizes": "#DatasetsField[size]"
             },
             "dialog": {
                 "title": "Really archive?",
@@ -359,20 +359,20 @@
                 "enabledTooltip": "Tip: tick \"My actionable data\" so you only act on your own datasets",
                 "conditions": [
                     {
-                        "condition": "@archiveViewMode === 'archivable' || (#Length(@addedFrom) > 0 && @addedFrom.every((m) => m === 'archivable'))",
-                        "disabledTooltip": "Select the Archivable view to archive datasets. The \"Archive status\" view selector has moved to the left, together with the other filters."
-                    },
-                    {
                         "condition": "#Length(@pids) > 0",
                         "disabledTooltip": "Select one or more datasets to archive."
                     },
                     {
-                        "condition": "@totalSize > 0",
-                        "disabledTooltip": "The selected datasets have a total size of 0 bytes, so there is nothing to archive."
+                        "condition": "@sizes.every((s) => s > 0)",
+                        "disabledTooltip": "Every selected dataset must have a size greater than 0 bytes."
                     },
                     {
                         "condition": "@lifecycles.every((l) => l?.archivable === true)",
                         "disabledTooltip": "All selected datasets must be archivable."
+                    },
+                    {
+                        "condition": "@ownerGroups.every((g) => (@accessGroups ?? []).includes(g))",
+                        "disabledTooltip": "You can only archive datasets whose owner group you belong to."
                     }
                 ]
             }
@@ -397,10 +397,8 @@
                 "userEmail": "#user.email",
                 "pids": "#DatasetsPid",
                 "datasetList": "#DatasetsPidEmptyFilesMap",
-                "archiveViewMode": "#currentArchViewMode",
-                "addedFrom": "#DatasetsField[addedFrom]",
                 "lifecycles": "#DatasetsField[datasetlifecycle]",
-                "totalPackedSize": "#DatasetsTotalPackedSize"
+                "packedSizes": "#DatasetsField[packedSize]"
             },
             "dialog": {
                 "title": "Retrieve to",
@@ -431,16 +429,12 @@
             "enabled": {
                 "conditions": [
                     {
-                        "condition": "@archiveViewMode === 'retrievable' || (#Length(@addedFrom) > 0 && @addedFrom.every((m) => m === 'retrievable'))",
-                        "disabledTooltip": "Select the Retrievable view to retrieve datasets. The \"Archive status\" view selector has moved to the left, together with the other filters."
-                    },
-                    {
                         "condition": "#Length(@pids) > 0",
                         "disabledTooltip": "Select one or more datasets to retrieve."
                     },
                     {
-                        "condition": "@totalPackedSize > 0",
-                        "disabledTooltip": "The selected datasets have a total packed size of 0 bytes, so there is no archived data to retrieve."
+                        "condition": "@packedSizes.every((s) => s > 0)",
+                        "disabledTooltip": "Every selected dataset must have a packed size greater than 0 bytes."
                     },
                     {
                         "condition": "@lifecycles.every((l) => l?.retrievable === true)",
