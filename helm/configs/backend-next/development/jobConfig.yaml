@@ -44,18 +44,25 @@
     update: *retentionUpdate
 
   # Created by the retention cronjob, once per owner group of a
-  # markedForDeletion job at every check-in, to email the datasets' contacts.
-  # jobParams.contactEmails is a list, rendered comma-separated in `to`.
+  # markedForDeletion job at every check-in and of a revertMarkForDeletion job.
+  # Node-RED receives it, looks up the owner group's emails in AD and patches
+  # them, once, into jobResultObject.contactEmails: that update sends the
+  # email. Every update sends it, so the job must be updated only that once.
   - jobType: notification
     create:
       auth: '@retentionManager'
       actions:
         - actionType: log
+        - *rabbitmq
+    update:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
         - actionType: email
-          # Fail the creation if the email is not sent, so that the cronjob
-          # retries the check-in on its next run.
+          # Fail the update if the email is not sent, so Node-RED knows
           ignoreErrors: false
-          to: "{{{job.jobParams.contactEmails}}}"
+          # A list, rendered comma-separated
+          to: "{{{job.jobResultObject.contactEmails}}}"
           subject: |-
             [SciCat {{{ env.DEPLOYMENT_ENV }}}] {{#if job.jobParams.expired}}Retention period expired{{else}}Datasets scheduled for deletion{{/if}} ({{job.jobParams.ownerGroup}}{{#if job.jobParams.deletionCode}}, {{job.jobParams.deletionCode}}{{/if}})
           bodyTemplateFile: email-templates/notification-template.html
