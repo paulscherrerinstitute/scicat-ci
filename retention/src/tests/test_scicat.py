@@ -612,3 +612,63 @@ class TestRevertMarkForDeletionJobsRepository:
             "fields": ["id", "datasetList", "jobResultObject"],
             "limits": {"skip": 0, "limit": 100},
         }
+
+
+class TestExpiredDatasetsRepository:
+
+    @patch(
+        "scicat.DatasetsApi.datasets_controller_find_all_v3",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages(
+            {"pid1": "group1", "pid2": "group2"}, {"pid3": "group1"}
+        ),
+    )
+    def test_expired_pids_by_owner_group(self, mock_find_datasets):
+        now = FixturesJobs.creation_time
+        repository = scicat.ExpiredDatasetsRepository()
+        repository.page_limit = 2
+
+        assert repository.expired_pids_by_owner_group(now) == {
+            "group1": ["pid1", "pid3"],
+            "group2": ["pid2"],
+        }
+        _, kwargs = mock_find_datasets.call_args_list[0]
+        filter_ = json.loads(kwargs["filter"])
+        assert filter_["where"] == {
+            "isPublished": False,
+            "datasetlifecycle.archiveRetentionTime": {"lte": now.isoformat()},
+            "datasetlifecycle.archiveStatusMessage": {"nin": ["markedForDeletion"]},
+        }
+        assert {"pid", "ownerGroup"} <= set(filter_["fields"])
+        skips = [
+            json.loads(kwargs["filter"])["limits"]["skip"]
+            for _, kwargs in mock_find_datasets.call_args_list
+        ]
+        assert skips == [0, 2, 4]
+
+
+class TestSubmitExpiredMarkedForDeletion:
+
+    @staticmethod
+    def _marked_for_deletion(pids):
+        return {
+            "type": "markedForDeletion",
+            "datasetList": [{"pid": pid, "files": []} for pid in pids],
+            "jobParams": {"ownerGroup": "group1", "deletionCode": "EXPIRED"},
+        }
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    def test_submits_one_job(self, mock_create):
+        scicat.submit_expired_marked_for_deletion("group1", ["pid1", "pid2"])
+        mock_create.assert_called_once_with(
+            ANY, self._marked_for_deletion(["pid1", "pid2"])
+        )
+
+    @patch("scicat.MARK_MAX_DATASETS_PER_JOB", 2)
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    def test_splits_large_groups_into_chunks(self, mock_create):
+        scicat.submit_expired_marked_for_deletion("group1", ["pid1", "pid2", "pid3"])
+        assert mock_create.call_args_list == [
+            call(ANY, self._marked_for_deletion(["pid1", "pid2"])),
+            call(ANY, self._marked_for_deletion(["pid3"])),
+        ]
