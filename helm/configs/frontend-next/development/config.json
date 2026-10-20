@@ -533,7 +533,7 @@
                 "id": "retrievable",
                 "label": "Retrievable",
                 "checkbox": {
-                    "label": "Actionable data",
+                    "label": "My actionable data",
                     "default": true,
                     "where": {
                         "packedSize": {
