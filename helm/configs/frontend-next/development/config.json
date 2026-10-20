@@ -518,6 +518,9 @@
                     "where": {
                         "ownerGroup": {
                             "$in": "#user.accessGroups"
+                        },
+                        "size": {
+                            "$gt": 0
                         }
                     }
                 },
@@ -529,6 +532,15 @@
             {
                 "id": "retrievable",
                 "label": "Retrievable",
+                "checkbox": {
+                    "label": "Actionable data",
+                    "default": true,
+                    "where": {
+                        "packedSize": {
+                            "$gt": 0
+                        }
+                    }
+                },
                 "where": {
                     "datasetlifecycle.retrievable": true,
                     "datasetlifecycle.archivable": false
