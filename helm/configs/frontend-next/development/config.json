@@ -363,12 +363,12 @@
                         "disabledTooltip": "Select one or more datasets to archive."
                     },
                     {
-                        "condition": "@sizes.every((s) => s > 0)",
-                        "disabledTooltip": "Every selected dataset must have a size greater than 0 bytes."
-                    },
-                    {
                         "condition": "@lifecycles.every((l) => l?.archivable === true)",
                         "disabledTooltip": "All selected datasets must be archivable."
+                    },
+                    {
+                        "condition": "@sizes.every((s) => s > 0)",
+                        "disabledTooltip": "Every selected dataset must have a size greater than 0 bytes."
                     },
                     {
                         "condition": "@ownerGroups.every((g) => (@accessGroups ?? []).includes(g))",
@@ -433,12 +433,12 @@
                         "disabledTooltip": "Select one or more datasets to retrieve."
                     },
                     {
-                        "condition": "@packedSizes.every((s) => s > 0)",
-                        "disabledTooltip": "Every selected dataset must have a packed size greater than 0 bytes."
-                    },
-                    {
                         "condition": "@lifecycles.every((l) => l?.retrievable === true)",
                         "disabledTooltip": "All selected datasets must be retrievable."
+                    },
+                    {
+                        "condition": "@packedSizes.every((s) => s > 0)",
+                        "disabledTooltip": "Every selected dataset must have a packed size greater than 0 bytes."
                     }
                 ]
             }
