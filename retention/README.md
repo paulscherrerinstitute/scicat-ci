@@ -5,22 +5,23 @@
 ## Workflow
 
 1. A SciCat job with `type`: `markedForDeletion`, `datasetList`: the
-   datasets and `jobParams.deletionCode`: the reason is created, either:
+   datasets, `jobParams.deletionCode`: the reason and
+   `jobParams.retentionTime`: the grace period (e.g. `3M`, a number and a unit
+   among `Y`, `M`, `d`, restricted to the allowed
+   values by the job config) is created, either:
    - from the frontend or the API, when a user marks datasets, or
    - by the `mark-expired` command (see [Commands](#commands)), with
-     `deletionCode` `EXPIRED`, for the datasets whose
-     `datasetlifecycle.archiveRetentionTime` has passed.
-2. A RabbitMQ listener picks up the job on creation: it flags each dataset
-   as `markedForDeletion`, and records on the job itself the grace period
-   (e.g. 3 months) and an initial check-in timestamp — the baseline the
-   first check-in is measured from. Until that's recorded, the job simply
-   isn't ready yet; that isn't treated as an error.
+     `deletionCode` `EXPIRED` and `retentionTime` `EXPIRED_RETENTION_TIME`, for
+     the datasets whose `datasetlifecycle.archiveRetentionTime` has passed.
+2. A RabbitMQ listener (Node-RED) picks up the job on creation and flags
+   each dataset as `markedForDeletion`.
 3. This service runs periodically (e.g. daily) and re-confirms every
    `markedForDeletion` job whose next check-in is due — once every
    retention step (currently 1 month), regardless of the job's own grace
    period: a job with a 1-year grace period is still re-checked monthly
    throughout the year, not just once at the end. A job this service never
-   checked in is due right away. Every check-in submits one `notification`
+   checked in is due right away. The grace period is counted from the job's
+   creation. Every check-in submits one `notification`
    job per owner group of the datasets; Node-RED emails the group members.
 4. Once a job's full grace period has elapsed, it checks which of its
    datasets are still marked for deletion — a dataset may have been
@@ -72,11 +73,14 @@ Variables to be supplied for docker run:
 - SCICAT_ENDPOINT
 - SCICAT_USERNAME
 - SCICAT_PASSWORD
+- EXPIRED_RETENTION_TIME: grace period of the datasets marked by `mark-expired`, e.g. `3M`
+  (`mark-expired` only), one of the values allowed by the job config
 
 ```bash
 IMAGE_NAME=<IMAGE_NAME>
 docker build -t $IMAGE_NAME .
 docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
 -e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" \
+-e "EXPIRED_RETENTION_TIME=<EXPIRED_RETENTION_TIME>" \
 $IMAGE_NAME python main.py [retention|mark-expired]
 ```

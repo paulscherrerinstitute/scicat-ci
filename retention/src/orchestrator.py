@@ -5,6 +5,7 @@ from scicat import (
     MarkedForDeletionJobsRepository,
     RevertMarkForDeletionJobsRepository,
     SciCatAuth,
+    retention_time_from_env,
     submit_expired_marked_for_deletion,
 )
 from utils import log
@@ -71,6 +72,7 @@ class MarkExpiredOrchestrator:
 
     def __init__(self):
         self.scicat_instance = SciCatAuth.from_env()
+        self.retention_time = retention_time_from_env("EXPIRED_RETENTION_TIME")
         self.datasets = ExpiredDatasetsRepository()
 
     def orchestrate(self):
@@ -82,7 +84,9 @@ class MarkExpiredOrchestrator:
         pids_by_group = self.datasets.expired_pids_by_owner_group(now)
         for owner_group, pids in pids_by_group.items():
             try:
-                submit_expired_marked_for_deletion(owner_group, pids)
+                submit_expired_marked_for_deletion(
+                    owner_group, pids, self.retention_time
+                )
             except Exception as e:
                 log.error(f"Failed to mark expired datasets of {owner_group}: {e}")
         log.info(f"{len(pids_by_group)} owner group(s) with expired datasets")

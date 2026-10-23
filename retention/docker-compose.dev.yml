@@ -7,6 +7,7 @@ services:
             SCICAT_ENDPOINT: https://dacat-development.psi.ch/api/v3
             SCICAT_USERNAME: retentionChecker
             SCICAT_PASSWORD: A_SCICAT_PASSWORD
+            EXPIRED_RETENTION_TIME: 3M
         volumes:
             - .:/usr/src/retention
         # infinite loop to keep the container running
