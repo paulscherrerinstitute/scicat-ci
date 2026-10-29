@@ -1,0 +1,44 @@
+# Development only job types, appended to the `jobs` list of ../jobConfig.yaml
+# by helmfile.yaml.gotmpl. Entries must keep the list item indentation.
+  # Datasets marked for deletion. Created by the marking agent and updated
+  # monthly by the retention cronjob until their retention time expires.
+  - jobType: markedForDeletion
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        - actionType: validate
+          request:
+            # Reason of the deletion:
+            # - SUPERSEDED, OBSOLETED: replaced by another entry with
+            #   scientifically equivalent (but not necessarily identical) data
+            # - EXPIRED: deleted after the date archiveRetentionTime
+            # - REMOVED: deleted without a replacement
+            jobParams.deletionCode:
+              enum: [SUPERSEDED, OBSOLETED, EXPIRED, REMOVED]
+          # Published datasets cannot be deleted
+          datasets:
+            isPublished:
+              const: false
+    update:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+          perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+
+  # Created by the retention cronjob, once per owner group of a
+  # markedForDeletion job at every check-in, to email the datasets' contacts.
+  # jobParams.contactEmails is a list, rendered comma-separated in `to`.
+  - jobType: notification
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        - actionType: email
+          # Fail the creation if the email is not sent, so that the cronjob
+          # retries the check-in on its next run.
+          ignoreErrors: false
+          to: "{{{job.jobParams.contactEmails}}}"
+          subject: |-
+            [SciCat {{{ env.DEPLOYMENT_ENV }}}] {{#if job.jobParams.expired}}Retention period expired{{else}}Datasets scheduled for deletion{{/if}} ({{job.jobParams.ownerGroup}}{{#if job.jobParams.deletionCode}}, {{job.jobParams.deletionCode}}{{/if}})
+          bodyTemplateFile: email-templates/notification-template.html
