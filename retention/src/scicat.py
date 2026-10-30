@@ -8,8 +8,12 @@ from scicat_sdk_py import AuthApi, Configuration, DatasetsV4Api, JobsApi
 
 from utils import log
 
-JOB_TYPE = "markedForDeletion"
-NOTIFICATION_JOB_TYPE = "notification"
+JOB_TYPE_MARKED_FOR_DELETION = "markedForDeletion"
+JOB_TYPE_NOTIFICATION = "notification"
+JOB_TYPE_DELETE = "delete"
+ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
+
+PARAM_DELETION_CODE = "deletionCode"
 
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
@@ -153,6 +157,11 @@ class MarkedForDeletionJob:
         return [dataset.pid for dataset in self._job.dataset_list]
 
     @property
+    def deletion_code(self):
+        """Reason of the deletion, e.g. EXPIRED. Required on creation by the job config."""
+        return self._job.job_params[PARAM_DELETION_CODE]
+
+    @property
     def retention_time(self):
         return self._job.job_result_object.get(RESULT_RETENTION_TIME)
 
@@ -177,13 +186,14 @@ class MarkedForDeletionJob:
         for owner_group, pids in _pids_by_owner_group(self.dataset_pids).items():
             JobsApi().jobs_controller_create_v3(
                 {
-                    "type": NOTIFICATION_JOB_TYPE,
+                    "type": JOB_TYPE_NOTIFICATION,
                     "datasetList": [{"pid": pid, "files": []} for pid in pids],
                     "jobParams": {
                         "ownerGroup": owner_group,
                         "markedForDeletionJobId": self.id,
                         "expiryDate": self.expiry_date.isoformat(),
                         "expired": expired,
+                        PARAM_DELETION_CODE: self.deletion_code,
                     },
                 }
             )
@@ -191,12 +201,50 @@ class MarkedForDeletionJob:
                 f"Job {self.id} notified {owner_group} about {len(pids)} dataset(s)"
             )
 
+    def _still_marked_pids(self):
+        """Returns the job's dataset pids whose archiveStatusMessage is still markedForDeletion."""
+        batches = _paginate(
+            DatasetsV4Api().datasets_v4_controller_find_all_v4,
+            {
+                "where": {
+                    "pid": {"$in": self.dataset_pids},
+                    "datasetlifecycle.archiveStatusMessage": ARCHIVE_STATUS_MARKED_FOR_DELETION,
+                },
+                "fields": ["pid"],
+            },
+            DATASETS_PAGE_LIMIT,
+            DATASETS_MAX_ITERATIONS,
+            "datasets still marked for deletion",
+        )
+        return [dataset.pid for batch in batches for dataset in batch]
+
+    def _submit_delete_job(self):
+        """Submits a "delete" job for the datasets still marked for deletion, if any."""
+        pids = self._still_marked_pids()
+        if not pids:
+            log.info(
+                f"Job {self.id} expired with no datasets still marked, nothing to delete"
+            )
+            return
+        JobsApi().jobs_controller_create_v3(
+            {
+                "type": JOB_TYPE_DELETE,
+                "datasetList": [{"pid": pid, "files": []} for pid in pids],
+                "jobParams": {PARAM_DELETION_CODE: self.deletion_code},
+            }
+        )
+        log.info(
+            f"Job {self.id} expired, submitted delete job for {len(pids)} dataset(s)"
+        )
+
     def advance(self, now):
         """Notifies the owner groups, then records the check-in and whether the grace period has elapsed."""
         expired = now >= self.expiry_date
-        # Notify first: if it fails, the check-in is not recorded and the job
-        # stays due for the next run.
+        # Notify (and submit the deletion) first: if it fails, the check-in is
+        # not recorded and the job stays due for the next run.
         self._notify(expired)
+        if expired:
+            self._submit_delete_job()
         now_iso = now.isoformat()
         job_result_object = self._job.job_result_object
         patch = {
@@ -223,7 +271,15 @@ class MarkedForDeletionJobsRepository:
     page_limit = 100
     max_iterations = 1000
 
-    fields = ["id", "datasetList", "jobResultObject", "creationTime"]
+    # jobParams.deletionCode rather than jobParams: datasetList maps to
+    # jobParams.datasetList and projecting a path with its parent fails.
+    fields = [
+        "id",
+        "datasetList",
+        f"jobParams.{PARAM_DELETION_CODE}",
+        "jobResultObject",
+        "creationTime",
+    ]
 
     def _due_jobs_filter(self, now):
         # A job is due when this service never checked it in (no verifiedAt
@@ -231,7 +287,7 @@ class MarkedForDeletionJobsRepository:
         # least one retention step old. A null match also covers missing fields.
         return {
             "where": {
-                "type": JOB_TYPE,
+                "type": JOB_TYPE_MARKED_FOR_DELETION,
                 "jobStatusMessage": {"neq": STATUS_RETENTION_EXPIRED},
                 "datasetList": {"neq": []},
                 "or": [
