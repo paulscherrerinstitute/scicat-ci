@@ -28,3 +28,15 @@ class FixturesJobs:
             ),
             creation_time=creation_time or FixturesJobs.creation_time,
         )
+
+    @staticmethod
+    def datasets(owner_group_by_pid):
+        return [
+            Mock(pid=pid, owner_group=owner_group)
+            for pid, owner_group in owner_group_by_pid.items()
+        ]
+
+    @staticmethod
+    def dataset_pages(*owner_group_by_pid_pages):
+        """Successive find_all responses: each given page, then an empty one."""
+        return [FixturesJobs.datasets(page) for page in owner_group_by_pid_pages] + [[]]
