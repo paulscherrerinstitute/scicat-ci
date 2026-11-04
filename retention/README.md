@@ -28,6 +28,11 @@
    created, so a job without one is reported as an error on every run. The
    original job is then marked expired so it's never picked up again — even
    if nothing ended up marked, meaning no `delete` job was submitted.
+5. In the same run, every `revertMarkForDeletion` job not notified yet
+   submits one `notification` job per owner group of its datasets (with
+   `jobParams.reverted`), then records `jobResultObject.notifiedAt` so it's
+   notified only once. The two steps are independent: a failure in one does
+   not prevent the other.
 
 `datasetList` is never modified once a job is created — it's a snapshot of
 what was originally marked. Whether a dataset is still eligible for deletion
