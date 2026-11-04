@@ -24,7 +24,7 @@
    creation. Every check-in submits one `notification`
    job per owner group of the datasets; Node-RED updates the job with
    contactEmails, and scicat-backend sends the emails.
-5. Once a job's full grace period has elapsed, it checks which of its
+4. Once a job's full grace period has elapsed, it checks which of its
    datasets are still marked for deletion — a dataset may have been
    restored in the meantime (by a `revertMarkForDeletion` job).
    Whatever is still marked gets submitted as a new `delete` job, with the
@@ -33,7 +33,7 @@
    created, so a job without one is reported as an error on every run. The
    original job is then marked expired so it's never picked up again — even
    if nothing ended up marked, meaning no `delete` job was submitted.
-6. In the same run, every `revertMarkForDeletion` job not notified yet
+5. In the same run, every `revertMarkForDeletion` job not notified yet
    submits one `notification` job per owner group of its datasets (with
    `jobParams.reverted`), then records `jobResultObject.notifiedAt` so it's
    notified only once. The two steps are independent: a failure in one does
