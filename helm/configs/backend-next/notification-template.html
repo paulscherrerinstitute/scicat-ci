@@ -1,6 +1,6 @@
 {{!--
-Template for the retention notification emails, sent on creation of a
-"notification" job by the retention cronjob.
+Template for the retention notification emails, sent when Node-RED sets a
+"notification" job, created by the retention cronjob, to finishedSuccessful.
 
 Env variables:
 - SCICAT_FRONTEND_URL: Scicat base URL. If set, the email will contain links
@@ -10,6 +10,7 @@ Job parameters:
 - expiryDate: date at which the retention period expires
 - expired: whether the retention period has already expired
 - deletionCode: optional reason of the deletion, from the markedForDeletion job
+- reverted: whether the datasets are no longer marked for deletion
 --}}
 <html>
 
@@ -79,7 +80,13 @@ Job parameters:
 <body>
   <div class="container">
 
-  {{#if job.jobParams.expired }}
+  {{#if job.jobParams.reverted }}
+    <h2>Your datasets are no longer scheduled for deletion</h2>
+
+    <div>
+      <p>The following dataset(s) of group <b>{{job.jobParams.ownerGroup}}</b> are no longer marked for deletion and will be kept.</p>
+    </div>
+  {{else if job.jobParams.expired }}
     <h2>The retention period of your datasets has expired</h2>
 
     <div>
