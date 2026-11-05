@@ -1,5 +1,5 @@
 # dev image
-FROM python:3.13-slim AS dev
+FROM python:3.15-slim AS dev
 ENV PYTHONDONTWRITEBYTECODE 1
 WORKDIR /usr/src/retention
 # install python dependecies
@@ -11,7 +11,7 @@ RUN poetry install --no-interaction --no-ansi \
 
 
 # prod image
-FROM python:3.13-slim AS prod
+FROM python:3.15-slim AS prod
 WORKDIR /usr/src/retention
 # copy and install dependencies
 COPY --from=dev /usr/src/retention/requirements.txt ./
