@@ -28,6 +28,7 @@ volumes:
 configMaps:
   "{{ .Release.Name }}-cm":
     job-template.html: "{{ .Values.JOB_TEMPLATE }}"
+    notification-template.html: "{{ .Values.NOTIFICATION_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
     ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
@@ -114,6 +115,9 @@ volumeMounts:
   - name: config-volume
     mountPath: /home/node/app/email-templates/job-template.html
     subPath: job-template.html
+  - name: config-volume
+    mountPath: /home/node/app/email-templates/notification-template.html
+    subPath: notification-template.html
   - name: config-volume
     mountPath: /home/node/app/publishedDataConfig.json
     subPath: publishedDataConfig.json
