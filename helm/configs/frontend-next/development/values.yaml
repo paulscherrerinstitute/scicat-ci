@@ -3,3 +3,7 @@ host: discovery.development.psi.ch
 ingress:
   annotations: 
     nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.secretsJson.OPENEM_WHITELISTED_CIDRS }}"
+
+image:
+  # commit on branch psi_archive_dropdown
+  tag: 9bf022ddf96f9204b8b9dba5667cca5c6b8698a9
