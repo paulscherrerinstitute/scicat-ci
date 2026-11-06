@@ -1,5 +1,5 @@
 import os
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import orchestrator
 
@@ -107,4 +107,45 @@ class TestRetentionOrchestrator:
         self.orchestrator.orchestrate()
 
         revert.notify.assert_called_once_with(ANY)
+        mock_log.error.assert_called_once()
+
+
+class TestMarkExpiredOrchestrator:
+
+    def setup_method(self):
+        self.env_patch = patch.dict(
+            os.environ,
+            {
+                "SCICAT_ENDPOINT": "http://scicat",
+                "SCICAT_USERNAME": "test_user",
+                "SCICAT_PASSWORD": "test_password",
+            },
+        )
+        self.env_patch.start()
+        self.orchestrator = orchestrator.MarkExpiredOrchestrator()
+
+    def teardown_method(self):
+        self.env_patch.stop()
+
+    @patch("orchestrator.log")
+    @patch("orchestrator.submit_expired_marked_for_deletion", autospec=True)
+    @patch(
+        "orchestrator.ExpiredDatasetsRepository.expired_pids_by_owner_group",
+        autospec=True,
+        return_value={"group1": ["pid1"], "group2": ["pid2"], "group3": ["pid3"]},
+    )
+    @patch("orchestrator.SciCatAuth.authenticate", autospec=True)
+    def test_orchestrate_marks_every_group_and_continues_on_error(
+        self, mock_authenticate, _, mock_submit, mock_log
+    ):
+        mock_submit.side_effect = [None, Exception("boom"), None]
+
+        self.orchestrator.orchestrate()
+
+        mock_authenticate.assert_called_once()
+        assert mock_submit.call_args_list == [
+            call("group1", ["pid1"]),
+            call("group2", ["pid2"]),
+            call("group3", ["pid3"]),
+        ]
         mock_log.error.assert_called_once()

@@ -4,7 +4,7 @@ from os import environ
 
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
-from scicat_sdk_py import AuthApi, Configuration, DatasetsV4Api, JobsApi
+from scicat_sdk_py import AuthApi, Configuration, DatasetsApi, DatasetsV4Api, JobsApi
 
 from utils import log
 
@@ -15,6 +15,7 @@ JOB_TYPE_REVERT_MARK_FOR_DELETION = "revertMarkForDeletion"
 ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
 
 PARAM_DELETION_CODE = "deletionCode"
+DELETION_CODE_EXPIRED = "EXPIRED"
 
 RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
@@ -57,6 +58,25 @@ _RETENTION_STEP_DELTA = relativedelta(
 
 DATASETS_PAGE_LIMIT = 100
 DATASETS_MAX_ITERATIONS = 1000
+
+# Maximum number of datasets in a single markedForDeletion job
+MARK_MAX_DATASETS_PER_JOB = 1000
+
+# The SDK's v3 dataset model rejects responses missing any of its required
+# fields, so a v3 projection must keep all of them.
+_DATASET_V3_FIELDS = [
+    "pid",
+    "ownerGroup",
+    "owner",
+    "contactEmail",
+    "sourceFolder",
+    "creationTime",
+    "type",
+    "createdBy",
+    "updatedBy",
+    "createdAt",
+    "updatedAt",
+]
 
 
 def _paginate(find_all, filter_, page_limit, max_iterations, description):
@@ -398,3 +418,62 @@ class RevertMarkForDeletionJobsRepository:
         for batch in batches:
             for job in batch:
                 yield RevertMarkForDeletionJob(job)
+
+
+class ExpiredDatasetsRepository:
+    """Fetches datasets whose archiveRetentionTime has passed and are not marked for deletion yet."""
+
+    page_limit = 100
+    max_iterations = 1000
+
+    def _expired_filter(self, now):
+        # v3 rather than v4: only the v3 endpoint converts ISO strings to
+        # dates, so archiveRetentionTime can be compared. Published datasets
+        # cannot be marked for deletion.
+        return {
+            "where": {
+                "isPublished": False,
+                "datasetlifecycle.archiveRetentionTime": {"lte": now.isoformat()},
+                "datasetlifecycle.archiveStatusMessage": {
+                    "nin": [ARCHIVE_STATUS_MARKED_FOR_DELETION]
+                },
+            },
+            "fields": _DATASET_V3_FIELDS,
+        }
+
+    def expired_pids_by_owner_group(self, now):
+        """Returns {ownerGroup: [pid, ...]} of the datasets expired at `now`."""
+        log.info("Fetching datasets whose archive retention time has passed")
+        batches = _paginate(
+            DatasetsApi().datasets_controller_find_all_v3,
+            self._expired_filter(now),
+            self.page_limit,
+            self.max_iterations,
+            "expired datasets",
+        )
+        # Collect every page before any job is created: marking changes the
+        # datasets' archiveStatusMessage, which would shift later pages.
+        by_group = defaultdict(list)
+        for batch in batches:
+            for dataset in batch:
+                by_group[dataset.owner_group].append(dataset.pid)
+        return dict(by_group)
+
+
+def submit_expired_marked_for_deletion(owner_group, pids):
+    """Submits markedForDeletion jobs with deletionCode EXPIRED, in chunks of MARK_MAX_DATASETS_PER_JOB."""
+    for start in range(0, len(pids), MARK_MAX_DATASETS_PER_JOB):
+        chunk = pids[start : start + MARK_MAX_DATASETS_PER_JOB]
+        JobsApi().jobs_controller_create_v3(
+            {
+                "type": JOB_TYPE_MARKED_FOR_DELETION,
+                "datasetList": [{"pid": pid, "files": []} for pid in chunk],
+                "jobParams": {
+                    "ownerGroup": owner_group,
+                    PARAM_DELETION_CODE: DELETION_CODE_EXPIRED,
+                },
+            }
+        )
+        log.info(
+            f"Marked {len(chunk)} expired dataset(s) of {owner_group} for deletion"
+        )
