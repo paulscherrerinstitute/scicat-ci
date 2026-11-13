@@ -1,7 +1,7 @@
 image:
   repository: mongo
   pullPolicy: IfNotPresent
-  tag: "8.3"
+  tag: "9.0"
 
 run:
   command: 
