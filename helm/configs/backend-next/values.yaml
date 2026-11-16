@@ -37,6 +37,7 @@ configMaps:
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
+    20261116100100-fix-dataset-lifecycle-default-dates.js: "{{ .Values.FIX_LIFECYCLE_DEFAULT_DATES }}"
     opensearch-sync.js: "{{ .Values.OPENSEARCH_SYNC_JS }}"
 
 secrets:
@@ -101,6 +102,10 @@ env:
     value: /home/node/app/opensearchConfig.json
   - name: OPENSEARCH_DEFAULT_INDEX
     value: "dataset-{{ .Values.envValue }}"
+  - name: POLICY_RETENTION_SHIFT
+    value: "10"
+  - name: POLICY_PUBLICATION_SHIFT
+    value: "3"
 
 volumeMounts:
   - name: secrets-volume
@@ -152,6 +157,10 @@ jobContainers:
         value: http://backend-next.scicat-{{ .Values.envValue }}
       - name: OPENSEARCH_INDEX
         value: "dataset-{{ .Values.envValue }}"
+      - name: POLICY_RETENTION_SHIFT
+        value: "10"
+      - name: POLICY_PUBLICATION_SHIFT
+        value: "3"
     volumeMounts:
       - name: secrets-volume
         mountPath: /home/node/app/.env
@@ -162,6 +171,9 @@ jobContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
+      - name: migrations-volume
+        mountPath: /home/node/app/migrations/20261116100100-fix-dataset-lifecycle-default-dates.js
+        subPath: 20261116100100-fix-dataset-lifecycle-default-dates.js
       - name: migrations-volume
         mountPath: /home/node/app/opensearch-sync.js
         subPath: opensearch-sync.js
