@@ -37,6 +37,7 @@ configMaps:
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
+    20261116100000-add-dataset-totals-to-job-results.js: "{{ .Values.ADD_DATASET_TOTALS }}"
     20261116100100-fix-dataset-lifecycle-default-dates.js: "{{ .Values.FIX_LIFECYCLE_DEFAULT_DATES }}"
     opensearch-sync.js: "{{ .Values.OPENSEARCH_SYNC_JS }}"
 
@@ -173,6 +174,9 @@ jobContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
+      - name: migrations-volume
+        mountPath: /home/node/app/migrations/20261116100000-add-dataset-totals-to-job-results.js
+        subPath: 20261116100000-add-dataset-totals-to-job-results.js
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20261116100100-fix-dataset-lifecycle-default-dates.js
         subPath: 20261116100100-fix-dataset-lifecycle-default-dates.js
