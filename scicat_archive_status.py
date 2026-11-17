@@ -10,8 +10,19 @@ Usage:
     export SCICAT_BACKEND=https://dacat-qa.psi.ch      # SciCat backend base URL
     export SCICAT_TOKEN=...                         # SciCat access token
     python scicat_archive_status.py "$GLOBUS_PSI_QA:/archive/20-500-11935/"
-    python scicat_archive_status.py "$GLOBUS_PSI_QA:/archive/20-500-11935/" --globus-size --csv out.csv
+    python scicat_archive_status.py --globus-size -F csv -o out.csv
     python scicat_archive_status.py -F md > status.md
+
+Cleanup:
+    --clean selects every dataset with retrievable == true and archiveStatus ==
+    datasetOnArchiveDisk (with -i, each one is confirmed after its info row is written).
+    Once all datasets are processed, the selected directories are deleted recursively in a
+    single non-blocking Globus task (`globus delete -r --batch`). The task ID is printed to
+    stderr; check it with `globus task show TASK_ID` or `globus task wait TASK_ID`.
+    Nothing is deleted if the script is interrupted before then.
+
+    python scicat_archive_status.py --clean -n    # show what would be deleted
+    python scicat_archive_status.py --clean -i
 """
 import argparse
 import csv
@@ -64,7 +75,7 @@ class DelimitedWriter:
     delimiter = ","
 
     def __init__(self, out, cols):
-        self.w = csv.DictWriter(out, fieldnames=cols, delimiter=self.delimiter)
+        self.w = csv.DictWriter(out, fieldnames=cols, delimiter=self.delimiter, extrasaction="ignore")
 
     def header(self):
         self.w.writeheader()
@@ -136,14 +147,23 @@ def main():
     ap.add_argument("--globus-size", action="store_true", help="also sum file sizes on Globus")
     ap.add_argument("-F", "--format", choices=FORMATS, default="tsv",
                     help="output format (default: tsv)")
-    ap.add_argument("-o", "--output", help="write results to this file (default: stdout)")
-    ap.add_argument("--csv", metavar="FILE", help="shorthand for -F csv -o FILE")
+    ap.add_argument("-o", "--output", type=argparse.FileType("w"), default=sys.stdout,
+                    help="write results to this file; '-' for stdout (default)")
+    ap.add_argument("--clean", action="store_true",
+                    help="delete Globus copies of datasets that are retrievable and on archive disk")
+    ap.add_argument("-n", "--dry-run", action="store_true",
+                    help="with --clean: pass --dry-run to globus delete; nothing is submitted")
+    ap.add_argument("-i", "--interactive", action="store_true",
+                    help="with --clean: confirm each deletion, and the final submission")
+    ap.add_argument("--notify", metavar="EVENTS",
+                    help="with --clean: passed to `globus delete --notify` "
+                         "(comma-separated: on, off, succeeded, failed, inactive)")
     args = ap.parse_args()
-    if args.csv:
-        args.format, args.output = "csv", args.csv
+    if (args.dry_run or args.interactive or args.notify) and not args.clean:
+        ap.error("-n/--dry-run, -i/--interactive and --notify require --clean")
     if not args.scicat_url:
         ap.error("set --scicat-url or SCICAT_BACKEND")
-    if not args.collection and (not args.pids or args.globus_size):
+    if not args.collection and (not args.pids or args.globus_size or args.clean):
         ap.error("set --collection or GLOBUS_COLLECTION")
     if not args.token:
         ap.error("set --token or SCICAT_TOKEN")
@@ -164,7 +184,8 @@ def main():
         cols.append("globus_size")
     cols.append("error")
 
-    out = open(args.output, "w", newline="") if args.output else sys.stdout
+    out = args.output
+    cleaner = Cleaner(args) if args.clean else None
     try:
         w = FORMATS[args.format](out, cols)
         w.header()
@@ -172,11 +193,15 @@ def main():
         for row in iter_rows(s, args, datasets):
             w.row(row)
             out.flush()
+            if cleaner:
+                cleaner.process(row)
         w.footer()
         out.flush()
     finally:
         if out is not sys.stdout:
             out.close()
+    if cleaner:
+        cleaner.submit(args.collection)
 
 
 def list_datasets(base, prefix):
@@ -215,7 +240,111 @@ def iter_rows(s, args, datasets):
             except subprocess.CalledProcessError as e:
                 row["globus_size"] = None
                 row["error"] = (row.get("error", "") + " globus: " + e.stderr.strip()).strip()
+        row["_path"] = ds_path
         yield row
+
+
+def human_size(n):
+    "Format a byte count with binary units, e.g. 1536 -> '1.5 KiB'"
+    if n is None:
+        return "unknown size"
+    n = float(n)
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB", "PiB"):
+        if abs(n) < 1024 or unit == "PiB":
+            break
+        n /= 1024
+    return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+
+
+def should_clean(row):
+    "Only delete datasets that SciCat says are safely archived"
+    return row.get("retrievable") is True and row.get("archiveStatus") == "datasetOnArchiveDisk"
+
+
+def confirm(prompt):
+    "Ask on the terminal; returns 'y', 'n', 'a' (all remaining) or 'q' (quit)"
+    while True:
+        sys.stderr.write(f"{prompt} [y/n/a/q] ")
+        sys.stderr.flush()
+        ans = sys.stdin.readline()
+        if not ans:  # EOF
+            return "q"
+        ans = ans.strip().lower()[:1]
+        if ans in ("y", "n", "a", "q"):
+            return ans
+
+
+def globus_delete(collection, paths, label, dry_run=False, notify=None):
+    """Submit one non-blocking recursive delete task for all paths on collection.
+
+    Returns the task ID (or None for dry runs)."""
+    cmd = ["globus", "delete", "-r", "--no-enable-globs", "--batch", "-", "--label", label,
+           "-F", "json", collection]
+    if dry_run:
+        cmd.insert(2, "--dry-run")
+    if notify:
+        cmd[2:2] = ["--notify", notify]
+    batch = "".join(f"{p}\n" for p in paths)
+    res = subprocess.run(cmd, check=True, capture_output=True, text=True, input=batch)
+    if dry_run:
+        sys.stderr.write(res.stdout)
+        return None
+    return json.loads(res.stdout)["task_id"]
+
+
+class Cleaner:
+    "Select datasets to delete one at a time, then submit them as a single Globus task"
+
+    def __init__(self, args):
+        self.dry_run = args.dry_run
+        self.notify = args.notify
+        self.interactive = args.interactive
+        self.ask = args.interactive
+        self.quit = False
+        self.paths = []  # paths within the collection
+        self.size = 0
+
+    def process(self, row):
+        "Returns the action taken: keep, skipped or selected"
+        if not should_clean(row):
+            return "keep"
+        if self.quit:
+            return "skipped"
+        ds_path = row["_path"]
+        ans = confirm(f"Delete {ds_path} ({human_size(row.get('size'))})?") if self.ask else "y"
+        if ans == "a":
+            self.ask, ans = False, "y"
+        if ans == "q":
+            self.quit, ans = True, "n"
+        if ans == "n":
+            return "skipped"
+        self.paths.append(ds_path.split(":", 1)[1])
+        self.size += row.get("size") or 0
+        return "selected"
+
+    def submit(self, collection):
+        "Submit the delete task. Returns the task ID, or None if nothing was submitted."
+        n = len(self.paths)
+        if not n:
+            sys.stderr.write("No datasets selected for deletion.\n")
+            return None
+        summary = f"{n} dataset{'s' if n != 1 else ''} ({human_size(self.size)})"
+        if self.interactive and not self.dry_run:
+            if confirm(f"Submit one delete task for {summary}?") not in ("y", "a"):
+                sys.stderr.write("Nothing deleted.\n")
+                return None
+        try:
+            task_id = globus_delete(collection, self.paths, f"SciCat cleanup of {n} datasets",
+                                    self.dry_run, self.notify)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write(f"globus delete failed: {e.stderr.strip()}\n")
+            sys.exit(1)
+        if self.dry_run:
+            sys.stderr.write(f"Dry run: would delete {summary}.\n")
+        else:
+            sys.stderr.write(f"Submitted delete task {task_id} for {summary}.\n"
+                             f"Check with: globus task show {task_id}\n")
+        return task_id
 
 
 if __name__ == "__main__":
