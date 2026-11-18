@@ -7,11 +7,12 @@ SciCat PID is "<prefix with dots>/<uuid>", e.g. 20.500.11935/07e6926a-....
 Requirements: `globus` CLI (logged in), `requests`.
 
 Usage:
-    export SCICAT_BACKEND=https://dacat-qa.psi.ch      # SciCat backend base URL
-    export SCICAT_TOKEN=...                         # SciCat access token
-    python scicat_archive_status.py "$GLOBUS_PSI_QA:/archive/20-500-11935/"
-    python scicat_archive_status.py --globus-size -F csv -o out.csv
-    python scicat_archive_status.py -F md > status.md
+    export SCICAT_BACKEND=https://dacat-qa.psi.ch   # SciCat backend base URL
+    export SCICAT_TOKEN=...                         # SciCat access token, or:
+    export SCICAT_SERVICE_USER_USERNAME=...         # SciCat functional account
+    export SCICAT_SERVICE_USER_PASSWORD=...
+    python scicat_archive_status.py --collection "$GLOBUS_PSI_QA"
+    python scicat_archive_status.py -F csv -o out.csv
 
 Cleanup:
     --clean selects every dataset with retrievable == true and archiveStatus ==
@@ -21,8 +22,8 @@ Cleanup:
     stderr; check it with `globus task show TASK_ID` or `globus task wait TASK_ID`.
     Nothing is deleted if the script is interrupted before then.
 
-    python scicat_archive_status.py --clean -n    # show what would be deleted
-    python scicat_archive_status.py --clean -i
+    python scicat_archive_status.py --clean -n  # show what would be deleted
+    python scicat_archive_status.py --clean -i  # ask interactively before deleting
 """
 import argparse
 import csv
@@ -64,6 +65,56 @@ class SciCatError(Exception):
     "Fatal problem talking to SciCat (unreachable, bad credentials)"
 
 
+TOKEN_HINT = "Get a new token (SCICAT_TOKEN / --token) or use --username/--password."
+
+
+class SciCatSession(requests.Session):
+    """requests.Session for SciCat using either a fixed token or username/password login.
+
+    With username/password, a 401 response triggers one re-login and retry, so long runs
+    survive token expiry."""
+
+    def __init__(self, base_url, token=None, username=None, password=None):
+        super().__init__()
+        self.base_url = base_url.rstrip("/")
+        self.username, self.password = username, password
+        self.logins = 0  # number of successful logins, used to detect re-logins
+        if token:
+            self.headers["Authorization"] = f"Bearer {token}"
+        elif username and password:
+            self.login()
+
+    @property
+    def can_login(self):
+        return bool(self.username and self.password)
+
+    def login(self):
+        "Get a new token from /auth/login and use it for subsequent requests"
+        url = f"{self.base_url}/api/v3/auth/login"
+        try:
+            r = super().request("POST", url, json={"username": self.username, "password": self.password},
+                                headers={"Accept": "application/json"}, timeout=30)
+        except requests.RequestException as e:
+            raise SciCatError(f"Cannot reach SciCat at {self.base_url}: {e}") from e
+        if r.status_code in (401, 403):
+            raise SciCatError(f"SciCat login failed for user {self.username!r}: wrong username or password")
+        if not r.ok:
+            raise SciCatError(f"SciCat login failed: HTTP {r.status_code} {r.text[:200]}")
+        try:
+            token = r.json()["access_token"]
+        except (ValueError, KeyError):
+            raise SciCatError(f"Unexpected login response from {url}: {r.text[:200]}")
+        self.headers["Authorization"] = f"Bearer {token}"
+        self.logins += 1
+
+    def request(self, method, url, *args, **kwargs):
+        r = super().request(method, url, *args, **kwargs)
+        if r.status_code == 401 and self.can_login:
+            self.login()
+            r = super().request(method, url, *args, **kwargs)
+        return r
+
+
 def check_scicat(session, base_url):
     """Check that SciCat is reachable and the token is valid. Returns the username.
 
@@ -76,7 +127,7 @@ def check_scicat(session, base_url):
     if r.status_code in (401, 403):
         raise SciCatError(
             f"SciCat rejected the token (HTTP {r.status_code}): it is invalid or has expired. "
-            "Get a new token and set SCICAT_TOKEN or --token.")
+            + TOKEN_HINT)
     if not r.ok:
         raise SciCatError(f"Unexpected response from {url}: HTTP {r.status_code} {r.text[:200]}")
     try:
@@ -94,7 +145,7 @@ def get_dataset(session, base_url, pid):
     r = session.get(url, timeout=30)
     if r.status_code == 401:
         raise SciCatError("SciCat rejected the token (HTTP 401): it is invalid or has expired. "
-                          "Get a new token and set SCICAT_TOKEN or --token.")
+                          + TOKEN_HINT)
     if r.status_code == 404:
         return None
     r.raise_for_status()
@@ -173,9 +224,15 @@ def main():
     ap.add_argument("--path", default="/archive", help="Globus path to the dataset location")
     ap.add_argument("--collection", default=os.environ.get("GLOBUS_COLLECTION"), help="Globus collection id")
     ap.add_argument("--scicat-url", default=os.environ.get("SCICAT_BACKEND"))
-    ap.add_argument("--token", default=os.environ.get("SCICAT_TOKEN"))
+    ap.add_argument("--token", default=os.environ.get("SCICAT_TOKEN"),
+                    help="SciCat access token (default: $SCICAT_TOKEN). Takes precedence over --username")
+    ap.add_argument("--username", default=os.environ.get("SCICAT_SERVICE_USER_USERNAME"),
+                    help="SciCat username to log in with (default: $SCICAT_SERVICE_USER_USERNAME)")
+    ap.add_argument("--password", default=os.environ.get("SCICAT_SERVICE_USER_PASSWORD"),
+                    help="SciCat password (default: $SCICAT_SERVICE_USER_PASSWORD; "
+                         "prefer the env var, command-line arguments are visible to other users)")
     ap.add_argument("--prefix", default="20.500.11935", help="PID prefix (ignored if PIDs are given)")
-    ap.add_argument("--globus-size", action="store_true", help="also sum file sizes on Globus")
+    ap.add_argument("--globus-size", action="store_true", help="calculate file sizes from Globus rather than SciCat (slow)")
     ap.add_argument("-F", "--format", choices=FORMATS, default="tsv",
                     help="output format (default: tsv)")
     ap.add_argument("-o", "--output", type=argparse.FileType("w"), default=sys.stdout,
@@ -196,14 +253,13 @@ def main():
         ap.error("set --scicat-url or SCICAT_BACKEND")
     if not args.collection and (not args.pids or args.globus_size or args.clean):
         ap.error("set --collection or GLOBUS_COLLECTION")
-    if not args.token:
-        ap.error("set --token or SCICAT_TOKEN")
+    if not args.token and not (args.username and args.password):
+        ap.error("set --token/SCICAT_TOKEN, or --username and --password "
+                 "(SCICAT_SERVICE_USER_USERNAME / SCICAT_SERVICE_USER_PASSWORD)")
 
 
-    s = requests.Session()
-    if args.token:
-        s.headers["Authorization"] = f"Bearer {args.token}"
     try:
+        s = SciCatSession(args.scicat_url, args.token, args.username, args.password)
         check_scicat(s, args.scicat_url)
     except SciCatError as e:
         sys.exit(f"Error: {e}")
@@ -269,9 +325,14 @@ def iter_rows(s, args, datasets):
             ds, row["error"] = None, str(e)
         if ds is None and "error" not in row:
             # Distinguish a missing dataset from credentials expiring mid-run
+            # (expired tokens can give 404 rather than 401)
+            logins = s.logins
             check_scicat(s, args.scicat_url)
-            row["error"] = "not found in SciCat"
-        else:
+            if s.logins != logins:  # re-logged in; the 404 may have been the old token
+                ds = get_dataset(s, args.scicat_url, pid)
+            if ds is None:
+                row["error"] = "not found in SciCat"
+        if ds is not None:
             lc = ds.get("datasetlifecycle") or {}
             row.update(
                 size=ds.get("size"),
