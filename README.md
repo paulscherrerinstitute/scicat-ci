@@ -1,11 +1,47 @@
+# Globus Cleanup
+
+Scripts to manage and release storage of datasets transferred by the globus-proxy.
+
+Reports SciCat archive status for datasets stored on a Globus collection, and deletes the
+Globus copies of datasets that SciCat reports as safely archived
+(`retrievable == true` and `archiveStatusMessage == datasetOnArchiveDisk`).
+
+See `python scicat_globus_cleaner.py --help` for all options.
+
+## Authentication
+
+This requires a globus service user with read and delete permissions. It also needs a
+scicat functional account which can read all datasets. Currently credentials are shared
+with the globus-proxy (`pass development/scicat/globus_proxy/env`).
+
+## Interactive use
+
+The `scicat_globus_cleaner.py` script can be run directly. It requires the [globus
+cli](https://docs.globus.org/cli/) be installed.
 
 ```sh
-eval `globus-shell`
-eval `scicat-login --env qa`
+pip install -r requirements.txt
 
-python scicat_archive_status.py
+# Set env vars
+eval `pass development/scicat/globus_proxy/env`
+export GLOBUS_CLIENT_ID GLOBUS_CLIENT_SECRET SCICAT_SERVICE_USER_USERNAME SCICAT_SERVICE_USER_PASSWORD
+export SCICAT_BACKEND=https://scicat.development.psi.ch
+export GLOBUS_COLLECTION=
 
+python scicat_globus_cleaner.py                # report only
+python scicat_globus_cleaner.py --clean -n     # show what would be deleted
+python scicat_globus_cleaner.py --clean -i     # confirm each deletion
 ```
 
+### Safeguards
 
+- **One cleanup at a time.** If an earlier `SciCat cleanup` delete task is still `ACTIVE`,
+  the run is skipped (exit 0). If one is `INACTIVE` (paused, e.g. expired credentials or
+  permission problems) the job fails, since it won't finish on its own.
+- **Limits.** `--max-datasets` / `--max-size` make the job fail without deleting anything
+  if the selection is unexpectedly large (e.g. bad SciCat data). A large backlog needs
+  to be cleared once by hand with higher limits.
+- **No retries.** `backoffLimit: 0`; a failed run shows up as a failed Job.
 
+The dataset table goes to stdout and the Globus task ID to stderr; both appear in
+`kubectl logs`. Check the deletion with `globus task show <TASK_ID>`.

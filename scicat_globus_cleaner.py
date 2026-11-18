@@ -11,8 +11,8 @@ Usage:
     export SCICAT_TOKEN=...                         # SciCat access token, or:
     export SCICAT_SERVICE_USER_USERNAME=...         # SciCat functional account
     export SCICAT_SERVICE_USER_PASSWORD=...
-    python scicat_archive_status.py --collection "$GLOBUS_PSI_QA"
-    python scicat_archive_status.py -F csv -o out.csv
+    python scicat_globus_cleaner.py --collection "$GLOBUS_PSI_QA"
+    python scicat_globus_cleaner.py -F csv -o out.csv
 
 Cleanup:
     --clean selects every dataset with retrievable == true and archiveStatus ==
@@ -22,13 +22,24 @@ Cleanup:
     stderr; check it with `globus task show TASK_ID` or `globus task wait TASK_ID`.
     Nothing is deleted if the script is interrupted before then.
 
-    python scicat_archive_status.py --clean -n  # show what would be deleted
-    python scicat_archive_status.py --clean -i  # ask interactively before deleting
+    Safeguards for unattended runs (e.g. a Kubernetes CronJob):
+    - If an earlier "SciCat cleanup" delete task is still ACTIVE, the run is skipped (exit 0).
+      If one is INACTIVE (paused, e.g. expired credentials), the script exits with an error,
+      since it needs attention. Use --allow-concurrent to skip this check.
+    - --max-datasets / --max-size abort the run (exit 1, nothing deleted) if the selection
+      is larger than expected, e.g. because of bad SciCat data.
+    - --ignore-missing (`globus delete -f`) doesn't fail on directories that are already gone.
+
+    Exit codes: 0 success (or skipped), 1 error, 2 usage error.
+
+    python scicat_globus_cleaner.py --clean -n  # show what would be deleted
+    python scicat_globus_cleaner.py --clean -i  # ask interactively before deleting
 """
 import argparse
 import csv
 import json
 import os
+import re
 import subprocess
 import sys
 from urllib.parse import quote
@@ -246,9 +257,20 @@ def main():
     ap.add_argument("--notify", metavar="EVENTS",
                     help="with --clean: passed to `globus delete --notify` "
                          "(comma-separated: on, off, succeeded, failed, inactive)")
+    ap.add_argument("--ignore-missing", action="store_true",
+                    help="with --clean: don't fail if a directory is already gone (globus delete -f)")
+    ap.add_argument("--max-datasets", type=int, metavar="N",
+                    help="with --clean: abort without deleting anything if more than N datasets are selected")
+    ap.add_argument("--max-size", type=parse_size, metavar="SIZE",
+                    help="with --clean: abort without deleting anything if the selection is larger than "
+                         "SIZE (bytes, or with a unit, e.g. 500GiB, 2TB)")
+    ap.add_argument("--allow-concurrent", action="store_true",
+                    help="with --clean: run even if an earlier cleanup task is still running")
     args = ap.parse_args()
-    if (args.dry_run or args.interactive or args.notify) and not args.clean:
-        ap.error("-n/--dry-run, -i/--interactive and --notify require --clean")
+    clean_opts = ("dry_run", "interactive", "notify", "ignore_missing", "max_datasets", "max_size",
+                  "allow_concurrent")
+    if not args.clean and any(getattr(args, o) for o in clean_opts):
+        ap.error("--" + "/--".join(o.replace("_", "-") for o in clean_opts) + " require --clean")
     if not args.scicat_url:
         ap.error("set --scicat-url or SCICAT_BACKEND")
     if not args.collection and (not args.pids or args.globus_size or args.clean):
@@ -257,6 +279,9 @@ def main():
         ap.error("set --token/SCICAT_TOKEN, or --username and --password "
                  "(SCICAT_SERVICE_USER_USERNAME / SCICAT_SERVICE_USER_PASSWORD)")
 
+
+    if args.clean and not args.allow_concurrent:
+        check_running_cleanups(args.dry_run)
 
     try:
         s = SciCatSession(args.scicat_url, args.token, args.username, args.password)
@@ -364,6 +389,50 @@ def human_size(n):
     return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
 
 
+UNITS = {"": 1, "b": 1,
+         "k": 1000, "kb": 1000, "m": 1000**2, "mb": 1000**2, "g": 1000**3, "gb": 1000**3,
+         "t": 1000**4, "tb": 1000**4, "p": 1000**5, "pb": 1000**5,
+         "kib": 1024, "mib": 1024**2, "gib": 1024**3, "tib": 1024**4, "pib": 1024**5}
+
+
+def parse_size(text):
+    "Parse '1234', '500GiB', '2 TB' etc. into bytes (for argparse)"
+    m = re.fullmatch(r"\s*([0-9.]+)\s*([a-zA-Z]*)\s*", text)
+    if not m or m.group(2).lower() not in UNITS:
+        raise argparse.ArgumentTypeError(f"invalid size {text!r}; use e.g. 500GiB or 2TB")
+    return int(float(m.group(1)) * UNITS[m.group(2).lower()])
+
+
+CLEANUP_LABEL = "SciCat cleanup"
+
+
+def check_running_cleanups(dry_run=False):
+    """Exit if an earlier cleanup delete task (by this Globus identity) hasn't finished.
+
+    ACTIVE tasks: skip this run (exit 0). INACTIVE tasks: exit 1, they need attention."""
+    cmd = ["globus", "task", "list", "--filter-type", "DELETE",
+           "--filter-status", "ACTIVE", "--filter-status", "INACTIVE",
+           "--filter-label", f"{CLEANUP_LABEL}*", "--inexact", "--limit", "100", "-F", "json"]
+    try:
+        res = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        tasks = json.loads(res.stdout).get("DATA", [])
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"Error: could not list Globus tasks: {e.stderr.strip()}")
+    except ValueError as e:
+        sys.exit(f"Error: unexpected output from globus task list: {e}")
+    if not tasks:
+        return
+    desc = "\n".join(f"  {t['task_id']}  {t['status']}  {t.get('label')}" for t in tasks)
+    if dry_run:
+        sys.stderr.write(f"Warning: earlier cleanup task(s) not finished; a real run would stop here:\n{desc}\n")
+    elif any(t["status"] == "INACTIVE" for t in tasks):
+        sys.exit(f"Error: earlier cleanup task(s) are paused and need attention "
+                 f"(see `globus task pause-info TASK_ID`):\n{desc}")
+    else:
+        sys.stderr.write(f"Earlier cleanup task(s) still running; skipping this run:\n{desc}\n")
+        sys.exit(0)
+
+
 def should_clean(row):
     "Only delete datasets that SciCat says are safely archived"
     return row.get("retrievable") is True and row.get("archiveStatus") == "datasetOnArchiveDisk"
@@ -382,7 +451,7 @@ def confirm(prompt):
             return ans
 
 
-def globus_delete(collection, paths, label, dry_run=False, notify=None):
+def globus_delete(collection, paths, label, dry_run=False, notify=None, ignore_missing=False):
     """Submit one non-blocking recursive delete task for all paths on collection.
 
     Returns the task ID (or None for dry runs)."""
@@ -392,6 +461,8 @@ def globus_delete(collection, paths, label, dry_run=False, notify=None):
         cmd.insert(2, "--dry-run")
     if notify:
         cmd[2:2] = ["--notify", notify]
+    if ignore_missing:
+        cmd.insert(2, "--ignore-missing")
     batch = "".join(f"{p}\n" for p in paths)
     res = subprocess.run(cmd, check=True, capture_output=True, text=True, input=batch)
     if dry_run:
@@ -406,6 +477,9 @@ class Cleaner:
     def __init__(self, args):
         self.dry_run = args.dry_run
         self.notify = args.notify
+        self.ignore_missing = args.ignore_missing
+        self.max_datasets = args.max_datasets
+        self.max_size = args.max_size
         self.interactive = args.interactive
         self.ask = args.interactive
         self.quit = False
@@ -437,13 +511,25 @@ class Cleaner:
             sys.stderr.write("No datasets selected for deletion.\n")
             return None
         summary = f"{n} dataset{'s' if n != 1 else ''} ({human_size(self.size)})"
+        too_many = []
+        if self.max_datasets is not None and n > self.max_datasets:
+            too_many.append(f"more than --max-datasets {self.max_datasets}")
+        if self.max_size is not None and self.size > self.max_size:
+            too_many.append(f"more than --max-size {human_size(self.max_size)}")
+        if too_many:
+            msg = (f"Selected {summary}, {' and '.join(too_many)}. Nothing was deleted. "
+                   "If this is expected, run again with a higher limit.")
+            if self.dry_run:
+                sys.stderr.write(f"Warning: {msg}\n")
+            else:
+                sys.exit(f"Error: {msg}")
         if self.interactive and not self.dry_run:
             if confirm(f"Submit one delete task for {summary}?") not in ("y", "a"):
                 sys.stderr.write("Nothing deleted.\n")
                 return None
         try:
-            task_id = globus_delete(collection, self.paths, f"SciCat cleanup of {n} datasets",
-                                    self.dry_run, self.notify)
+            task_id = globus_delete(collection, self.paths, f"{CLEANUP_LABEL} of {n} datasets",
+                                    self.dry_run, self.notify, self.ignore_missing)
         except subprocess.CalledProcessError as e:
             sys.stderr.write(f"globus delete failed: {e.stderr.strip()}\n")
             sys.exit(1)
