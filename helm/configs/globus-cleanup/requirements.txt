@@ -1,2 +1,2 @@
-globus-cli>=3.25.0
-requests>=2.31.0
+globus-cli>=3.44,<4
+requests>=2.31,<3

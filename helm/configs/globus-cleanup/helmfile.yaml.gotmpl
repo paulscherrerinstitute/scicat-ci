@@ -1,0 +1,21 @@
+bases:
+  - ../../helmfile-common.yaml
+
+releases:
+  - name: globus-cleanup
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/cron
+    version: 1.0.0
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          GLOBUS_PROXY_ENV: {{ .Values.secrets.GLOBUS_PROXY_ENV | quote }}
+
+    set:
+      - name: REQUIREMENTS_TXT
+        file: requirements.txt
+      - name: ENTRYPOINT_SH
+        file: entrypoint.sh
+      - name: SCICAT_GLOBUS_CLEANER_PY
+        file: scicat_globus_cleaner.py
