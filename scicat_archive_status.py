@@ -60,10 +60,41 @@ def path_to_pid(path):
     "Convert a path to a PID. Replaces hyphens with periods."
     return path.rstrip("/").rsplit("/", 1)[-1].split(":")[-1].replace("-", ".")
 
+class SciCatError(Exception):
+    "Fatal problem talking to SciCat (unreachable, bad credentials)"
+
+
+def check_scicat(session, base_url):
+    """Check that SciCat is reachable and the token is valid. Returns the username.
+
+    Raises SciCatError with a readable message otherwise."""
+    url = f"{base_url.rstrip('/')}/api/v3/auth/whoami"
+    try:
+        r = session.get(url, timeout=30)
+    except requests.RequestException as e:
+        raise SciCatError(f"Cannot reach SciCat at {base_url}: {e}") from e
+    if r.status_code in (401, 403):
+        raise SciCatError(
+            f"SciCat rejected the token (HTTP {r.status_code}): it is invalid or has expired. "
+            "Get a new token and set SCICAT_TOKEN or --token.")
+    if not r.ok:
+        raise SciCatError(f"Unexpected response from {url}: HTTP {r.status_code} {r.text[:200]}")
+    try:
+        user = r.json() or {}
+    except ValueError:
+        raise SciCatError(f"{url} did not return JSON; is {base_url} a SciCat backend?")
+    if not user:
+        raise SciCatError("SciCat did not recognise the token; it may have expired.")
+    return user.get("username") or user.get("email") or "unknown user"
+
+
 def get_dataset(session, base_url, pid):
-    "Get a dataset from scicat"
+    "Get a dataset from scicat. Returns None if not found."
     url = f"{base_url.rstrip('/')}/api/v4/datasets/{quote(pid, safe='')}"
     r = session.get(url, timeout=30)
+    if r.status_code == 401:
+        raise SciCatError("SciCat rejected the token (HTTP 401): it is invalid or has expired. "
+                          "Get a new token and set SCICAT_TOKEN or --token.")
     if r.status_code == 404:
         return None
     r.raise_for_status()
@@ -172,6 +203,10 @@ def main():
     s = requests.Session()
     if args.token:
         s.headers["Authorization"] = f"Bearer {args.token}"
+    try:
+        check_scicat(s, args.scicat_url)
+    except SciCatError as e:
+        sys.exit(f"Error: {e}")
 
     # Globus base directory, e.g. COLLECTION:/archive
     base = "{collection}:{path}".format(collection=args.collection, path=args.path.rstrip("/"))
@@ -190,16 +225,26 @@ def main():
         w = FORMATS[args.format](out, cols)
         w.header()
         out.flush()
-        for row in iter_rows(s, args, datasets):
-            w.row(row)
-            out.flush()
-            if cleaner:
-                cleaner.process(row)
-        w.footer()
+        try:
+            for row in iter_rows(s, args, datasets):
+                w.row(row)
+                out.flush()
+                if cleaner:
+                    cleaner.process(row)
+        except SciCatError as e:
+            error = e
+        else:
+            error = None
+        w.footer()  # keep partial output well-formed (e.g. JSON)
         out.flush()
     finally:
         if out is not sys.stdout:
             out.close()
+    if error:
+        msg = f"Error: {error}"
+        if cleaner and cleaner.paths:
+            msg += "\nAborted before submitting the delete task; nothing was deleted."
+        sys.exit(msg)
     if cleaner:
         cleaner.submit(args.collection)
 
@@ -222,8 +267,10 @@ def iter_rows(s, args, datasets):
             ds = get_dataset(s, args.scicat_url, pid)
         except requests.RequestException as e:
             ds, row["error"] = None, str(e)
-        if ds is None:
-            row.setdefault("error", "not found in SciCat")
+        if ds is None and "error" not in row:
+            # Distinguish a missing dataset from credentials expiring mid-run
+            check_scicat(s, args.scicat_url)
+            row["error"] = "not found in SciCat"
         else:
             lc = ds.get("datasetlifecycle") or {}
             row.update(
