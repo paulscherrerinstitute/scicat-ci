@@ -137,7 +137,9 @@ volumeMounts:
     subPath: datasetTypes.json
 
 migrateCommand: "echo 'No migration command specified.'"
-opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"
+# Recreates and refills the OpenSearch index on every deploy: set it only for
+# the deploy that changes opensearchConfig.json, then reset it to the echo.
+opensearchSyncCommand: node /home/node/app/opensearch-sync.js
 
 jobContainers:
   - name: migrate
