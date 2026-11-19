@@ -42,7 +42,7 @@ and namespace:
 
 | Workflow                                                   | Trigger                                         | What it does                                                                                           |
 | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger                                |
+| [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger; `deploy ok` is the check to require |
 | [lint.yml](.github/workflows/lint.yml)                     | PR to `main`                                    | Renders every changed helmfile state for all three environments, to catch template errors before merge |
 | [actionlint.yml](.github/workflows/actionlint.yml)         | PR touching `.github/**`                        | Lints the GitHub Actions workflow files themselves                                                     |
 | [proposals-test.yml](.github/workflows/proposals-test.yml) | PR touching `proposals/**`                      | Builds and smoke-tests the proposals component                                                         |
