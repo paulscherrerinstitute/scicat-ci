@@ -1,6 +1,8 @@
 import os
 from unittest.mock import ANY, Mock, call, patch
 
+import pytest
+
 import orchestrator
 
 
@@ -119,6 +121,7 @@ class TestMarkExpiredOrchestrator:
                 "SCICAT_ENDPOINT": "http://scicat",
                 "SCICAT_USERNAME": "test_user",
                 "SCICAT_PASSWORD": "test_password",
+                "EXPIRED_RETENTION_TIME": "3M",
             },
         )
         self.env_patch.start()
@@ -144,8 +147,18 @@ class TestMarkExpiredOrchestrator:
 
         mock_authenticate.assert_called_once()
         assert mock_submit.call_args_list == [
-            call("group1", ["pid1"]),
-            call("group2", ["pid2"]),
-            call("group3", ["pid3"]),
+            call("group1", ["pid1"], "3M"),
+            call("group2", ["pid2"], "3M"),
+            call("group3", ["pid3"], "3M"),
         ]
         mock_log.error.assert_called_once()
+
+    @pytest.mark.parametrize("value", [None, "3 months"])
+    def test_requires_a_valid_retention_time(self, value):
+        with patch.dict(os.environ):
+            if value is None:
+                del os.environ["EXPIRED_RETENTION_TIME"]
+            else:
+                os.environ["EXPIRED_RETENTION_TIME"] = value
+            with pytest.raises((KeyError, ValueError)):
+                orchestrator.MarkExpiredOrchestrator()

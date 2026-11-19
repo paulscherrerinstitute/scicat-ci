@@ -1,4 +1,5 @@
 import json
+import re
 from collections import defaultdict
 from os import environ
 
@@ -16,45 +17,42 @@ ARCHIVE_STATUS_MARKED_FOR_DELETION = "markedForDeletion"
 
 PARAM_DELETION_CODE = "deletionCode"
 DELETION_CODE_EXPIRED = "EXPIRED"
+# Grace period, e.g. "3M", set by the client creating the job and restricted
+# by the job config
+PARAM_RETENTION_TIME = "retentionTime"
 
-RESULT_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
 RESULT_VERIFIED_AT = "verifiedAt"
 RESULT_NOTIFIED_AT = "notifiedAt"
 
 STATUS_RETENTION_EXPIRED = "retentionExpired"
 
-# retentionTime suffix -> relativedelta keyword, following the same calendar
-# (upper) vs clock (lower) case convention as ISO 8601 durations.
+# retentionTime suffix -> relativedelta keyword.
 _RELATIVEDELTA_KWARG_BY_UNIT = {
     "Y": "years",
     "M": "months",
     "d": "days",
-    "h": "hours",
-    "m": "minutes",
-    "s": "seconds",
 }
 
 
 def _parse_retention(retention_time):
-    """Validates e.g. {"value": 3, "unit": "M"} and returns (3, "months")."""
-    try:
-        amount = retention_time["value"]
-        unit = retention_time["unit"]
-    except (TypeError, KeyError) as e:
-        raise ValueError(
-            f"Unrecognized retention time format: {retention_time!r}"
-        ) from e
-    kwarg = _RELATIVEDELTA_KWARG_BY_UNIT.get(unit)
-    if kwarg is None or not isinstance(amount, int) or isinstance(amount, bool):
+    """Validates e.g. "3M" and returns (3, "months")."""
+    match = isinstance(retention_time, str) and re.fullmatch(
+        rf"(\d+)([{''.join(_RELATIVEDELTA_KWARG_BY_UNIT)}])", retention_time
+    )
+    if not match:
         raise ValueError(f"Unrecognized retention time format: {retention_time!r}")
-    return amount, kwarg
+    return int(match[1]), _RELATIVEDELTA_KWARG_BY_UNIT[match[2]]
 
 
-_RETENTION_STEP = {"value": 1, "unit": "M"}
-_RETENTION_STEP_DELTA = relativedelta(
-    **{_RELATIVEDELTA_KWARG_BY_UNIT[_RETENTION_STEP["unit"]]: _RETENTION_STEP["value"]}
-)
+def retention_time_from_env(name):
+    """Reads a grace period, e.g. "3M", from the env variable `name`, raising if malformed."""
+    retention_time = environ[name]
+    _parse_retention(retention_time)
+    return retention_time
+
+
+_RETENTION_STEP_DELTA = relativedelta(months=1)
 
 DATASETS_PAGE_LIMIT = 100
 DATASETS_MAX_ITERATIONS = 1000
@@ -203,11 +201,11 @@ class MarkedForDeletionJob:
 
     @property
     def retention_time(self):
-        return self._job.job_result_object.get(RESULT_RETENTION_TIME)
+        return self._job.job_params.get(PARAM_RETENTION_TIME)
 
     @property
     def retention_amount(self):
-        """The grace period's numeric value, e.g. 3 for {"value": 3, "unit": "M"}."""
+        """The grace period's numeric value, e.g. 3 for "3M"."""
         return _parse_retention(self.retention_time)[0]
 
     @property
@@ -304,12 +302,13 @@ class MarkedForDeletionJobsRepository:
     page_limit = 100
     max_iterations = 1000
 
-    # jobParams.deletionCode rather than jobParams: datasetList maps to
+    # jobParams.<param> rather than jobParams: datasetList maps to
     # jobParams.datasetList and projecting a path with its parent fails.
     fields = [
         "id",
         "datasetList",
         f"jobParams.{PARAM_DELETION_CODE}",
+        f"jobParams.{PARAM_RETENTION_TIME}",
         "jobResultObject",
         "creationTime",
     ]
@@ -460,8 +459,8 @@ class ExpiredDatasetsRepository:
         return dict(by_group)
 
 
-def submit_expired_marked_for_deletion(owner_group, pids):
-    """Submits markedForDeletion jobs with deletionCode EXPIRED, in chunks of MARK_MAX_DATASETS_PER_JOB."""
+def submit_expired_marked_for_deletion(owner_group, pids, retention_time):
+    """Submits markedForDeletion jobs with deletionCode EXPIRED and the grace period retention_time, in chunks of MARK_MAX_DATASETS_PER_JOB."""
     for start in range(0, len(pids), MARK_MAX_DATASETS_PER_JOB):
         chunk = pids[start : start + MARK_MAX_DATASETS_PER_JOB]
         JobsApi().jobs_controller_create_v3(
@@ -471,6 +470,7 @@ def submit_expired_marked_for_deletion(owner_group, pids):
                 "jobParams": {
                     "ownerGroup": owner_group,
                     PARAM_DELETION_CODE: DELETION_CODE_EXPIRED,
+                    PARAM_RETENTION_TIME: retention_time,
                 },
             }
         )

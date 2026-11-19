@@ -74,19 +74,16 @@ class TestMarkedForDeletionJob:
     @pytest.mark.parametrize(
         "retention_time, expected",
         [
-            [{"value": 3, "unit": "M"}, 3],
-            [{"value": 6, "unit": "d"}, 6],
-            [{"value": 2, "unit": "h"}, 2],
-            [{"value": 10, "unit": "m"}, 10],  # lowercase m is minutes, not months
-            [{"value": 45, "unit": "s"}, 45],
-            [{"value": 1, "unit": "Y"}, 1],
+            ["3M", 3],
+            ["6d", 6],
+            ["1Y", 1],
         ],
     )
     def test_retention_amount_reads_the_unit_from_the_object(
         self, retention_time, expected
     ):
         job = scicat.MarkedForDeletionJob(
-            FixturesJobs.raw_job(job_result_object={"retentionTime": retention_time})
+            FixturesJobs.raw_job(retention_time=retention_time)
         )
         assert job.retention_amount == expected
 
@@ -94,28 +91,29 @@ class TestMarkedForDeletionJob:
         "retention_time",
         [
             None,
-            {},
-            "3M",
-            {"value": 3},
-            {"unit": "M"},
-            {"value": "3", "unit": "M"},
-            {"value": 3, "unit": "X"},
-            {"value": True, "unit": "M"},
+            "",
+            "3",
+            "M",
+            "3X",
+            "2h",
+            "10m",
+            "45s",
+            "-3M",
+            "3.5M",
+            " 3M",
+            "3MM",
+            {"value": 3, "unit": "M"},
         ],
     )
     def test_retention_amount_rejects_malformed_retention_time(self, retention_time):
         job = scicat.MarkedForDeletionJob(
-            FixturesJobs.raw_job(job_result_object={"retentionTime": retention_time})
+            FixturesJobs.raw_job(retention_time=retention_time)
         )
         with pytest.raises(ValueError):
             job.retention_amount
 
     def test_expiry_date_uses_the_retention_time_unit(self):
-        job = scicat.MarkedForDeletionJob(
-            FixturesJobs.raw_job(
-                job_result_object={"retentionTime": {"value": 1, "unit": "Y"}}
-            )
-        )
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(retention_time="1Y"))
         assert job.expiry_date == FixturesJobs.creation_time + relativedelta(years=1)
 
     @staticmethod
@@ -153,7 +151,6 @@ class TestMarkedForDeletionJob:
             FixturesJobs.job_id,
             {
                 "jobResultObject": {
-                    "retentionTime": {"value": 3, "unit": "M"},
                     "lastVerifiedAt": now.isoformat(),
                     "verifiedAt": [now.isoformat()],
                 },
@@ -172,7 +169,6 @@ class TestMarkedForDeletionJob:
         job = scicat.MarkedForDeletionJob(
             FixturesJobs.raw_job(
                 job_result_object={
-                    "retentionTime": {"value": 3, "unit": "M"},
                     "lastVerifiedAt": previous,
                     "verifiedAt": [previous],
                 }
@@ -195,7 +191,6 @@ class TestMarkedForDeletionJob:
             FixturesJobs.job_id,
             {
                 "jobResultObject": {
-                    "retentionTime": {"value": 3, "unit": "M"},
                     "lastVerifiedAt": now.isoformat(),
                     "verifiedAt": [previous, now.isoformat()],
                 },
@@ -242,7 +237,6 @@ class TestMarkedForDeletionJob:
             FixturesJobs.job_id,
             {
                 "jobResultObject": {
-                    "retentionTime": {"value": 3, "unit": "M"},
                     "lastVerifiedAt": now.isoformat(),
                     "verifiedAt": [now.isoformat()],
                 },
@@ -473,6 +467,7 @@ class TestMarkedForDeletionJobsRepository:
                 "id",
                 "datasetList",
                 "jobParams.deletionCode",
+                "jobParams.retentionTime",
                 "jobResultObject",
                 "creationTime",
             ],
@@ -654,12 +649,16 @@ class TestSubmitExpiredMarkedForDeletion:
         return {
             "type": "markedForDeletion",
             "datasetList": [{"pid": pid, "files": []} for pid in pids],
-            "jobParams": {"ownerGroup": "group1", "deletionCode": "EXPIRED"},
+            "jobParams": {
+                "ownerGroup": "group1",
+                "deletionCode": "EXPIRED",
+                "retentionTime": "3M",
+            },
         }
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     def test_submits_one_job(self, mock_create):
-        scicat.submit_expired_marked_for_deletion("group1", ["pid1", "pid2"])
+        scicat.submit_expired_marked_for_deletion("group1", ["pid1", "pid2"], "3M")
         mock_create.assert_called_once_with(
             ANY, self._marked_for_deletion(["pid1", "pid2"])
         )
@@ -667,7 +666,9 @@ class TestSubmitExpiredMarkedForDeletion:
     @patch("scicat.MARK_MAX_DATASETS_PER_JOB", 2)
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     def test_splits_large_groups_into_chunks(self, mock_create):
-        scicat.submit_expired_marked_for_deletion("group1", ["pid1", "pid2", "pid3"])
+        scicat.submit_expired_marked_for_deletion(
+            "group1", ["pid1", "pid2", "pid3"], "3M"
+        )
         assert mock_create.call_args_list == [
             call(ANY, self._marked_for_deletion(["pid1", "pid2"])),
             call(ANY, self._marked_for_deletion(["pid3"])),

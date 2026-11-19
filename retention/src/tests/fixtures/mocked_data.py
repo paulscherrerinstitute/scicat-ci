@@ -17,18 +17,24 @@ class FixturesJobs:
         job_id=None,
         dataset_pids=None,
         deletion_code="EXPIRED",
+        retention_time="3M",
     ):
         pids = dataset_pids if dataset_pids is not None else FixturesJobs.dataset_pids
         return Mock(
             id=job_id or FixturesJobs.job_id,
             dataset_list=[Mock(pid=pid) for pid in pids],
-            job_params=(
-                {"deletionCode": deletion_code} if deletion_code is not None else {}
-            ),
+            job_params={
+                **(
+                    {"deletionCode": deletion_code} if deletion_code is not None else {}
+                ),
+                **(
+                    {"retentionTime": retention_time}
+                    if retention_time is not None
+                    else {}
+                ),
+            },
             job_result_object=(
-                job_result_object
-                if job_result_object is not None
-                else {"retentionTime": {"value": 3, "unit": "M"}}
+                job_result_object if job_result_object is not None else {}
             ),
             creation_time=creation_time or FixturesJobs.creation_time,
         )
