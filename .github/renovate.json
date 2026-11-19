@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigestsToSemver",
     ":semanticCommits"
   ],
+  "timezone": "Europe/Zurich",
   "platformAutomerge": false,
   "packageRules": [
     {
@@ -36,6 +37,27 @@
         "ghcr.io/paulscherrerinstitute/scicat-ci/**"
       ],
       "enabled": false
+    },
+    {
+      "description": "Batch automergeable helm updates into one weekly PR, so one dev + one qa deploy per week",
+      "matchFileNames": [
+        "helm/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "matchPackageNames": [
+        "!/scicat/i",
+        "!/openem/i"
+      ],
+      "groupName": "helm deployments",
+      "schedule": [
+        "* 0-5 * * 1"
+      ]
     }
   ]
 }
