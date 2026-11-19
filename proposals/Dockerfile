@@ -1,5 +1,5 @@
 # dev image
-FROM python:3.13-slim AS dev
+FROM python:3.13-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90 AS dev
 ENV PYTHONDONTWRITEBYTECODE 1
 WORKDIR /usr/src/proposals
 # install python dependecies
@@ -11,7 +11,7 @@ RUN poetry install --no-interaction --no-ansi \
 
 
 # prod image
-FROM python:3.13-slim AS prod
+FROM python:3.13-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90 AS prod
 WORKDIR /usr/src/proposals
 # copy and install dependencies
 COPY --from=dev /usr/src/proposals/requirements.txt ./
