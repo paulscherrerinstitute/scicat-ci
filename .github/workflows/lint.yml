@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - .github/workflows/lint.yml
+      - .github/workflows/**
       - helm/**
 
 permissions:
@@ -15,11 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       states: ${{ steps.states.outputs.matrix }}
+      workflows: ${{ steps.workflows.outputs.any_changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Get changed workflows
+        id: workflows
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: .github/workflows/**
 
       - name: Get changed helmfile base
         id: base
@@ -60,6 +67,26 @@ jobs:
         env:
           BASE_CHANGED: ${{ steps.base.outputs.any_changed }}
           COMPONENTS: ${{ steps.components.outputs.all_changed_files }}
+
+  actionlint:
+    needs: changes
+    if: needs.changes.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # review comments
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint workflows
+        uses: reviewdog/action-actionlint@ae857e78c1b42b3d0a49637181b09d3d56d402b4 # v1.84.1
+        with:
+          reporter: github-pr-review
+          # the older workflows are not actionlint-clean
+          filter_mode: file
+          # without this nothing fails, and "error" would skip shellcheck's info findings
+          fail_level: any
 
   helmfile:
     needs: changes
