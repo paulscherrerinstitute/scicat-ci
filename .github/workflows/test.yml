@@ -1,0 +1,107 @@
+name: test
+
+# Tests the components whose source lives in this repo. Runs on every PR and
+# picks inside which components to test. Jobs that don't apply are skipped,
+# which "test ok" counts as passing, so "test ok" is the one check of this
+# workflow to require on main.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.select.outputs.components }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A change here tests every component.
+      - name: Get changed test workflow
+        id: self
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: .github/workflows/test.yml
+
+      - name: Get changed top-level folders
+        id: dirs
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          dir_names: true
+          dir_names_max_depth: 1
+          matrix: true
+
+      - name: Select components to test
+        id: select
+        run: |
+          set -euo pipefail
+
+          # A component is a top-level folder with a compose.test.yml.
+          if [ "$SELF_CHANGED" = "true" ]; then
+            candidates=$(for f in ./*/compose.test.yml; do basename "$(dirname "$f")"; done)
+          else
+            candidates=$(jq -r '.[]' <<< "$DIRS")
+          fi
+
+          components=$(printf '%s\n' "$candidates" | while read -r dir; do
+            if [ -n "$dir" ] && [ -f "$dir/compose.test.yml" ]; then echo "$dir"; fi
+          done | jq -ncR '[inputs | select(. != "")]')
+
+          echo "components=$components" >> "$GITHUB_OUTPUT"
+          echo "components: $components"
+        env:
+          SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
+          DIRS: ${{ steps.dirs.outputs.all_changed_files }}
+
+  # Runs the test service of a component's compose.test.yml, which defines
+  # what testing means for it, then builds its prod image.
+  component:
+    needs: changes
+    if: needs.changes.outputs.components != '[]'
+    name: test ${{ matrix.dir }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: ${{ fromJSON(needs.changes.outputs.components) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Test
+        run: docker compose -f compose.test.yml run --rm --build test
+
+      - name: Build prod
+        run: docker build -t prod .
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f compose.test.yml down
+
+  test-ok:
+    name: test ok
+    if: always()
+    needs: [changes, component]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check every job passed or was skipped
+        run: jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+        env:
+          NEEDS: ${{ toJSON(needs) }}
