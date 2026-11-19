@@ -34,7 +34,13 @@ jobs:
         with:
           files: |
             helm/helmfile-common.yaml
-            .github/workflows/lint.yml
+
+      # A change here renders one canary state, not every state.
+      - name: Get changed lint workflow
+        id: self
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: .github/workflows/lint.yml
 
       - name: Get changed component directories
         id: components
@@ -50,7 +56,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # a change to the shared base, or to this workflow, can affect every state
+          # a change to the shared base can affect every state
           if [ "$BASE_CHANGED" = "true" ]; then
             candidates=$(find helm/configs -name helmfile.yaml.gotmpl)
           else
@@ -61,11 +67,19 @@ jobs:
           # silently skipped here (not rendered/linted by this job).
           matrix=$(printf '%s\n' "$candidates" | while read -r state; do
             if [ -f "$state" ]; then echo "$state"; fi
-          done | jq -R . | jq -sc .)
+          done)
+
+          # States rendered alongside already exercise the workflow.
+          if [ "$SELF_CHANGED" = "true" ] && [ -z "$matrix" ]; then
+            matrix=$CANARY
+          fi
+          matrix=$(printf '%s\n' "$matrix" | jq -ncR '[inputs | select(. != "")]')
 
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
         env:
           BASE_CHANGED: ${{ steps.base.outputs.any_changed }}
+          SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
+          CANARY: helm/configs/proposals/helmfile.yaml.gotmpl
           COMPONENTS: ${{ steps.components.outputs.all_changed_files }}
 
   actionlint:
