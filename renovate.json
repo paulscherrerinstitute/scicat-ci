@@ -1,15 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
+    "helpers:pinGitHubActionDigestsToSemver",
     ":semanticCommits"
   ],
   "packageRules": [
     {
-      "description": "Automerge minor and patch updates of non-SciCat dependencies, once released for 3 days",
+      "description": "Automerge minor, patch and pin/digest updates of non-SciCat dependencies, once released for 3 days",
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
       ],
       "matchPackageNames": [
         "!/scicat/i",
