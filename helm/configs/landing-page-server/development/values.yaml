@@ -1,5 +1,5 @@
 host: oaipmh.development.psi.ch
-exporterHost: scicat-exporter.development.psi.ch
+exporterHost: scicat-rocrate-development.psi.ch
 
 ingresses:
   - enabled: true

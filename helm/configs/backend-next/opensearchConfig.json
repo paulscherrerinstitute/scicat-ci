@@ -1,15 +1,16 @@
 {
   "settings": {
     "index": {
-      "max_result_window": 2000000,
-      "number_of_replicas": 0
+      "max_result_window": 10000,
+      "number_of_shards": 3,
+      "number_of_replicas": 1
     },
     "analysis": {
       "analyzer": {
         "autocomplete": {
           "type": "custom",
           "tokenizer": "autocomplete",
-          "filter": ["word_delimiter", "lowercase"]
+          "filter": ["word_delimiter", "lowercase", "flatten_graph"]
         },
         "autocomplete_search": {
           "type": "custom",
@@ -21,7 +22,7 @@
         "autocomplete": {
           "type": "edge_ngram",
           "min_gram": 2,
-          "max_gram": 150,
+          "max_gram": 64,
           "token_chars": ["letter", "digit", "symbol", "punctuation"]
         }
       },
@@ -37,28 +38,56 @@
     }
   },
   "mappings": {
+    "dynamic": false,
+    "_source": { "excludes": ["scientificMetadata", "scientificMetadataText"] },
     "properties": {
-      "description": {
+      "all_text": {
         "type": "text",
         "analyzer": "autocomplete",
-        "search_analyzer": "autocomplete_search"
+        "search_analyzer": "autocomplete_search",
+        "fields": { "wild": { "type": "wildcard", "ignore_above": 8191 } }
       },
-      "datasetName": {
-        "type": "text",
-        "analyzer": "autocomplete",
-        "search_analyzer": "autocomplete_search"
+      "isPublished": { "type": "boolean" },
+      "ownerGroup": { "type": "keyword" },
+      "accessGroups": { "type": "keyword" },
+      "pid": { "type": "keyword", "copy_to": "all_text" },
+      "owner": { "type": "keyword", "copy_to": "all_text" },
+      "ownerEmail": { "type": "keyword", "copy_to": "all_text" },
+      "contactEmail": { "type": "keyword", "copy_to": "all_text" },
+      "sourceFolder": { "type": "keyword", "copy_to": "all_text" },
+      "type": { "type": "keyword", "copy_to": "all_text" },
+      "keywords": { "type": "keyword", "copy_to": "all_text" },
+      "description": { "type": "keyword", "ignore_above": 1024, "copy_to": "all_text" },
+      "datasetName": { "type": "keyword", "copy_to": "all_text" },
+      "classification": { "type": "keyword", "copy_to": "all_text" },
+      "version": { "type": "keyword", "copy_to": "all_text" },
+      "createdBy": { "type": "keyword", "copy_to": "all_text" },
+      "updatedBy": { "type": "keyword", "copy_to": "all_text" },
+      "creationLocation": { "type": "keyword", "copy_to": "all_text" },
+      "proposalIds": { "type": "keyword", "copy_to": "all_text" },
+      "instrumentIds": { "type": "keyword", "copy_to": "all_text" },
+      "sampleIds": { "type": "keyword", "copy_to": "all_text" },
+      "techniques": {
+        "properties": {
+          "pid": { "type": "keyword", "copy_to": "all_text" },
+          "name": { "type": "keyword", "copy_to": "all_text" }
+        }
       },
-      "isPublished": {
-        "type": "boolean"
+      "principalInvestigators": { "type": "keyword", "copy_to": "all_text" },
+      "creationTime": { "type": "date" },
+      "createdAt": { "type": "date" },
+      "updatedAt": { "type": "date" },
+      "numberOfFiles": { "type": "long" },
+      "runNumber": { "type": "keyword", "copy_to": "all_text" },
+      "size": { "type": "long" },
+      "datasetlifecycle": {
+        "properties": {
+          "archiveStatusMessage": { "type": "keyword", "copy_to": "all_text" },
+          "retrieveStatusMessage": { "type": "keyword", "copy_to": "all_text" }
+        }
       },
-      "ownerGroup": {
-        "type": "keyword",
-        "ignore_above": 256
-      },
-      "accessGroups": {
-        "type": "keyword",
-        "ignore_above": 256
-      }
+      "scientificMetadata": { "type": "object", "enabled": false },
+      "scientificMetadataText": { "type": "text", "index": false }
     }
   }
 }

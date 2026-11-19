@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Lint workflows
-        uses: reviewdog/action-actionlint@13465d022aa41c282f730be17574b5ce692d0186 # v1.78.1
+        uses: reviewdog/action-actionlint@cfa6a621f27735ccc88d35af9d0608692fd9b9f7 # v1.80.8
         with:
           reporter: github-pr-review
           # the older workflows are not actionlint-clean

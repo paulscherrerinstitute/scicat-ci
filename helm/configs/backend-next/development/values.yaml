@@ -4,6 +4,8 @@ doiPrefix: "10.83766"
 
 registerDoiUri: https://api.test.datacite.org/dois
 
+publicUrlPrefix: https://oaipmh.development.psi.ch/detail/
+
 host: scicat.development.psi.ch
 
 ingresses:

@@ -1,0 +1,102 @@
+# Development only job types, appended to the `jobs` list of ../jobConfig.yaml
+# by helmfile.yaml.gotmpl. Entries must keep the list item indentation.
+  # Datasets marked for deletion. Created by the marking agent and updated
+  # monthly by the retention cronjob until their retention time expires.
+  - jobType: markedForDeletion
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        - actionType: validate
+          request: &deletionCodeRequest
+            # Reason of the deletion:
+            # - SUPERSEDED, OBSOLETED: replaced by another entry with
+            #   scientifically equivalent (but not necessarily identical) data
+            # - EXPIRED: deleted after the date archiveRetentionTime
+            # - REMOVED: deleted without a replacement
+            jobParams.deletionCode:
+              enum: [SUPERSEDED, OBSOLETED, EXPIRED, REMOVED]
+          # Published datasets cannot be deleted
+          datasets:
+            isPublished:
+              const: false
+        - *rabbitmq
+    update: &retentionUpdate
+      auth: '@retentionManager'
+      actions:
+        - &logUpdate
+          actionType: log
+          perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+
+  # Reverts a markedForDeletion: its datasets are no longer to be deleted.
+  - jobType: revertMarkForDeletion
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        # Only datasets currently marked for deletion can be reverted
+        - actionType: validate
+          datasets: &markedDatasets
+            isPublished:
+              const: false
+            "datasetlifecycle.archiveStatusMessage":
+              const: markedForDeletion
+        - *rabbitmq
+    update: *retentionUpdate
+
+  # Created by the retention cronjob, once per owner group of a
+  # markedForDeletion job at every check-in and of a revertMarkForDeletion job.
+  # Node-RED receives it, looks up the owner group's emails in AD and sets
+  # them in jobResultObject.contactEmails together with the status
+  # finishedSuccessful: that update sends the email.
+  - jobType: notification
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions:
+        - *logUpdate
+        # Only finishedSuccessful sends the email, so that Node-RED can set
+        # finishedUnsuccessful when it fails without sending it again
+        - actionType: switch
+          phase: perform
+          property: job.statusCode
+          cases:
+            - match: finishedSuccessful
+              actions:
+              - actionType: email
+                # The job is saved before the email is sent: a failed email
+                # fails the request but leaves the job finishedSuccessful, so
+                # Node-RED sets it to finishedUnsuccessful
+                ignoreErrors: false
+                # A list, rendered comma-separated
+                to: "{{{job.jobResultObject.contactEmails}}}"
+                subject: |-
+                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] {{#if job.jobParams.reverted}}Deletion cancelled{{else if job.jobParams.expired}}Retention period expired{{else}}Datasets scheduled for deletion{{/if}} ({{job.jobParams.ownerGroup}}{{#if job.jobParams.deletionCode}}, {{job.jobParams.deletionCode}}{{/if}})
+                bodyTemplateFile: email-templates/notification-template.html
+            - actions:
+              - actionType: log
+                perform: "(Job {{job.id}}) Skip email notification for status {{job.statusCode}}"
+
+  # Created by the retention cronjob when a markedForDeletion job expires, for
+  # its datasets still marked for deletion. Processed by the archive system.
+  - jobType: delete
+    create:
+      auth: '@retentionManager'
+      actions:
+        - actionType: log
+        # Deletion cannot be undone: only datasets still marked for deletion
+        # (not restored in the meantime) and never published ones
+        - actionType: validate
+          # Same reason as the markedForDeletion job it comes from
+          request: *deletionCodeRequest
+          datasets: *markedDatasets
+        - *psiStorage
+        - *rabbitmq
+    update:
+      auth: archiveManager
+      actions:
+        - *logUpdate

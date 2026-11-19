@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const http = require("http");
+const https = require("https");
 require("dotenv").config({ path: "/home/node/app/.env" });
 
 const HOST = process.env.SCICAT_HOST;
@@ -58,6 +60,23 @@ async function retry(desc, fn, okCodes = [200, 201]) {
   fail(`[${desc}] failed after ${RETRIES} attempts`);
 }
 
+// fetch aborts when the response headers take more than 300s, and the
+// sync-database endpoint only answers once the whole sync is done (much longer
+// on production). This POST waits for as long as it takes.
+function postWithoutTimeout(url, headers) {
+  const client = url.startsWith("https:") ? https : http;
+  return new Promise((resolve, reject) => {
+    const req = client.request(url, { method: "POST", headers }, (res) => {
+      let body = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => (body += chunk));
+      res.on("end", () => resolve({ status: res.statusCode, body }));
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
 async function main() {
   console.log("Waiting for SciCat BE health...");
   await retry("health", () => fetch(`${HOST}/api/v3/health`));
@@ -98,13 +117,16 @@ async function main() {
   );
 
   console.log("Syncing database into OpenSearch...");
-  const syncResp = await retry("sync-database", () =>
-    fetch(`${HOST}/api/v3/opensearch/sync-database?${qs}`, {
-      method: "POST",
-      headers,
-    })
+  // Not retried: a retry would start another full sync on top of the one
+  // still running in the backend
+  const syncResp = await postWithoutTimeout(
+    `${HOST}/api/v3/opensearch/sync-database?${qs}`,
+    headers
   );
-  const result = await syncResp.json();
+  if (syncResp.status !== 200 && syncResp.status !== 201) {
+    fail(`[sync-database] got ${syncResp.status}: ${syncResp.body}`);
+  }
+  const result = JSON.parse(syncResp.body);
   console.log(
     `Synced ${result.successful} of ${result.total} documents ` +
       `(${result.failed} failed, took ${result.time}ms).`

@@ -4,8 +4,8 @@ replicaCount: 2
 # commit the hook builds.
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/backend-next
-  # latest [psi_local](https://github.com/SciCatProject/backend/commits/psi_local/) branch
-  tag: 3802645221e9a60a2e3275d694157b54e95f2568
+  # latest [master](https://github.com/SciCatProject/backend/commits/master/) branch
+  tag: 61fba70f7170f8330199bfd9efccdb81a2455968
   pullPolicy: Always
 
 service:
@@ -28,6 +28,7 @@ volumes:
 configMaps:
   "{{ .Release.Name }}-cm":
     job-template.html: "{{ .Values.JOB_TEMPLATE }}"
+    notification-template.html: "{{ .Values.NOTIFICATION_TEMPLATE }}"
     jobConfig.yaml: "{{ .Values.JOB_CONFIG }}"
     publishedDataConfig.json: "{{ .Values.PUBLISHED_DATA_CONFIG }}"
     ajvCustomDefinitions.js: "{{ .Values.AJV_CUSTOM_DEFINITIONS }}"
@@ -36,6 +37,7 @@ configMaps:
   "{{ .Release.Name }}-migrations-cm":
     20250819165001-rename-measurement-id.js: "{{ .Values.RENAME_MEASUREMENT_ID_JS }}"
     20260127161201-migrate-broken-legacy-history.js: "{{ .Values.MIGRATE_BROKEN_HISTORY }}"
+    20261116100100-fix-dataset-lifecycle-default-dates.js: "{{ .Values.FIX_LIFECYCLE_DEFAULT_DATES }}"
     opensearch-sync.js: "{{ .Values.OPENSEARCH_SYNC_JS }}"
 
 secrets:
@@ -82,6 +84,8 @@ env:
     value: "{{ .Values.doiPrefix }}"
   - name: REGISTER_DOI_URI
     value: "{{ .Values.registerDoiUri }}"
+  - name: PUBLIC_URL_PREFIX
+    value: "{{ .Values.publicUrlPrefix }}"
   - name: PID_PREFIX
     value: "20.500.11935"
   - name: SITE
@@ -98,6 +102,10 @@ env:
     value: /home/node/app/opensearchConfig.json
   - name: OPENSEARCH_DEFAULT_INDEX
     value: "dataset-{{ .Values.envValue }}"
+  - name: POLICY_RETENTION_SHIFT
+    value: "10"
+  - name: POLICY_PUBLICATION_SHIFT
+    value: "3"
 
 volumeMounts:
   - name: secrets-volume
@@ -113,6 +121,9 @@ volumeMounts:
     mountPath: /home/node/app/email-templates/job-template.html
     subPath: job-template.html
   - name: config-volume
+    mountPath: /home/node/app/email-templates/notification-template.html
+    subPath: notification-template.html
+  - name: config-volume
     mountPath: /home/node/app/publishedDataConfig.json
     subPath: publishedDataConfig.json
   - name: config-volume
@@ -126,7 +137,9 @@ volumeMounts:
     subPath: datasetTypes.json
 
 migrateCommand: "echo 'No migration command specified.'"
-opensearchSyncCommand: "echo 'No OpenSearch sync command specified.'"
+# Recreates and refills the OpenSearch index on every deploy: set it only for
+# the deploy that changes opensearchConfig.json, then reset it to the echo.
+opensearchSyncCommand: node /home/node/app/opensearch-sync.js
 
 jobContainers:
   - name: migrate
@@ -146,6 +159,10 @@ jobContainers:
         value: http://backend-next.scicat-{{ .Values.envValue }}
       - name: OPENSEARCH_INDEX
         value: "dataset-{{ .Values.envValue }}"
+      - name: POLICY_RETENTION_SHIFT
+        value: "10"
+      - name: POLICY_PUBLICATION_SHIFT
+        value: "3"
     volumeMounts:
       - name: secrets-volume
         mountPath: /home/node/app/.env
@@ -156,6 +173,9 @@ jobContainers:
       - name: migrations-volume
         mountPath: /home/node/app/migrations/20260127161201-migrate-broken-legacy-history.js
         subPath: 20260127161201-migrate-broken-legacy-history.js
+      - name: migrations-volume
+        mountPath: /home/node/app/migrations/20261116100100-fix-dataset-lifecycle-default-dates.js
+        subPath: 20261116100100-fix-dataset-lifecycle-default-dates.js
       - name: migrations-volume
         mountPath: /home/node/app/opensearch-sync.js
         subPath: opensearch-sync.js
