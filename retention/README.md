@@ -22,7 +22,8 @@
    throughout the year, not just once at the end. A job this service never
    checked in is due right away. The grace period is counted from the job's
    creation. Every check-in submits one `notification`
-   job per owner group of the datasets; Node-RED emails the group members.
+   job per owner group of the datasets; Node-RED updates the job with
+   contactEmails, and scicat-backend sends the emails.
 4. Once a job's full grace period has elapsed, it checks which of its
    datasets are still marked for deletion — a dataset may have been
    restored in the meantime (by a `revertMarkForDeletion` job).
