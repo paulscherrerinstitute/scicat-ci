@@ -29,6 +29,13 @@
         "github-actions"
       ],
       "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Own images are tagged by the deploy pipeline",
+      "matchPackageNames": [
+        "ghcr.io/paulscherrerinstitute/scicat-ci/**"
+      ],
+      "enabled": false
     }
   ]
 }
