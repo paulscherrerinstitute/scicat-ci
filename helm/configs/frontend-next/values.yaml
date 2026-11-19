@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/paulscherrerinstitute/scicat-ci/frontend-next
   # commit on branch psi_retrieve_fix
-  tag: d0b0c9b3825bd6c582dbb812940493a9dc0094b8
+  tag: 83af8f6ca58a1e77749f7136819789cd20741684
   pullPolicy: Always
 
 service:
