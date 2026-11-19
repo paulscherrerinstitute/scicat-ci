@@ -84,14 +84,14 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: recursive
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
         ref: ${{ inputs.commit }}
 
     - if: ${{ inputs.submodule_commit }}
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/checkout-submodule@99dfe4abfedcbe36ae6c04733eb9ad57d74eed2f # main
       with: 
         submodule_commit: ${{ inputs.submodule_commit }}
         commit: ${{ inputs.commit }}
@@ -105,7 +105,7 @@ jobs:
         done
 
     - name: Log in to the Container registry
-      uses: docker/login-action@v4
+      uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
       with:
         registry: ${{ inputs.registry }}
         username: ${{ github.actor }}
@@ -113,7 +113,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v6.2.0
+      uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
       with:
         images: ${{ inputs.registry }}/${{ inputs.image_name }}
         tags: |
@@ -121,7 +121,7 @@ jobs:
     
     - name: Build and push Docker image
       id: build-and-push
-      uses: docker/build-push-action@v7
+      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
       with:
         context: ${{ inputs.context }}
         push: true
@@ -138,19 +138,19 @@ jobs:
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ inputs.commit }}
 
     - name: Open ssh tunnel
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@99dfe4abfedcbe36ae6c04733eb9ad57d74eed2f # main
       with: 
         bastion_user: '${{ secrets.BASTION_USER }}'
         bastion_ssh_key: '${{ secrets.BASTION_SSH_KEY }}'
 
     - name: Deploy to k8s using helm
       id: helm-deploy
-      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@main
+      uses: paulscherrerinstitute/scicat-ci/.github/actions/deploy-helm@99dfe4abfedcbe36ae6c04733eb9ad57d74eed2f # main
       with:
         release: '${{ inputs.release_name }}'
         namespace: '${{ inputs.namespace_prefix }}${{ inputs.environment }}'
