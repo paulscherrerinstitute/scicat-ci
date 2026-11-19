@@ -1,6 +1,6 @@
 image:
-  repository: python
-  tag: 3.12-slim
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/scicat-to-pss
+  pullPolicy: Always
 
 env:
   - name: SCICAT_BACKEND
@@ -14,9 +14,6 @@ volumes:
   - name: secrets-volume
     secret:
       secretName: "{{ .Release.Name }}-s"
-  - name: config-volume
-    configMap:
-      name: "{{ .Release.Name }}-cm"
   # HOME must be writable: the Globus CLI caches tokens in ~/.globus/cli/
   - name: home
     emptyDir: {}
@@ -27,40 +24,26 @@ secrets:
     data:
       .env: "{{ .Values.secretsJson.GLOBUS_PROXY_ENV }}"
 
-configMaps:
-  "{{ .Release.Name }}-cm":
-    requirements.txt: "{{ .Values.REQUIREMENTS_TXT }}"
-    entrypoint.sh: "{{ .Values.ENTRYPOINT_SH }}"
-    scicat_globus_cleaner.py: "{{ .Values.SCICAT_GLOBUS_CLEANER_PY }}"
-
 volumeMounts:
   - name: home
     mountPath: /home/app
   - name: secrets-volume
     mountPath: /app/.env
     subPath: .env
-  - name: config-volume
-    mountPath: /app/requirements.txt
-    subPath: requirements.txt
-  - name: config-volume
-    mountPath: /app/entrypoint.sh
-    subPath: entrypoint.sh
-  - name: config-volume
-    mountPath: /app/scicat_globus_cleaner.py
-    subPath: scicat_globus_cleaner.py
 
 cronjob:
   schedule: "17 2 * * *"          # daily at 02:17
   suspend: true
   restartPolicy: Never
+  concurrencyPolicy: Forbid
 
 securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   runAsGroup: 1000
   fsGroup: 1000
+
 run:
-  command: ["/app/entrypoint.sh"]
   args:
     - --clean
     - --dry-run                 # TODO: remove once the dry-run logs look right
