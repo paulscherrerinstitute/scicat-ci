@@ -49,15 +49,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          # A component is a top-level folder with a docker-compose.dev.yml.
+          # A component is a top-level folder with a compose.test.yaml.
           if [ "$SELF_CHANGED" = "true" ]; then
-            candidates=$(for f in ./*/docker-compose.dev.yml; do basename "$(dirname "$f")"; done)
+            candidates=$(for f in ./*/compose.test.yaml; do basename "$(dirname "$f")"; done)
           else
             candidates=$(jq -r '.[]' <<< "$DIRS")
           fi
 
           components=$(printf '%s\n' "$candidates" | while read -r dir; do
-            if [ -n "$dir" ] && [ -f "$dir/docker-compose.dev.yml" ]; then echo "$dir"; fi
+            if [ -n "$dir" ] && [ -f "$dir/compose.test.yaml" ]; then echo "$dir"; fi
           done | jq -ncR '[inputs | select(. != "")]')
 
           echo "components=$components" >> "$GITHUB_OUTPUT"
@@ -66,8 +66,8 @@ jobs:
           SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
           DIRS: ${{ steps.dirs.outputs.all_changed_files }}
 
-  # Tests a component through the app service of its docker-compose.dev.yml,
-  # then builds its prod image.
+  # Runs the test service of a component's compose.test.yaml, which defines
+  # what testing means for it, then builds its prod image.
   component:
     needs: changes
     if: needs.changes.outputs.components != '[]'
@@ -85,32 +85,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Build
-        run: |
-          cp docker-compose.dev.yml docker-compose.yml
-          docker compose up -d --build
-
       - name: Test
-        run: docker compose exec -T app pytest
-
-      - name: Black
-        run: docker compose exec -T app black --check --diff --no-color ./src
-
-      - name: Isort
-        run: docker compose exec -T app isort --check --diff ./src
-
-      - name: Pylint
-        run: docker compose exec -T app pylint ./src
-        continue-on-error: true
+        run: docker compose -f compose.test.yaml run --rm --build test
 
       - name: Build prod
         run: docker build -t prod .
 
       - name: Cleanup
         if: always()
-        run: docker compose down
+        run: docker compose -f compose.test.yaml down
 
-  # always() makes it report even when a job it needs failed or was skipped.
   test-ok:
     name: test ok
     if: always()
