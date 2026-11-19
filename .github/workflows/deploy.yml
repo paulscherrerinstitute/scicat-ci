@@ -54,7 +54,15 @@ jobs:
         with:
           files: |
             helm/helmfile-common.yaml
-            .github/workflows/deploy.yml
+
+      # On a PR, a change here deploys one canary component to development,
+      # not every component. Merged, it deploys nothing by itself.
+      - name: Get changed deploy workflow
+        id: workflow
+        if: github.event_name == 'pull_request'
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: .github/workflows/deploy.yml
 
       # path makes dir_names report the component name alone.
       - name: Get changed components
@@ -84,13 +92,21 @@ jobs:
           # A component without a helmfile config deploys from its own workflow.
           components=$(printf '%s\n' "$candidates" | while read -r name; do
             if [ -f "helm/configs/$name/helmfile.yaml.gotmpl" ]; then echo "$name"; fi
-          done | jq -ncR '[inputs]')
+          done)
+
+          # Components deployed alongside already exercise the workflow.
+          if [ "$WORKFLOW_CHANGED" = "true" ] && [ -z "$components" ]; then
+            components=$CANARY
+          fi
+          components=$(printf '%s\n' "$components" | jq -ncR '[inputs | select(. != "")]')
 
           echo "components=$components" >> "$GITHUB_OUTPUT"
           echo "to deploy: $components"
         env:
           TAG: ${{ github.event.release.tag_name }}
           SHARED_CHANGED: ${{ steps.shared.outputs.any_changed }}
+          WORKFLOW_CHANGED: ${{ steps.workflow.outputs.any_changed }}
+          CANARY: proposals
           CHANGED: ${{ steps.changed.outputs.all_changed_files }}
 
   deploy:
