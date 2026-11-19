@@ -1,0 +1,6 @@
+# Run by .github/workflows/test.yml as `docker compose -f compose.test.yaml run test`.
+# No tests yet: builds the image and checks the script compiles.
+services:
+  test:
+    build: .
+    command: python -m py_compile copy_public_ds.py

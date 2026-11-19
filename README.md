@@ -45,7 +45,7 @@ and namespace:
 | [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger                                |
 | [lint.yml](.github/workflows/lint.yml)                     | PR to `main`                                    | Renders every changed helmfile state for all three environments, to catch template errors before merge |
 | [actionlint.yml](.github/workflows/actionlint.yml)         | PR touching `.github/**`                        | Lints the GitHub Actions workflow files themselves                                                     |
-| [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Tests every changed top-level folder with a `docker-compose.dev.yml` and builds its prod image; `test ok` is the check to require |
+| [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Runs the `test` service of every changed top-level folder with a `compose.test.yaml` and builds its prod image; `test ok` is the check to require |
 
 ### How deploy.yml picks environment and components
 
@@ -63,10 +63,13 @@ deploys exactly the one component the tag names, regardless of what changed.
 
 ### How test.yml picks components
 
-`test.yml` treats every top-level folder with a `docker-compose.dev.yml` as a
-python component: it starts the compose file, runs `pytest`, `black`, `isort` and
-`pylint` (non-blocking) in its `app` service, then builds the folder's `Dockerfile`.
-A new folder following that layout is tested without touching the workflow.
+`test.yml` tests every top-level folder with a `compose.test.yaml`: it runs that
+file's `test` service (`docker compose -f compose.test.yaml run --rm --build test`),
+then builds the folder's `Dockerfile`. The `test` service defines what testing means
+for the component, in any language; the python components extend their
+`docker-compose.dev.yml` and run `pytest`, `black`, `isort` and `pylint`
+(non-blocking). A new folder with a `compose.test.yaml` is tested without touching
+the workflow.
 
 ### Typical workflow: changing a component's configuration or image
 
