@@ -1,11 +1,11 @@
 name: lint
 
+# Runs on every PR and picks inside which jobs apply. Jobs that don't apply
+# are skipped, which "lint ok" counts as passing, so "lint ok" is the one
+# check of this workflow to require on main.
 on:
   pull_request:
     branches: [main]
-    paths:
-      - .github/workflows/**
-      - helm/**
 
 permissions:
   contents: read
@@ -125,3 +125,14 @@ jobs:
           helm-version: v4.2.2
           # a template run needs no plugin, the action installs helm-diff by default
           helm-plugins: ''
+
+  lint-ok:
+    name: lint ok
+    if: always()
+    needs: [changes, actionlint, helmfile]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check every job passed or was skipped
+        run: jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+        env:
+          NEEDS: ${{ toJSON(needs) }}
