@@ -1,0 +1,2 @@
+globus-cli>=3.44,<4
+requests>=2.31,<3
