@@ -5,11 +5,9 @@ inputs:
   bastion_user: 
     description: username@host for the ssh tunnel
     required: true
-    type: string
   bastion_ssh_key: 
     description: private ssh key content
     required: true
-    type: string
 
 runs:
   using: "composite"
