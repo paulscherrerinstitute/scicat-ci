@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigestsToSemver",
     ":semanticCommits"
   ],
+  "platformAutomerge": false,
   "packageRules": [
     {
       "description": "Automerge minor, patch and pin/digest updates of non-SciCat dependencies, once released for 3 days",
