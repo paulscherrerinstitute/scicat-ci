@@ -6,7 +6,7 @@
   ],
   "packageRules": [
     {
-      "description": "Automerge minor and patch updates of non-SciCat dependencies",
+      "description": "Automerge minor and patch updates of non-SciCat dependencies, once released for 3 days",
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -15,7 +15,15 @@
         "!/scicat/i",
         "!/openem/i"
       ],
+      "minimumReleaseAge": "3 days",
       "automerge": true
+    },
+    {
+      "description": "Update GitHub Actions together",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
     }
   ]
 }
