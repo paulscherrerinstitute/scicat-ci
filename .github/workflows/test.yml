@@ -49,15 +49,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          # A component is a top-level folder with a compose.test.yaml.
+          # A component is a top-level folder with a compose.test.yml.
           if [ "$SELF_CHANGED" = "true" ]; then
-            candidates=$(for f in ./*/compose.test.yaml; do basename "$(dirname "$f")"; done)
+            candidates=$(for f in ./*/compose.test.yml; do basename "$(dirname "$f")"; done)
           else
             candidates=$(jq -r '.[]' <<< "$DIRS")
           fi
 
           components=$(printf '%s\n' "$candidates" | while read -r dir; do
-            if [ -n "$dir" ] && [ -f "$dir/compose.test.yaml" ]; then echo "$dir"; fi
+            if [ -n "$dir" ] && [ -f "$dir/compose.test.yml" ]; then echo "$dir"; fi
           done | jq -ncR '[inputs | select(. != "")]')
 
           echo "components=$components" >> "$GITHUB_OUTPUT"
@@ -66,7 +66,7 @@ jobs:
           SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
           DIRS: ${{ steps.dirs.outputs.all_changed_files }}
 
-  # Runs the test service of a component's compose.test.yaml, which defines
+  # Runs the test service of a component's compose.test.yml, which defines
   # what testing means for it, then builds its prod image.
   component:
     needs: changes
@@ -86,14 +86,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Test
-        run: docker compose -f compose.test.yaml run --rm --build test
+        run: docker compose -f compose.test.yml run --rm --build test
 
       - name: Build prod
         run: docker build -t prod .
 
       - name: Cleanup
         if: always()
-        run: docker compose -f compose.test.yaml down
+        run: docker compose -f compose.test.yml down
 
   test-ok:
     name: test ok
