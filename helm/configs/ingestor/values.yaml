@@ -1,7 +1,7 @@
 image:
   repository: ghcr.io/swissopenem/ingestor
   pullPolicy: Always
-  tag: 1.3.2
+  tag: 1.4.0@sha256:d9765eab31c0164fd48dfab4844e012dfd8cd18a533f8c0c40b9e2e639a0412f
 
 run:
   command: ["/bin/sh", "/app/docker-entrypoint.sh"]
