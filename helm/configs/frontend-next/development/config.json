@@ -46,7 +46,7 @@
             "authURL": "api/v3/auth/oidc"
         }
     ],
-    "maxDirectDownloadSize": 5000000000,
+    "maxDirectDownloadSize": null,
     "metadataPreviewEnabled": false,
     "metadataStructure": "tree",
     "multipleDownloadAction": null,
