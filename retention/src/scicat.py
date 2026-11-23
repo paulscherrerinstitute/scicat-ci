@@ -421,7 +421,7 @@ class RevertMarkForDeletionJobsRepository:
 
 
 class ExpiredDatasetsRepository:
-    """Fetches datasets whose archiveRetentionTime has passed and are not marked for deletion yet."""
+    """Fetches retrievable (archived, not deleted) datasets whose archiveRetentionTime has passed and are not marked for deletion yet."""
 
     page_limit = 100
     max_iterations = 1000
@@ -429,10 +429,13 @@ class ExpiredDatasetsRepository:
     def _expired_filter(self, now):
         # v3 rather than v4: only the v3 endpoint converts ISO strings to
         # dates, so archiveRetentionTime can be compared. Published datasets
-        # cannot be marked for deletion.
+        # cannot be marked for deletion. Only retrievable datasets are
+        # considered: this excludes the ones not archived yet, and the deleted
+        # ones, which keep their record and archiveRetentionTime.
         return {
             "where": {
                 "isPublished": False,
+                "datasetlifecycle.retrievable": True,
                 "datasetlifecycle.archiveRetentionTime": {"lte": now.isoformat()},
                 "datasetlifecycle.archiveStatusMessage": {
                     "nin": [ARCHIVE_STATUS_MARKED_FOR_DELETION]

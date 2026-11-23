@@ -636,6 +636,7 @@ class TestExpiredDatasetsRepository:
         filter_ = json.loads(kwargs["filter"])
         assert filter_["where"] == {
             "isPublished": False,
+            "datasetlifecycle.retrievable": True,
             "datasetlifecycle.archiveRetentionTime": {"lte": now.isoformat()},
             "datasetlifecycle.archiveStatusMessage": {"nin": ["markedForDeletion"]},
         }
