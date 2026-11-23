@@ -18,6 +18,7 @@
               enum: [SUPERSEDED, OBSOLETED, EXPIRED, REMOVED]
             # Grace period before deletion, a number and a unit among Y
             # (years), M (months), d (days)
+            # for now limited to 3M, more might come later
             jobParams.retentionTime:
               enum: [3M]
           # Published datasets cannot be deleted
