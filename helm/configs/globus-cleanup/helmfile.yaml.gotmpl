@@ -1,6 +1,13 @@
 bases:
   - ../../helmfile-common.yaml
 
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/paulscherrerinstitute/scicat-ci
+        sourceDir: globus-cleanup
+---
 releases:
   - name: globus-cleanup
     namespace: scicat-{{ .Environment.Name }}
@@ -11,11 +18,3 @@ releases:
       - {{ .Environment.Name }}/values.yaml
       - secretsJson:
           GLOBUS_PROXY_ENV: {{ .Values.secrets.GLOBUS_PROXY_ENV | quote }}
-
-    set:
-      - name: REQUIREMENTS_TXT
-        file: requirements.txt
-      - name: ENTRYPOINT_SH
-        file: entrypoint.sh
-      - name: SCICAT_GLOBUS_CLEANER_PY
-        file: scicat_globus_cleaner.py
