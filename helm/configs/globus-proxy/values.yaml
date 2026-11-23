@@ -31,6 +31,7 @@ secrets:
     data:
       .env: "{{ .Values.secretsJson.GLOBUS_PROXY_ENV }}"
 
+
 configMaps:
   "{{ .Release.Name }}-cm":
     scicat-globus-proxy-conf.yaml: "{{ .Values.CONFIG }}"
