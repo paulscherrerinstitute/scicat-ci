@@ -18,3 +18,6 @@ releases:
       - {{ .Environment.Name }}/values.yaml
       - secretsJson:
           GLOBUS_PROXY_ENV: {{ .Values.secrets.GLOBUS_PROXY_ENV | quote }}
+
+helmDefaults:
+  createNamespace: false
