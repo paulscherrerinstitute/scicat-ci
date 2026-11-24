@@ -45,6 +45,13 @@
         # Only datasets currently marked for deletion, and still retrievable
         # (archived and not deleted yet), can be reverted
         - actionType: validate
+          # Optional extension of archiveRetentionTime, a number and a unit as
+          # for retentionTime, no extension when missing.
+          request:
+            jobParams:
+              properties:
+                retentionExtension:
+                  enum: [1Y]
           datasets: &markedDatasets
             isPublished:
               const: false
