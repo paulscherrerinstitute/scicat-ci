@@ -21,10 +21,13 @@
             # for now limited to 3M, more might come later
             jobParams.retentionTime:
               enum: [3M]
-          # Published datasets cannot be deleted
+          # Published datasets cannot be deleted, and only retrievable ones
+          # (archived and not deleted yet) can be marked
           datasets:
             isPublished:
               const: false
+            "datasetlifecycle.retrievable":
+              const: true
         - *rabbitmq
     update: &retentionUpdate
       auth: '@retentionManager'
@@ -39,11 +42,14 @@
       auth: '@retentionManager'
       actions:
         - actionType: log
-        # Only datasets currently marked for deletion can be reverted
+        # Only datasets currently marked for deletion, and still retrievable
+        # (archived and not deleted yet), can be reverted
         - actionType: validate
           datasets: &markedDatasets
             isPublished:
               const: false
+            "datasetlifecycle.retrievable":
+              const: true
             "datasetlifecycle.archiveStatusMessage":
               const: markedForDeletion
         - *rabbitmq
@@ -94,7 +100,8 @@
       actions:
         - actionType: log
         # Deletion cannot be undone: only datasets still marked for deletion
-        # (not restored in the meantime) and never published ones
+        # (not restored in the meantime), still retrievable (not deleted
+        # already) and never published ones
         - actionType: validate
           # Same reason as the markedForDeletion job it comes from
           request:
