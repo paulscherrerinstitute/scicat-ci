@@ -76,6 +76,31 @@ time. A dataset is handled only if:
 That keeps `revertMarkForDeletion` simple too: restoring a dataset only ever
 touches the dataset itself, never any `markedForDeletion` job.
 
+### Job statuses
+
+Every job starts with the backend's default status, `jobSubmitted`. Then,
+by job type:
+
+- `markedForDeletion`, set by this cronjob. Both final statuses take the job
+  out of the check-ins for good:
+  - `jobSubmitted`: the grace period is running. The check-ins are recorded
+    in `jobResultObject` (`verifiedAt`, `lastVerifiedAt`), not in the
+    status.
+  - `retentionExpired`: the grace period has elapsed, and a `delete` job was
+    submitted for the datasets the job still handled, if any.
+  - `allReverted`: all its datasets were reverted, so there is nothing left
+    to notify or delete. It takes precedence over `retentionExpired` when
+    both apply.
+- `revertMarkForDeletion`: stays `jobSubmitted`. Whether its owner groups
+  were notified is recorded in `jobResultObject.notifiedAt`, not in the
+  status.
+- `notification`, set by Node-RED:
+  - `finishedSuccessful`: the `contactEmails` were looked up, and this
+    update makes scicat-backend send the email.
+  - `finishedUnsuccessful`: the lookup or the email failed, no email sent.
+- `delete`: submitted by this cronjob with `jobSubmitted`, then updated by
+  the archive system as it processes the deletion.
+
 ## Commands
 
 The same image runs two independent commands, each meant as its own cronjob:
@@ -109,7 +134,12 @@ datasets concerned. Node-RED updates the job with the group's
 
 Also:
 
-- A `markedForDeletion` check-in with no dataset left to handle sends no
+- A `markedForDeletion` job whose datasets were all reverted sends no
+  notification. Its check-in is recorded with the status `allReverted`
+  (rather than `retentionExpired` at the end of the grace period), and it is
+  never due again: none of its datasets can come back, since marking them
+  again creates a new job.
+- A `markedForDeletion` check-in with no dataset marked yet sends no
   notification and is not recorded, so the job stays due and is retried on
   the next run. This covers a run before the listener has flagged the
   datasets: the owners are notified once they are flagged. Once the grace

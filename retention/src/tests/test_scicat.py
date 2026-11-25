@@ -551,17 +551,46 @@ class TestMarkedForDeletionJob:
     def test_advance_all_datasets_reverted(
         self, mock_find_datasets, mock_update, mock_create, mock_reverts
     ):
-        # Nothing left to own: no dataset query, no notification, and the
-        # check-in is not recorded before expiry
+        # Nothing left: no dataset query and no notification, but the
+        # check-in is recorded with the status allReverted, so the job is
+        # never due again
         mock_reverts.side_effect = [
             [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid1", "pid2"])],
             [],
         ]
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
-        job.advance(FixturesJobs.creation_time)
+        now = FixturesJobs.creation_time
+        job.advance(now)
         mock_find_datasets.assert_not_called()
         mock_create.assert_not_called()
-        mock_update.assert_not_called()
+        mock_update.assert_called_once_with(
+            ANY,
+            FixturesJobs.job_id,
+            {
+                "jobResultObject": {
+                    "lastVerifiedAt": now.isoformat(),
+                    "verifiedAt": [now.isoformat()],
+                },
+                "jobStatusMessage": "allReverted",
+            },
+        )
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch("scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4", autospec=True)
+    def test_advance_all_reverted_at_expiry(
+        self, mock_find_datasets, mock_update, mock_create, mock_reverts
+    ):
+        # allReverted rather than expired: there is nothing to delete
+        mock_reverts.side_effect = [
+            [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid1", "pid2"])],
+            [],
+        ]
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time + relativedelta(months=3))
+        mock_find_datasets.assert_not_called()
+        mock_create.assert_not_called()
+        assert mock_update.call_args[0][2]["jobStatusMessage"] == "allReverted"
 
 
 class TestMarkedForDeletionJobsRepository:
@@ -582,7 +611,7 @@ class TestMarkedForDeletionJobsRepository:
         assert json.loads(kwargs["filter"]) == {
             "where": {
                 "type": "markedForDeletion",
-                "jobStatusMessage": {"neq": "retentionExpired"},
+                "jobStatusMessage": {"nin": ["retentionExpired", "allReverted"]},
                 "datasetList": {"neq": []},
                 "or": [
                     {"jobResultObject.verifiedAt": None},
