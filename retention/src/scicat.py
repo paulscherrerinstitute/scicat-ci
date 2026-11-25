@@ -21,9 +21,11 @@ DELETION_CODE_EXPIRED = "EXPIRED"
 # by the job config
 PARAM_RETENTION_TIME = "retentionTime"
 
+# When this service last processed a job: every check-in of a
+# markedForDeletion job, the only notification of a revertMarkForDeletion one.
+# The job config emails the submitter only before it is set.
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
 RESULT_VERIFIED_AT = "verifiedAt"
-RESULT_NOTIFIED_AT = "notifiedAt"
 # When and why this service stopped following a markedForDeletion job, which
 # is then never due again
 RESULT_CLOSED_AT = "closedAt"
@@ -440,7 +442,8 @@ class RevertMarkForDeletionJob:
         # job is picked up again on the next run. Only the datasets actually
         # restored, i.e. no longer marked, as a revert may partly fail: the
         # others stay protected, but are not cancelled. With none restored,
-        # nothing is sent, but the notification is still recorded.
+        # nothing is sent, but lastVerifiedAt is still recorded, so that the
+        # job is processed only once.
         _submit_notifications(
             self.id,
             self.dataset_pids,
@@ -450,7 +453,7 @@ class RevertMarkForDeletionJob:
         patch = {
             "jobResultObject": {
                 **(self._job.job_result_object or {}),
-                RESULT_NOTIFIED_AT: now.isoformat(),
+                RESULT_LAST_VERIFIED_AT: now.isoformat(),
             }
         }
         JobsApi().jobs_controller_update_v3(self.id, patch)
@@ -471,8 +474,8 @@ class RevertMarkForDeletionJobsRepository:
 
     def _unnotified_jobs_filter(self):
         # Only once Node-RED is done restoring, fully or partly: a pending
-        # revert is notified on a later run. A null match also covers jobs
-        # without notifiedAt.
+        # revert is notified on a later run. Not processed yet: a null match
+        # also covers jobs without lastVerifiedAt.
         return {
             "where": {
                 "type": JOB_TYPE_REVERT_MARK_FOR_DELETION,
@@ -480,7 +483,7 @@ class RevertMarkForDeletionJobsRepository:
                     "inq": [STATUS_FINISHED_SUCCESSFUL, STATUS_FINISHED_UNSUCCESSFUL]
                 },
                 "datasetList": {"neq": []},
-                f"jobResultObject.{RESULT_NOTIFIED_AT}": None,
+                f"jobResultObject.{RESULT_LAST_VERIFIED_AT}": None,
             },
             "fields": self.fields,
         }

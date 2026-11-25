@@ -64,9 +64,9 @@ In detail:
    that Node-RED is done with (`finishedSuccessful` or
    `finishedUnsuccessful`), submits one `notification` job per owner group
    of its datasets actually restored, i.e. no longer marked (with
-   `jobParams.reverted`), then records `jobResultObject.notifiedAt` so it's
-   notified only once. The two steps are independent: a failure in one does
-   not prevent the other.
+   `jobParams.reverted`), then records `jobResultObject.lastVerifiedAt`, as
+   for a check-in, so it's notified only once. The two steps are
+   independent: a failure in one does not prevent the other.
 
 ### Datasets of a job
 
@@ -114,8 +114,8 @@ worked. This cronjob never sets a status: it records its own follow-up in
   Once finished either way, on its next run this cronjob emails the owner
   groups of the datasets actually restored ("Deletion cancelled"), checked
   on the datasets themselves (no longer marked), and writes the time to
-  `jobResultObject.notifiedAt`, so that it never emails them again for this
-  job, even if none was restored.
+  `jobResultObject.lastVerifiedAt`, so that it never emails them again for
+  this job, even if none was restored.
 
   Whatever its status, a revert keeps its datasets from being deleted (see
   [Datasets of a job](#datasets-of-a-job)). The datasets it could not
@@ -142,7 +142,10 @@ The submitter of a `markedForDeletion`, `revertMarkForDeletion` or `delete`
 job (its `contactEmail`, by default the submitting user's email) is emailed
 when the job is submitted, and once it is finished, successfully or not. The
 email's dataset table then has a Result column, from `result`, and a failure
-says how many datasets could not be processed.
+says how many datasets could not be processed. For `markedForDeletion` and
+`revertMarkForDeletion` jobs, the finished email is only sent while
+`jobResultObject.lastVerifiedAt` is not set, i.e. on Node-RED's update: this
+cronjob's later updates keep the finished status and would email again.
 
 ## Commands
 
@@ -182,8 +185,8 @@ Also:
   reverted, or none flagged) sends no notification, and is recorded as
   usual. With all reverted, the job is also closed (see
   [Datasets of a job](#datasets-of-a-job)).
-- If submitting a notification fails, the check-in (or `notifiedAt` for a
-  revert) is not recorded, so the job is retried on the next run.
+- If submitting a notification fails, the check-in (`lastVerifiedAt`) is
+  not recorded, so the job is retried on the next run.
 - Nothing is sent when a `markedForDeletion` job is created, nor for the
   `delete` job: the first email comes with the first check-in.
 

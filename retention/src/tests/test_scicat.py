@@ -742,7 +742,7 @@ class TestRevertMarkForDeletionJob:
         mock_update.assert_called_once_with(
             ANY,
             FixturesJobs.job_id,
-            {"jobResultObject": {"notifiedAt": now.isoformat()}},
+            {"jobResultObject": {"lastVerifiedAt": now.isoformat()}},
         )
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
@@ -781,7 +781,7 @@ class TestRevertMarkForDeletionJob:
         mock_update.assert_called_once_with(
             ANY,
             FixturesJobs.job_id,
-            {"jobResultObject": {"notifiedAt": now.isoformat()}},
+            {"jobResultObject": {"lastVerifiedAt": now.isoformat()}},
         )
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
@@ -823,7 +823,7 @@ class TestRevertMarkForDeletionJobsRepository:
                     "inq": ["finishedSuccessful", "finishedUnsuccessful"]
                 },
                 "datasetList": {"neq": []},
-                "jobResultObject.notifiedAt": None,
+                "jobResultObject.lastVerifiedAt": None,
             },
             "fields": ["id", "datasetList", "jobResultObject"],
             "limits": {"skip": 0, "limit": 100},
