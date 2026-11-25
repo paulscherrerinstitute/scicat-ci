@@ -177,8 +177,12 @@ class TestMarkedForDeletionJob:
         now = FixturesJobs.creation_time + relativedelta(months=1)
         job.advance(now)
         _, kwargs = mock_find_datasets.call_args_list[0]
+        # Only the datasets still marked for deletion are notified
         assert json.loads(kwargs["filter"]) == {
-            "where": {"pid": {"$in": ["pid1", "pid2"]}},
+            "where": {
+                "pid": {"$in": ["pid1", "pid2"]},
+                "datasetlifecycle.archiveStatusMessage": "markedForDeletion",
+            },
             "fields": ["pid", "ownerGroup"],
             "limits": {"skip": 0, "limit": 100},
         }
@@ -330,9 +334,41 @@ class TestMarkedForDeletionJob:
     @patch(
         "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
         autospec=True,
+        side_effect=FixturesJobs.dataset_pages({}),
+    )
+    def test_advance_does_not_record_check_in_when_none_still_marked(
+        self, _, mock_update, mock_create
+    ):
+        # E.g. the listener has not flagged the datasets yet: the job stays
+        # due, so the owners are notified on a later run
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time)
+        mock_create.assert_not_called()
+        mock_update.assert_not_called()
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({}) + FixturesJobs.dataset_pages({}),
+    )
+    def test_advance_expires_when_none_still_marked(self, _, mock_update, mock_create):
+        # At expiry the check-in is recorded anyway, so that the job is closed
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time + relativedelta(months=3))
+        mock_create.assert_not_called()
+        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
         side_effect=FixturesJobs.dataset_pages({"pid1": "group1"}),
     )
     def test_advance_skips_missing_datasets(self, _, mock_update, mock_create):
+        # Also covers the datasets no longer marked: the query leaves them out
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         job.advance(FixturesJobs.creation_time)
         mock_create.assert_called_once_with(
@@ -551,12 +587,17 @@ class TestRevertMarkForDeletionJob:
         autospec=True,
         side_effect=FixturesJobs.dataset_pages({"pid1": "group1", "pid2": "group2"}),
     )
-    def test_notify(self, _, mock_update, mock_create):
+    def test_notify(self, mock_find_datasets, mock_update, mock_create):
         job = scicat.RevertMarkForDeletionJob(
             FixturesJobs.raw_job(job_result_object={})
         )
         now = FixturesJobs.creation_time
         job.notify(now)
+        # Reverted datasets are no longer marked: no status filter
+        _, kwargs = mock_find_datasets.call_args_list[0]
+        assert json.loads(kwargs["filter"])["where"] == {
+            "pid": {"$in": ["pid1", "pid2"]}
+        }
         assert mock_create.call_args_list == [
             call(ANY, self._notification("group1", ["pid1"])),
             call(ANY, self._notification("group2", ["pid2"])),
