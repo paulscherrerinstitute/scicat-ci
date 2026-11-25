@@ -13,11 +13,9 @@ releases:
     namespace: scicat-{{ .Environment.Name }}
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/cron
     version: 1.0.0
+    createNamespace: false
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml
       - secretsJson:
           GLOBUS_PROXY_ENV: {{ .Values.secrets.GLOBUS_PROXY_ENV | quote }}
-
-helmDefaults:
-  createNamespace: false
