@@ -35,12 +35,30 @@
         # Only datasets on PSI storage
         - *psiStorage
         - *rabbitmq
+        # Emails the submitter (contactEmail) that the job was submitted
+        - *email_create
     update: &retentionUpdate
       auth: '@retentionManager'
       actions:
         - &logUpdate
           actionType: log
           perform: "(Job {{job.id}}) UPDATE to status {{job.statusCode}}"
+        # Emails the submitter once Node-RED finished the job, i.e. on the
+        # only update before the retention cronjob first processes it, which
+        # records lastVerifiedAt. Not *email_update, which would email again
+        # at every later update, as the status stays finished.
+        - actionType: switch
+          phase: perform
+          property: job.jobResultObject.lastVerifiedAt
+          cases:
+            - match: null
+              actions:
+              - actionType: email
+                ignoreErrors: true
+                to: "{{job.contactEmail}}"
+                subject: |-
+                  [SciCat {{{ env.DEPLOYMENT_ENV }}}] Your {{job.type}} job {{#if (eq job.statusCode "finishedSuccessful")}}completed successfully{{else}}encountered an error{{/if}}
+                bodyTemplateFile: email-templates/job-template.html
 
   # Reverts a markedForDeletion: its datasets are no longer to be deleted.
   - jobType: revertMarkForDeletion
@@ -68,6 +86,7 @@
         # Only datasets on PSI storage
         - *psiStorage
         - *rabbitmq
+        - *email_create
     update: *retentionUpdate
 
   # Created by the retention cronjob, once per owner group of a
@@ -125,7 +144,9 @@
         # Only datasets on PSI storage
         - *psiStorage
         - *rabbitmq
+        - *email_create
     update:
       auth: archiveManager
       actions:
         - *logUpdate
+        - *email_update

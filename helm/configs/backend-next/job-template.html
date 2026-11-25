@@ -41,6 +41,9 @@ The following inline partials are defined for inclusion below:
       <th>Archivable</th>
       <th>Retrievable</th>
       {{/unless}}
+      {{#if @root.job.jobResultObject.datasetsTotal}}
+      <th>Result</th>
+      {{/if}}
   </tr>
   {{#each datasets}}
   <tr>
@@ -55,6 +58,14 @@ The following inline partials are defined for inclusion below:
       <td class="archivable-{{datasetlifecycle.archivable}}">{{datasetlifecycle.archivable}}</td>
       <td class="retrievable-{{datasetlifecycle.retrievable}}">{{datasetlifecycle.retrievable}}</td>
       {{/unless}}
+      {{#if @root.job.jobResultObject.datasetsTotal}}
+      {{! One jobResultObject.result entry per dataset, matched by datasetId as for retrieve jobs }}
+      <td>
+        {{#each @root.job.jobResultObject.result}}
+        {{#if (eq datasetId ../pid)}}<span class="result-{{status}}">{{status}}{{#if error}} ({{error}}){{/if}}</span>{{/if}}
+        {{/each}}
+      </td>
+      {{/if}}
   </tr>
   {{/each}}
 </table>
@@ -193,6 +204,13 @@ The following inline partials are defined for inclusion below:
     .error {
       color: #9e1a1a;
     }
+    .result-failed {
+      color: #9e1a1a;
+      font-weight: bold;
+    }
+    tr:has(.result-failed) {
+      background-color: #fadada;
+    }
 
     {{#if (or (matches job.type "retrieve|public") (and (eq job.type "archive") (not (eq job.statusCode "jobSubmitted")))) }}
     {{! Highlight unretrievable datasets only for retrieval jobs and non-new archive jobs }}
@@ -264,9 +282,15 @@ The following inline partials are defined for inclusion below:
     {{/if}}
     {{/if}}
 
+    {{! Jobs that record a result per dataset (e.g. markedForDeletion,
+        revertMarkForDeletion): see the Result column of the table }}
+    {{#if job.jobResultObject.datasetsFailed }}
+    <p class="error"><b>{{job.jobResultObject.datasetsFailed}} of {{job.jobResultObject.datasetsTotal}} dataset(s) could not be processed, see the Result column above.</b></p>
+    {{else}}
     {{#unless (eq job.statusCode "finishedSuccessful") }}
     <p>Check the dataset details for information on which datasets were not processed successfully.</p>
     {{/unless}}
+    {{/if}}
 
     {{#if (and (matches job.type "retrieve|public") (matches job.statusCode "^finished")) }}
       {{#if (eq job.jobParams.option "URLs")}}
