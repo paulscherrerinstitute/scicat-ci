@@ -675,6 +675,7 @@ class TestExpiredDatasetsRepository:
             "datasetlifecycle.retrievable": True,
             "datasetlifecycle.archiveRetentionTime": {"lte": now.isoformat()},
             "datasetlifecycle.archiveStatusMessage": {"nin": ["markedForDeletion"]},
+            "datasetlifecycle.storageLocation": {"inq": ["PSI", "", None]},
         }
         assert {"pid", "ownerGroup"} <= set(filter_["fields"])
         skips = [

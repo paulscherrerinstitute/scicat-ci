@@ -28,6 +28,8 @@
               const: false
             "datasetlifecycle.retrievable":
               const: true
+        # Only datasets on PSI storage
+        - *psiStorage
         - *rabbitmq
     update: &retentionUpdate
       auth: '@retentionManager'
@@ -59,6 +61,8 @@
               const: true
             "datasetlifecycle.archiveStatusMessage":
               const: markedForDeletion
+        # Only datasets on PSI storage
+        - *psiStorage
         - *rabbitmq
     update: *retentionUpdate
 
@@ -114,6 +118,7 @@
           request:
             jobParams.deletionCode: *deletionCode
           datasets: *markedDatasets
+        # Only datasets on PSI storage
         - *psiStorage
         - *rabbitmq
     update:

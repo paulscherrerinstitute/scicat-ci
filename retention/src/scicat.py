@@ -452,7 +452,9 @@ class ExpiredDatasetsRepository:
         # dates, so archiveRetentionTime can be compared. Published datasets
         # cannot be marked for deletion. Only retrievable datasets are
         # considered: this excludes the ones not archived yet, and the deleted
-        # ones, which keep their record and archiveRetentionTime.
+        # ones, which keep their record and archiveRetentionTime. Like the
+        # job config's psiStorage check, only PSI storage, empty or unset
+        # (null also matches a missing field), else the job is rejected.
         return {
             "where": {
                 "isPublished": False,
@@ -461,6 +463,7 @@ class ExpiredDatasetsRepository:
                 "datasetlifecycle.archiveStatusMessage": {
                     "nin": [ARCHIVE_STATUS_MARKED_FOR_DELETION]
                 },
+                "datasetlifecycle.storageLocation": {"inq": ["PSI", "", None]},
             },
             "fields": _DATASET_V3_FIELDS,
         }
