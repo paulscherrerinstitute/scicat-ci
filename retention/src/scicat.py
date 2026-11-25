@@ -193,6 +193,11 @@ class MarkedForDeletionJob:
 
     Every check-in notifies the datasets' owner groups through one
     "notification" job per group, then records the check-in on this job.
+
+    A dataset listed in a revertMarkForDeletion job created after this job
+    is dropped from it for good, even if it is marked again later: the new
+    markedForDeletion job handles it, with its own grace period. datasetList
+    itself is never modified, for auditing.
     """
 
     def __init__(self, job):
@@ -231,13 +236,28 @@ class MarkedForDeletionJob:
             **{self._retention_unit: self.retention_amount}
         )
 
-    def _notify(self, expired):
-        """Submits one notification job per owner group of the job's datasets still marked for deletion, returning how many."""
+    def _reverted_pids(self):
+        """Returns the job's dataset pids listed by a revertMarkForDeletion job created after it."""
+        own_pids = set(self.dataset_pids)
+        reverts = RevertMarkForDeletionJobsRepository().jobs_listing_since(
+            self.dataset_pids, self._job.creation_time
+        )
+        return {pid for revert in reverts for pid in revert.dataset_pids} & own_pids
+
+    def _owned_pids(self):
+        """Returns the job's dataset pids not reverted since the job was created."""
+        reverted = self._reverted_pids()
+        if reverted:
+            log.info(f"Job {self.id} skips {len(reverted)} dataset(s) reverted since")
+        return [pid for pid in self.dataset_pids if pid not in reverted]
+
+    def _notify(self, pids, expired):
+        """Submits one notification job per owner group of `pids` still marked for deletion, returning how many."""
         # Restored datasets (reverted) are no longer to be deleted: their
         # owners are not notified anymore, nor at all if none is left.
         return _submit_notifications(
             self.id,
-            self.dataset_pids,
+            pids,
             {
                 "markedForDeletionJobId": self.id,
                 "expiryDate": self.expiry_date.isoformat(),
@@ -247,13 +267,13 @@ class MarkedForDeletionJob:
             where=_STILL_MARKED,
         )
 
-    def _still_marked_pids(self):
-        """Returns the job's dataset pids whose archiveStatusMessage is still markedForDeletion."""
+    def _still_marked_pids(self, pids):
+        """Returns the `pids` whose archiveStatusMessage is still markedForDeletion."""
         batches = _paginate(
             DatasetsV4Api().datasets_v4_controller_find_all_v4,
             {
                 "where": {
-                    "pid": {"$in": self.dataset_pids},
+                    "pid": {"$in": pids},
                     **_STILL_MARKED,
                 },
                 "fields": ["pid"],
@@ -264,9 +284,9 @@ class MarkedForDeletionJob:
         )
         return [dataset.pid for batch in batches for dataset in batch]
 
-    def _submit_delete_job(self):
-        """Submits a "delete" job for the datasets still marked for deletion, if any."""
-        pids = self._still_marked_pids()
+    def _submit_delete_job(self, owned_pids):
+        """Submits a "delete" job for the `owned_pids` still marked for deletion, if any."""
+        pids = self._still_marked_pids(owned_pids) if owned_pids else []
         if not pids:
             log.info(
                 f"Job {self.id} expired with no datasets still marked, nothing to delete"
@@ -288,16 +308,17 @@ class MarkedForDeletionJob:
         expired = now >= self.expiry_date
         # Notify (and submit the deletion) first: if it fails, the check-in is
         # not recorded and the job stays due for the next run.
-        notified = self._notify(expired)
+        owned_pids = self._owned_pids()
+        notified = self._notify(owned_pids, expired) if owned_pids else 0
         if not notified and not expired:
             # Nothing marked yet (the listener has not flagged the datasets)
-            # or anymore (all reverted): the check-in is not recorded, so the
-            # job stays due and the owners get their email once flagged. At
-            # expiry it is recorded anyway, so that the job is closed.
+            # or anymore (all reverted): the check-in is not recorded, so the job stays due and the owners
+            # get their email once flagged. At expiry it is recorded anyway,
+            # so that the job is closed.
             log.info(f"Job {self.id} has no dataset marked, check-in not recorded")
             return
         if expired:
-            self._submit_delete_job()
+            self._submit_delete_job(owned_pids)
         now_iso = now.isoformat()
         job_result_object = self._job.job_result_object
         patch = {
@@ -425,6 +446,26 @@ class RevertMarkForDeletionJobsRepository:
             },
             "fields": self.fields,
         }
+
+    def jobs_listing_since(self, pids, since):
+        """Yields revertMarkForDeletion jobs created after `since` listing any of `pids`, as RevertMarkForDeletionJob."""
+        batches = _paginate(
+            JobsApi().jobs_controller_find_all_v3,
+            {
+                "where": {
+                    "type": JOB_TYPE_REVERT_MARK_FOR_DELETION,
+                    "creationTime": {"gt": since.isoformat()},
+                    "jobParams.datasetList.pid": {"inq": pids},
+                },
+                "fields": ["datasetList"],
+            },
+            self.page_limit,
+            self.max_iterations,
+            "revertMarkForDeletion jobs",
+        )
+        for batch in batches:
+            for job in batch:
+                yield RevertMarkForDeletionJob(job)
 
     def unnotified_jobs(self):
         """Yields revertMarkForDeletion jobs not notified yet, as RevertMarkForDeletionJob."""
