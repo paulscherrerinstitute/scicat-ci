@@ -93,6 +93,9 @@ _DATASET_V3_FIELDS = [
 _STILL_MARKED = {
     "datasetlifecycle.archiveStatusMessage": ARCHIVE_STATUS_MARKED_FOR_DELETION
 }
+_NOT_MARKED = {
+    "datasetlifecycle.archiveStatusMessage": {"$ne": ARCHIVE_STATUS_MARKED_FOR_DELETION}
+}
 
 
 def _paginate(find_all, filter_, page_limit, max_iterations, description):
@@ -432,13 +435,17 @@ class RevertMarkForDeletionJob:
         return [dataset.pid for dataset in self._job.dataset_list]
 
     def notify(self, now):
-        """Notifies the owner groups, then records the notification on the job."""
+        """Notifies the owner groups of the restored datasets, then records the notification on the job."""
         # Notify first: if it fails, the notification is not recorded and the
-        # job is picked up again on the next run.
+        # job is picked up again on the next run. Only the datasets actually
+        # restored, i.e. no longer marked, as a revert may partly fail: the
+        # others stay protected, but are not cancelled. With none restored,
+        # nothing is sent, but the notification is still recorded.
         _submit_notifications(
             self.id,
             self.dataset_pids,
             {"revertMarkForDeletionJobId": self.id, "reverted": True},
+            where=_NOT_MARKED,
         )
         patch = {
             "jobResultObject": {
@@ -463,13 +470,15 @@ class RevertMarkForDeletionJobsRepository:
     fields = ["id", "datasetList", "jobResultObject"]
 
     def _unnotified_jobs_filter(self):
-        # Only once all the datasets were restored: a pending revert is
-        # notified on a later run, a failed one never. A null match also
-        # covers jobs without notifiedAt.
+        # Only once Node-RED is done restoring, fully or partly: a pending
+        # revert is notified on a later run. A null match also covers jobs
+        # without notifiedAt.
         return {
             "where": {
                 "type": JOB_TYPE_REVERT_MARK_FOR_DELETION,
-                "jobStatusMessage": STATUS_FINISHED_SUCCESSFUL,
+                "jobStatusMessage": {
+                    "inq": [STATUS_FINISHED_SUCCESSFUL, STATUS_FINISHED_UNSUCCESSFUL]
+                },
                 "datasetList": {"neq": []},
                 f"jobResultObject.{RESULT_NOTIFIED_AT}": None,
             },

@@ -61,8 +61,9 @@ In detail:
    `closedReason` `expired`, so it's never picked up again — even if nothing
    ended up marked, meaning no `delete` job was submitted.
 5. In the same run, every `revertMarkForDeletion` job not notified yet,
-   whose datasets Node-RED restored (`finishedSuccessful`), submits one
-   `notification` job per owner group of its datasets (with
+   that Node-RED is done with (`finishedSuccessful` or
+   `finishedUnsuccessful`), submits one `notification` job per owner group
+   of its datasets actually restored, i.e. no longer marked (with
    `jobParams.reverted`), then records `jobResultObject.notifiedAt` so it's
    notified only once. The two steps are independent: a failure in one does
    not prevent the other.
@@ -107,11 +108,14 @@ worked. This cronjob never sets a status: it records its own follow-up in
   (`jobResultObject.closedAt`, `closedReason`).
 - `revertMarkForDeletion`, set by Node-RED:
   - `jobSubmitted`: the datasets are not restored yet.
-  - `finishedSuccessful`: all the datasets were restored. On its next run,
-    this cronjob emails the owner groups ("Deletion cancelled") and writes
-    the time to `jobResultObject.notifiedAt`, so that it never emails them
-    again for this job.
-  - `finishedUnsuccessful`: some or all could not be restored. No email.
+  - `finishedSuccessful`: all the datasets were restored.
+  - `finishedUnsuccessful`: some or all could not be restored.
+
+  Once finished either way, on its next run this cronjob emails the owner
+  groups of the datasets actually restored ("Deletion cancelled"), checked
+  on the datasets themselves (no longer marked), and writes the time to
+  `jobResultObject.notifiedAt`, so that it never emails them again for this
+  job, even if none was restored.
 
   Whatever its status, a revert keeps its datasets from being deleted (see
   [Datasets of a job](#datasets-of-a-job)). The datasets it could not
@@ -168,8 +172,9 @@ datasets concerned. Node-RED updates the job with the group's
   which its grace period has elapsed, for the datasets it still handles, the
   same ones as the `delete` job.
 - **Deletion cancelled** (`jobParams.reverted`): once per
-  `revertMarkForDeletion` job, at the first run after Node-RED restored its
-  datasets (`finishedSuccessful`), for all the job's datasets.
+  `revertMarkForDeletion` job, at the first run after Node-RED is done with
+  it, for the job's datasets actually restored (no longer marked). Its
+  datasets that could not be restored are kept, but not reported here.
 
 Also:
 
