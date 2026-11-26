@@ -29,17 +29,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      # A change here tests every component.
-      - name: Get changed test workflow
-        id: self
+      # dir_names and matrix shape every key's file list; self only reads any_changed
+      - name: Get changed files
+        id: changed
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          files: .github/workflows/test.yml
-
-      - name: Get changed top-level folders
-        id: dirs
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
+          files_yaml: |
+            # a change here tests every component
+            self:
+              - .github/workflows/test.yml
+            components:
+              - '**'
           dir_names: true
           dir_names_max_depth: 1
           matrix: true
@@ -53,7 +53,7 @@ jobs:
           if [ "$SELF_CHANGED" = "true" ]; then
             candidates=$(for f in ./*/compose.test.yml; do basename "$(dirname "$f")"; done)
           else
-            candidates=$(jq -r '.[]' <<< "$DIRS")
+            candidates=$(jq -r '.[]' <<< "$COMPONENTS")
           fi
 
           components=$(printf '%s\n' "$candidates" | while read -r dir; do
@@ -63,8 +63,8 @@ jobs:
           echo "components=$components" >> "$GITHUB_OUTPUT"
           echo "components: $components"
         env:
-          SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
-          DIRS: ${{ steps.dirs.outputs.all_changed_files }}
+          SELF_CHANGED: ${{ steps.changed.outputs.self_any_changed }}
+          COMPONENTS: ${{ steps.changed.outputs.components_all_changed_files }}
 
   # Runs the test service of a component's compose.test.yml, which defines
   # what testing means for it, then builds its prod image.
