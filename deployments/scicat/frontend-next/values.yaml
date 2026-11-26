@@ -1,0 +1,77 @@
+replicaCount: 1
+
+# Nobody publishes this component. The tag is the source commit the hook builds.
+image:
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/frontend-next
+  # commit on branch psi_retrieve_fix
+  tag: 83af8f6ca58a1e77749f7136819789cd20741684
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ .Values.host }}"
+      paths:
+        - path: "/"
+          pathType: Prefix
+  tls:
+    - hosts:
+      - "{{ .Values.host }}"
+      secretName: "scicat-fe-next-certificate"
+
+volumes:
+  - name: config-volume
+    configMap:
+      name: "{{ .Release.Name }}-cm"
+  - name: downloaddir
+    emptyDir: {}
+
+configMaps:
+  "{{ .Release.Name }}-cm":
+    config.json: "{{ .Values.ENVIRONMENT }}"
+    keycloak-icon-256px.svg: "{{ .Values.KEYCLOAK_ICON }}"
+
+initContainers:
+  - name: install
+    image: alpine
+    command:
+      - "/bin/sh"
+      - -c
+    args:
+      - >-
+        apk update && apk add ca-certificates && update-ca-certificates;
+        wget
+        -O /download-dir/site.png
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/deployments/scicat/frontend/site.png;
+        wget
+        -O /download-dir/site-logo.png
+        https://raw.githubusercontent.com/paulscherrerinstitute/scicat-ci/main/deployments/scicat/frontend/site-logo.png;
+    volumeMounts:
+      - name: downloaddir
+        mountPath: "/download-dir"
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /usr/share/nginx/html/assets/config.json
+    subPath: config.json
+  - name: config-volume
+    mountPath: /usr/share/nginx/html/assets/images/keycloak_icon_256px.svg
+    subPath: keycloak-icon-256px.svg
+  - name: downloaddir
+    mountPath: /usr/share/nginx/html/assets/images/site.png
+    subPath: site.png
+  - name: downloaddir
+    mountPath: /usr/share/nginx/html/assets/images/site-logo.png
+    subPath: site-logo.png
+
+# Keep the pre-rename chart name so selectors and resource names still match
+# releases installed from the vendored charts (Deployment selectors are immutable).
+nameOverride: generic-service-chart

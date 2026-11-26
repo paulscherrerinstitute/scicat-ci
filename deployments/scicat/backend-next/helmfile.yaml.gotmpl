@@ -1,0 +1,56 @@
+bases:
+  - ../helmfile-common.yaml
+
+# Only development builds. qa and production pull the image development pushed.
+environments:
+  development:
+    values:
+      - sourceRepo: https://github.com/SciCatProject/scicat-backend-next
+---
+releases:
+  - name: backend-next
+    namespace: scicat-{{ .Environment.Name }}
+    chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/generic-service
+    version: 2.0.0
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
+    values:
+      - values.yaml
+      - {{ .Environment.Name }}/values.yaml
+      - secretsJson:
+          BENEXT_ENV: {{ .Values.secrets.BENEXT_ENV | quote }}
+          BENEXT_FUNCTIONAL_ACCOUNTS: {{ .Values.secrets.BENEXT_FUNCTIONAL_ACCOUNTS | quote }}
+          WHITELISTED_CIDRS: {{ .Values.secrets.WHITELISTED_CIDRS | quote }}
+          # Only development restricts the OpenEM route by source range.
+          {{- if eq .Environment.Name "development" }}
+          OPENEM_WHITELISTED_CIDRS: {{ .Values.secrets.OPENEM_WHITELISTED_CIDRS | quote }}
+          {{- end }}
+      # development appends its own job types to the shared job config
+      {{- $jobConfig := readFile "jobConfig.yaml" }}
+      {{- if eq .Environment.Name "development" }}
+      {{- $jobConfig = print $jobConfig (readFile "development/jobConfig.yaml") }}
+      {{- end }}
+      - JOB_CONFIG: {{ $jobConfig | toJson }}
+    set:
+      - name: JOB_TEMPLATE
+        file: job-template.html
+      - name: NOTIFICATION_TEMPLATE
+        file: notification-template.html
+      - name: PUBLISHED_DATA_CONFIG
+        file: publishedDataConfig.json
+      - name: RENAME_MEASUREMENT_ID_JS
+        file: rename-measurement-id.js
+      - name: AJV_CUSTOM_DEFINITIONS
+        file: ajvCustomDefinitions.js
+      - name: MIGRATE_BROKEN_HISTORY
+        file: migrate-broken-legacy-history.js
+      - name: FIX_LIFECYCLE_DEFAULT_DATES
+        file: 20261116100100-fix-dataset-lifecycle-default-dates.js
+      - name: OPENSEARCH_CONFIG
+        file: opensearchConfig.json
+      - name: OPENSEARCH_SYNC_JS
+        file: opensearch-sync.js
+      - name: DATASET_TYPES
+        file: datasetTypes.json

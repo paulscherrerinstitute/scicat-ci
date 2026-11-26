@@ -28,16 +28,17 @@ jobs:
         with:
           files: .github/workflows/**
 
-      # A component is a folder under helm/configs with a helmfile state.
+      # A component is a deployments/<product>/<component> folder with a helmfile state.
       # Components not yet migrated to helmfile have none and are skipped.
       - name: Select helmfile states to render
         id: states
         uses: ./.github/actions/select-components
         with:
-          components_root: helm/configs
+          components_root: deployments
           component_marker: helmfile.yaml.gotmpl
+          component_depth: 2
           all_components_triggers: |
-            helm/helmfile-common.yaml
+            deployments/*/helmfile-common.yaml
             .github/workflows/lint.yml
             .github/actions/select-components/**
 
@@ -81,7 +82,7 @@ jobs:
           # Configs dereference .Values.secretsJson.<KEY> unconditionally, so a render
           # needs every key present. The value is base64 because a `secrets:` block
           # feeds a k8s Secret, which rejects anything else.
-          grep -rhoE 'secretsJson\.[A-Za-z0-9_]+' helm/configs \
+          grep -rhoE 'secretsJson\.[A-Za-z0-9_]+' deployments \
             | cut -d. -f2 | sort -u | jq -R . \
             | jq -s '{secrets: (map({key: ., value: "ZHVtbXk="}) | from_entries)}' \
             > "$RUNNER_TEMP/placeholder-secrets.json"
@@ -90,7 +91,7 @@ jobs:
         uses: helmfile/helmfile-action@614b4cd063ada10b87f668f6ffd35485bce0cac5 # v2.4.8
         with:
           helmfile-args: >-
-            --file helm/configs/${{ matrix.component }}/helmfile.yaml.gotmpl
+            --file deployments/${{ matrix.component }}/helmfile.yaml.gotmpl
             --environment ${{ matrix.environment }}
             --state-values-file ${{ runner.temp }}/placeholder-secrets.json
             template
