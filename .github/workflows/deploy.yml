@@ -5,6 +5,9 @@ name: deploy
 #
 # Add the config and delete the component's own workflow in the same commit.
 # Otherwise both run helm upgrade on the same release.
+#
+# PRs run it unfiltered so "deploy ok" reports on every PR and can be required;
+# discover picks the components, and a PR changing none deploys nothing.
 
 on:
   pull_request:
@@ -14,9 +17,6 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-    paths:
-      - .github/workflows/deploy.yml
-      - helm/**
   push:
     branches: [main]
     paths:
@@ -154,3 +154,14 @@ jobs:
           kubeconfig: "${{ secrets.KUBECONFIG }}"
           secrets: ${{ toJSON(secrets) }}
           registry_token: "${{ secrets.GITHUB_TOKEN }}"
+
+  deploy-ok:
+    name: deploy ok
+    if: always()
+    needs: [set_env, discover, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check every job passed or was skipped
+        run: jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+        env:
+          NEEDS: ${{ toJSON(needs) }}
