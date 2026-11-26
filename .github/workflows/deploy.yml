@@ -139,7 +139,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Open ssh tunnel
-        uses: paulscherrerinstitute/scicat-ci/.github/actions/open-ssh-tunnel@main
+        uses: ./.github/actions/open-ssh-tunnel
         with:
           bastion_user: "${{ secrets.BASTION_USER }}"
           bastion_ssh_key: "${{ secrets.BASTION_SSH_KEY }}"
