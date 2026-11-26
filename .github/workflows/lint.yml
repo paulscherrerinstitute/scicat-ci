@@ -15,32 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       states: ${{ steps.states.outputs.matrix }}
-      workflows: ${{ steps.workflows.outputs.any_changed }}
+      workflows: ${{ steps.changed.outputs.workflows_any_changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Get changed workflows
-        id: workflows
+      - name: Get changed files
+        id: changed
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          files: .github/workflows/**
-
-      - name: Get changed helmfile base
-        id: base
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: |
-            helm/helmfile-common.yaml
-
-      # A change here renders one canary state, not every state.
-      - name: Get changed lint workflow
-        id: self
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: .github/workflows/lint.yml
+          files_yaml: |
+            workflows:
+              - .github/workflows/**
+            # a change to the shared base can affect every state
+            base:
+              - helm/helmfile-common.yaml
+            # a change here renders one canary state, not every state
+            self:
+              - .github/workflows/lint.yml
 
       - name: Get changed component directories
         id: components
@@ -77,8 +71,8 @@ jobs:
 
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
         env:
-          BASE_CHANGED: ${{ steps.base.outputs.any_changed }}
-          SELF_CHANGED: ${{ steps.self.outputs.any_changed }}
+          BASE_CHANGED: ${{ steps.changed.outputs.base_any_changed }}
+          SELF_CHANGED: ${{ steps.changed.outputs.self_any_changed }}
           CANARY: helm/configs/proposals/helmfile.yaml.gotmpl
           COMPONENTS: ${{ steps.components.outputs.all_changed_files }}
 
