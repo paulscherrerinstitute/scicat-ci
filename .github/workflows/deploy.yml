@@ -38,7 +38,7 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     outputs:
-      components: ${{ steps.select.outputs.components }}
+      components: ${{ steps.release.outputs.components || steps.changed.outputs.components }}
     steps:
 
       - name: Checkout repository
@@ -46,68 +46,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      # A change here can change what every config renders.
-      - name: Get changed shared files
-        id: shared
-        if: github.event_name != 'release'
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: |
-            helm/helmfile-common.yaml
-
-      # On a PR, a change here deploys one canary component to development,
-      # not every component. Merged, it deploys nothing by itself.
-      - name: Get changed deploy workflow
-        id: workflow
-        if: github.event_name == 'pull_request'
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: .github/workflows/deploy.yml
-
-      # path makes dir_names report the component name alone.
-      - name: Get changed components
-        id: changed
-        if: github.event_name != 'release'
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          path: helm/configs
-          dir_names: true
-          dir_names_max_depth: 1
-          matrix: true
-
-      - name: Select the components to deploy
-        id: select
+      # A tag names its component, <component>-vX.Y.Z.
+      - name: Select the released component
+        id: release
+        if: github.event_name == 'release'
         run: |
           set -euo pipefail
 
-          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
-            # A tag names its component, <component>-vX.Y.Z.
-            candidates=${TAG%-v*}
-          elif [ "$SHARED_CHANGED" = "true" ]; then
-            candidates=$(ls helm/configs)
-          else
-            candidates=$(jq -r '.[]' <<< "$CHANGED" | sort)
-          fi
-
+          name=${TAG%-v*}
           # A component without a helmfile config deploys from its own workflow.
-          components=$(printf '%s\n' "$candidates" | while read -r name; do
-            if [ -f "helm/configs/$name/helmfile.yaml.gotmpl" ]; then echo "$name"; fi
-          done)
-
-          # Components deployed alongside already exercise the workflow.
-          if [ "$WORKFLOW_CHANGED" = "true" ] && [ -z "$components" ]; then
-            components=$CANARY
+          if [ -f "helm/configs/$name/helmfile.yaml.gotmpl" ]; then
+            components=$(jq -nc --arg name "$name" '[$name]')
+          else
+            components='[]'
           fi
-          components=$(printf '%s\n' "$components" | jq -ncR '[inputs | select(. != "")]')
 
           echo "components=$components" >> "$GITHUB_OUTPUT"
           echo "to deploy: $components"
         env:
           TAG: ${{ github.event.release.tag_name }}
-          SHARED_CHANGED: ${{ steps.shared.outputs.any_changed }}
-          WORKFLOW_CHANGED: ${{ steps.workflow.outputs.any_changed }}
-          CANARY: proposals
-          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+      # On a PR, a change to the canary triggers deploys one component per chart
+      # to development, not every component. Merged, it deploys nothing by itself.
+      - name: Select the changed components
+        id: changed
+        if: github.event_name != 'release'
+        uses: ./.github/actions/select-components
+        with:
+          components_root: helm/configs
+          component_marker: helmfile.yaml.gotmpl
+          # a change here can change what every config renders
+          all_components_triggers: helm/helmfile-common.yaml
+          canary_components_triggers: |
+            .github/workflows/deploy.yml
+            .github/actions/select-components/**
+          # one per chart: generic-service, cron, proposals-cronjob; none once merged
+          canary_components: >-
+            ${{ github.event_name == 'pull_request'
+              && 'search-api scicat-to-pss proposals' || '' }}
 
   deploy:
     needs:

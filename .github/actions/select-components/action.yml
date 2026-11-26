@@ -1,0 +1,86 @@
+name: select-components
+description: >-
+  Select the components a change touches, as a JSON array of names for a job
+  matrix. A component is a folder directly under `components_root` that
+  contains `component_marker`. Needs a checkout with full history
+  (fetch-depth: 0) beforehand.
+
+inputs:
+  components_root:
+    description: folder whose subfolders are the components, "." for the repository root
+    required: true
+  component_marker:
+    description: file a folder must contain to count as a component, e.g. compose.test.yml
+    required: true
+  all_components_triggers:
+    description: newline-separated files whose change selects every component
+    required: false
+    default: ""
+  canary_components_triggers:
+    description: >-
+      newline-separated files whose change selects `canary_components`, when
+      no component changed alongside
+    required: false
+    default: ""
+  canary_components:
+    description: >-
+      whitespace-separated components selected by a change to
+      `canary_components_triggers`, e.g. one per kind of component
+    required: false
+    default: ""
+
+outputs:
+  components:
+    description: JSON array of the selected component names
+    value: ${{ steps.select.outputs.components }}
+
+runs:
+  using: composite
+  steps:
+
+    # toJSON quotes each input as a YAML string, which the action splits on
+    # newlines. An empty string drops its key, where an empty list would match
+    # every file.
+    - name: Get changed files
+      id: changed
+      uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      with:
+        files_yaml: |
+          components: ${{ toJSON(inputs.components_root == '.' && '**' || format('{0}/**', inputs.components_root)) }}
+          all: ${{ toJSON(inputs.all_components_triggers) }}
+          canary: ${{ toJSON(inputs.canary_components_triggers) }}
+        json: true
+        escape_json: false
+
+    - name: Select components
+      id: select
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [ "$ALL_CHANGED" = "true" ]; then
+          candidates=$(for marker in "$ROOT"/*/"$MARKER"; do basename "$(dirname "$marker")"; done)
+        else
+          # changed paths are relative to the repository root, whatever ROOT is
+          candidates=$(jq -r --arg root "${ROOT%/}/" '.[] | ltrimstr($root) | split("/")[0]' <<< "$CHANGED")
+        fi
+
+        components=$(printf '%s\n' "$candidates" | sort -u | while read -r name; do
+          if [ -n "$name" ] && [ -f "$ROOT/$name/$MARKER" ]; then echo "$name"; fi
+        done)
+
+        # Components selected alongside already exercise what changed.
+        if [ "$CANARY_CHANGED" = "true" ] && [ -z "$components" ]; then
+          components=$(tr -s '[:space:]' '\n' <<< "$CANARY")
+        fi
+
+        components=$(printf '%s\n' "$components" | jq -ncR '[inputs | select(. != "")]')
+        echo "components=$components" >> "$GITHUB_OUTPUT"
+        echo "components: $components"
+      env:
+        ROOT: ${{ inputs.components_root }}
+        MARKER: ${{ inputs.component_marker }}
+        CANARY: ${{ inputs.canary_components }}
+        CHANGED: ${{ steps.changed.outputs.components_all_changed_files }}
+        ALL_CHANGED: ${{ steps.changed.outputs.all_any_changed }}
+        CANARY_CHANGED: ${{ steps.changed.outputs.canary_any_changed }}
