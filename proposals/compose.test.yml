@@ -1,0 +1,12 @@
+# Run by .github/workflows/test.yml as `docker compose -f compose.test.yml run test`.
+services:
+  test:
+    extends:
+      file: docker-compose.dev.yml
+      service: app
+    command: >-
+      sh -c "set -x;
+      pytest
+      && black --check --diff --no-color ./src
+      && isort --check --diff ./src
+      && (pylint ./src || true)"
