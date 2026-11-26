@@ -14,67 +14,32 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      states: ${{ steps.states.outputs.matrix }}
-      workflows: ${{ steps.changed.outputs.workflows_any_changed }}
+      components: ${{ steps.states.outputs.components }}
+      workflows: ${{ steps.workflows.outputs.any_changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Get changed files
-        id: changed
+      - name: Get changed workflows
+        id: workflows
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          files_yaml: |
-            workflows:
-              - .github/workflows/**
-            # a change to the shared base can affect every state
-            base:
-              - helm/helmfile-common.yaml
-            # a change here renders one canary state, not every state
-            self:
-              - .github/workflows/lint.yml
+          files: .github/workflows/**
 
-      - name: Get changed component directories
-        id: components
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: helm/configs/**
-          dir_names: true
-          dir_names_max_depth: 3
-          matrix: true
-
+      # A component is a folder under helm/configs with a helmfile state.
+      # Components not yet migrated to helmfile have none and are skipped.
       - name: Select helmfile states to render
         id: states
-        run: |
-          set -euo pipefail
-
-          # a change to the shared base can affect every state
-          if [ "$BASE_CHANGED" = "true" ]; then
-            candidates=$(find helm/configs -name helmfile.yaml.gotmpl)
-          else
-            candidates=$(jq -r '.[] + "/helmfile.yaml.gotmpl"' <<< "$COMPONENTS")
-          fi
-
-          # Components not yet migrated to helmfile have no helmfile.yaml.gotmpl and are
-          # silently skipped here (not rendered/linted by this job).
-          matrix=$(printf '%s\n' "$candidates" | while read -r state; do
-            if [ -f "$state" ]; then echo "$state"; fi
-          done)
-
-          # States rendered alongside already exercise the workflow.
-          if [ "$SELF_CHANGED" = "true" ] && [ -z "$matrix" ]; then
-            matrix=$CANARY
-          fi
-          matrix=$(printf '%s\n' "$matrix" | jq -ncR '[inputs | select(. != "")]')
-
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-        env:
-          BASE_CHANGED: ${{ steps.changed.outputs.base_any_changed }}
-          SELF_CHANGED: ${{ steps.changed.outputs.self_any_changed }}
-          CANARY: helm/configs/proposals/helmfile.yaml.gotmpl
-          COMPONENTS: ${{ steps.components.outputs.all_changed_files }}
+        uses: ./.github/actions/select-components
+        with:
+          components_root: helm/configs
+          component_marker: helmfile.yaml.gotmpl
+          all_components_triggers: |
+            helm/helmfile-common.yaml
+            .github/workflows/lint.yml
+            .github/actions/select-components/**
 
   actionlint:
     needs: changes
@@ -98,12 +63,12 @@ jobs:
 
   helmfile:
     needs: changes
-    if: needs.changes.outputs.states != '[]'
+    if: needs.changes.outputs.components != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        state: ${{ fromJSON(needs.changes.outputs.states) }}
+        component: ${{ fromJSON(needs.changes.outputs.components) }}
         environment: [development, qa, production]
     steps:
       - name: Checkout repository
@@ -125,7 +90,7 @@ jobs:
         uses: helmfile/helmfile-action@614b4cd063ada10b87f668f6ffd35485bce0cac5 # v2.4.8
         with:
           helmfile-args: >-
-            --file ${{ matrix.state }}
+            --file helm/configs/${{ matrix.component }}/helmfile.yaml.gotmpl
             --environment ${{ matrix.environment }}
             --state-values-file ${{ runner.temp }}/placeholder-secrets.json
             template

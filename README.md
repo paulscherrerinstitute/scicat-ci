@@ -17,7 +17,7 @@ For a simpler setup to run and develop the SciCat core components locally, see t
 ├── curation/                notebooks and scripts used to curate data
 └── .github/
     ├── workflows/             deploy.yml, lint.yml, test.yml and their reusable building blocks
-    └── actions/                deploy-helmfile, deploy-helm, open-ssh-tunnel
+    └── actions/                select-components, deploy-helmfile, deploy-helm, open-ssh-tunnel
 ```
 
 Most components (backend, frontend, search-api, ...) live in their own repository
@@ -43,7 +43,7 @@ and namespace:
 | Workflow                                                   | Trigger                                         | What it does                                                                                           |
 | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger; `deploy ok` is the check to require |
-| [lint.yml](.github/workflows/lint.yml)                     | PR touching `helm/**` or `.github/workflows/**` | Renders every changed helmfile state for all three environments, and lints changed workflow files with actionlint |
+| [lint.yml](.github/workflows/lint.yml)                     | PR to `main`                                    | Renders every changed helmfile state for all three environments, and lints changed workflow files with actionlint; `lint ok` is the check to require |
 | [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Runs the `test` service of every changed top-level folder with a `compose.test.yml` and builds its prod image; `test ok` is the check to require |
 
 ### How deploy.yml picks environment and components
@@ -56,9 +56,28 @@ The trigger determines the environment:
   the release tag (`<component>-vX.Y.Z`)
 
 For `pull_request` and `push`, the workflow diffs the changed files and deploys only
-the components whose `helm/configs/<component>` folder changed (or all of them if
-`helm/helmfile-common.yaml` or `deploy.yml` itself changed). A release always
-deploys exactly the one component the tag names, regardless of what changed.
+the components whose `helm/configs/<component>` folder changed, or all of them if
+`helm/helmfile-common.yaml` changed. On a PR, a change to `deploy.yml` or to the
+`select-components` action deploys one canary component per chart (`search-api`
+for `generic-service`, `scicat-to-pss` for `cron`, `proposals` for
+`proposals-cronjob`), unless components already deploy alongside it; merged, such a
+change deploys nothing by itself. A release always deploys exactly the one
+component the tag names, regardless of what changed.
+
+### How the workflows pick components
+
+`deploy.yml`, `lint.yml` and `test.yml` share the
+[select-components](.github/actions/select-components/action.yml) action. A
+component is a folder directly under a root that holds a marker file:
+
+| Workflow     | Root           | Marker                 | Every component on a change to                                          |
+| ------------ | -------------- | ---------------------- | ----------------------------------------------------------------------- |
+| `deploy.yml` | `helm/configs` | `helmfile.yaml.gotmpl` | `helm/helmfile-common.yaml`                                             |
+| `lint.yml`   | `helm/configs` | `helmfile.yaml.gotmpl` | `helm/helmfile-common.yaml`, `lint.yml`, the `select-components` action |
+| `test.yml`   | `.`            | `compose.test.yml`     | `test.yml`, the `select-components` action                              |
+
+A changed folder without the marker is skipped, so a component not yet on helmfile
+is neither linted nor deployed by these workflows.
 
 ### How test.yml picks components
 
@@ -68,7 +87,8 @@ then builds the folder's `Dockerfile`. The `test` service defines what testing m
 for the component, in any language; the python components extend their
 `docker-compose.dev.yml` and run `pytest`, `black`, `isort` and `pylint`
 (non-blocking). A new folder with a `compose.test.yml` is tested without touching
-the workflow.
+the workflow. A change to `test.yml` or to the `select-components` action tests
+every component.
 
 ### Typical workflow: changing a component's configuration or image
 
