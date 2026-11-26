@@ -1,10 +1,13 @@
 image:
-  repository: ghcr.io/paulscherrerinstitute/scicat-ci/scicat-to-pss
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/globus-cleanup
+  tag: 18352c57aa57585f1ad48b79c7ff863c808b4d83
   pullPolicy: Always
 
 env:
   - name: SCICAT_BACKEND
-    value: "http://backend-next.scicat-{{ .Environment.Name }}/"
+    value: "{{ .Values.scicatBackend }}"
+  - name: GLOBUS_COLLECTION
+    value: "{{ .Values.globusCollection }}"
   - name: PYTHONUNBUFFERED
     value: "1"
   - name: HOME

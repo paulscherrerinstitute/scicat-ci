@@ -14,6 +14,10 @@ releases:
     chart: oci://ghcr.io/paulscherrerinstitute/dc-charts/cron
     version: 1.0.0
     createNamespace: false
+    {{ if .Values.sourceRepo }}
+    inherit:
+      - template: build
+    {{ end }}
     values:
       - values.yaml
       - {{ .Environment.Name }}/values.yaml

@@ -1,2 +1,2 @@
-env:
-- GLOBUS_COLLECTION: deda66cc-9e42-49fc-a997-18a02abb7903
+scicatBackend: http://backend-next.scicat-development/
+globusCollection: deda66cc-9e42-49fc-a997-18a02abb7903

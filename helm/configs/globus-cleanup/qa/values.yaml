@@ -1,2 +1,2 @@
-env:
-- GLOBUS_COLLECTION: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
+scicatBackend: http://backend-next.scicat-qa/
+globusCollection: 394fb902-2fcf-4ffd-ba61-98d72e29dd0e
