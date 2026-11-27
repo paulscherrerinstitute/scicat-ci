@@ -1,0 +1,55 @@
+image:
+  repository: ghcr.io/paulscherrerinstitute/scicat-ci/globus-cleanup
+  tag: 18352c57aa57585f1ad48b79c7ff863c808b4d83
+  pullPolicy: Always
+
+env:
+  - name: SCICAT_BACKEND
+    value: "{{ .Values.scicatBackend }}"
+  - name: GLOBUS_COLLECTION
+    value: "{{ .Values.globusCollection }}"
+  - name: PYTHONUNBUFFERED
+    value: "1"
+  - name: HOME
+    value: "/home/app"
+
+volumes:
+  - name: secrets-volume
+    secret:
+      secretName: "{{ .Release.Name }}-s"
+  # HOME must be writable: the Globus CLI caches tokens in ~/.globus/cli/
+  - name: home
+    emptyDir: {}
+
+secrets:
+  "{{ .Release.Name }}-s":
+    type: Opaque
+    data:
+      .env: "{{ .Values.secretsJson.GLOBUS_PROXY_ENV }}"
+
+volumeMounts:
+  - name: home
+    mountPath: /home/app
+  - name: secrets-volume
+    mountPath: /app/.env
+    subPath: .env
+
+cronjob:
+  schedule: "17 2 * * *"          # daily at 02:17
+  suspend: true
+  restartPolicy: Never
+  concurrencyPolicy: Forbid
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+run:
+  args:
+    - --clean
+    - --dry-run                 # TODO: remove once the dry-run logs look right
+    - --ignore-missing
+    - --max-datasets=20        # Max number to clean
+    #- --notify=failed,inactive
