@@ -4,6 +4,24 @@
 
 ## Workflow
 
+In short, each part has a single role:
+
+1. A job (`markedForDeletion` or `revertMarkForDeletion`) is submitted. The
+   backend only validates it and publishes it on RabbitMQ.
+2. A RabbitMQ listener (Node-RED) changes the datasets' lifecycle, right
+   after the job is created: it flags them as `markedForDeletion`, or
+   restores them on a revert.
+3. This cronjob decides when to email: on its schedule it reads the job and
+   dataset state, and submits `notification` jobs (and the `delete` job at
+   the end of the grace period). It never sends emails itself.
+4. Node-RED picks up each `notification` job, looks up the owner group's
+   emails and completes the job, which makes scicat-backend send the email.
+
+So nothing is emailed when a job is created, only later on the cronjob's
+schedule.
+
+In detail:
+
 1. A SciCat job with `type`: `markedForDeletion`, `datasetList`: the
    datasets, `jobParams.deletionCode`: the reason and
    `jobParams.retentionTime`: the grace period (e.g. `3M`, a number and a unit
@@ -21,9 +39,8 @@
    period: a job with a 1-year grace period is still re-checked monthly
    throughout the year, not just once at the end. A job this service never
    checked in is due right away. The grace period is counted from the job's
-   creation. Every check-in submits one `notification`
-   job per owner group of the datasets; Node-RED updates the job with
-   contactEmails, and scicat-backend sends the emails.
+   creation. Every check-in notifies the owner groups of the datasets still
+   marked for deletion (see [Notifications](#notifications)).
 4. Once a job's full grace period has elapsed, it checks which of its
    datasets are still marked for deletion — a dataset may have been
    restored in the meantime (by a `revertMarkForDeletion` job).
@@ -41,10 +58,10 @@
 
 `datasetList` is never modified once a job is created — it's a snapshot of
 what was originally marked. Whether a dataset is still eligible for deletion
-is decided fresh, right before submitting the `delete` job, rather than
-tracked on the job over time. That keeps `revertMarkForDeletion` simple
-too: restoring a dataset only ever touches the dataset itself, never any
-`markedForDeletion` job.
+is decided fresh, at every check-in (for the notification) and right before
+submitting the `delete` job, rather than tracked on the job over time. That
+keeps `revertMarkForDeletion` simple too: restoring a dataset only ever
+touches the dataset itself, never any `markedForDeletion` job.
 
 ## Commands
 
@@ -59,6 +76,29 @@ The same image runs two independent commands, each meant as its own cronjob:
   retention time has passed and that are not marked for deletion yet. It only
   submits the jobs: everything after is the same as for a job from the
   frontend or the API.
+
+## Notifications
+
+Every notification is a `notification` job, one per owner group of the
+datasets concerned. Node-RED updates the job with the group's
+contactEmails, and scicat-backend sends the email.
+They are sent:
+
+| When | Datasets | Email |
+| --- | --- | --- |
+| Every check-in of a `markedForDeletion` job before its grace period has elapsed | Those still marked for deletion | Datasets scheduled for deletion, with the expiry date and the deletion code |
+| The check-in at which its grace period has elapsed | Those still marked for deletion, the same ones as the `delete` job | Retention period expired (`jobParams.expired`) |
+| Once per `revertMarkForDeletion` job, at the first run after its creation | All the job's datasets | Deletion cancelled (`jobParams.reverted`) |
+
+- A `markedForDeletion` check-in with no dataset marked sends no
+  notification and is not recorded, so the job stays due and is retried on
+  the next run. This covers a run before the listener has flagged the
+  datasets: the owners are notified once they are flagged. Once the grace
+  period has elapsed, the check-in is recorded anyway, which closes the job.
+- If submitting a notification fails, the check-in (or `notifiedAt` for a
+  revert) is not recorded, so the job is retried on the next run.
+- Nothing is sent when a `markedForDeletion` job is created, nor for the
+  `delete` job: the first email comes with the first check-in.
 
 ## Getting started
 

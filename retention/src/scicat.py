@@ -77,6 +77,11 @@ _DATASET_V3_FIELDS = [
 ]
 
 
+_STILL_MARKED = {
+    "datasetlifecycle.archiveStatusMessage": ARCHIVE_STATUS_MARKED_FOR_DELETION
+}
+
+
 def _paginate(find_all, filter_, page_limit, max_iterations, description):
     """Yields pages from `find_all`, walking `limits.skip` until a page is empty."""
     filter_ = {**filter_, "limits": {"skip": 0, "limit": page_limit}}
@@ -89,11 +94,14 @@ def _paginate(find_all, filter_, page_limit, max_iterations, description):
     raise RuntimeError(f"Exceeded maximum pages while fetching {description}")
 
 
-def _pids_by_owner_group(pids):
-    """Returns {ownerGroup: [pid, ...]} for the given dataset pids."""
+def _pids_by_owner_group(pids, where=None):
+    """Returns {ownerGroup: [pid, ...]} for the given dataset pids matching `where`."""
     batches = _paginate(
         DatasetsV4Api().datasets_v4_controller_find_all_v4,
-        {"where": {"pid": {"$in": pids}}, "fields": ["pid", "ownerGroup"]},
+        {
+            "where": {"pid": {"$in": pids}, **(where or {})},
+            "fields": ["pid", "ownerGroup"],
+        },
         DATASETS_PAGE_LIMIT,
         DATASETS_MAX_ITERATIONS,
         "datasets",
@@ -104,13 +112,16 @@ def _pids_by_owner_group(pids):
             by_group[dataset.owner_group].append(dataset.pid)
     missing = set(pids) - {pid for group in by_group.values() for pid in group}
     if missing:
-        log.warning(f"Datasets not found, not notified: {sorted(missing)}")
+        log.warning(
+            f"Datasets not found or not matching, not notified: {sorted(missing)}"
+        )
     return dict(by_group)
 
 
-def _submit_notifications(job_id, pids, job_params):
-    """Submits one notification job per owner group of the given datasets."""
-    for owner_group, group_pids in _pids_by_owner_group(pids).items():
+def _submit_notifications(job_id, pids, job_params, where=None):
+    """Submits one notification job per owner group of the given datasets matching `where`, returning how many."""
+    pids_by_group = _pids_by_owner_group(pids, where)
+    for owner_group, group_pids in pids_by_group.items():
         JobsApi().jobs_controller_create_v3(
             {
                 "type": JOB_TYPE_NOTIFICATION,
@@ -124,6 +135,7 @@ def _submit_notifications(job_id, pids, job_params):
         log.info(
             f"Job {job_id} notified {owner_group} about {len(group_pids)} dataset(s)"
         )
+    return len(pids_by_group)
 
 
 class SciCatAuth:
@@ -220,8 +232,10 @@ class MarkedForDeletionJob:
         )
 
     def _notify(self, expired):
-        """Submits one notification job per owner group of the job's datasets."""
-        _submit_notifications(
+        """Submits one notification job per owner group of the job's datasets still marked for deletion, returning how many."""
+        # Restored datasets (reverted) are no longer to be deleted: their
+        # owners are not notified anymore, nor at all if none is left.
+        return _submit_notifications(
             self.id,
             self.dataset_pids,
             {
@@ -230,6 +244,7 @@ class MarkedForDeletionJob:
                 "expired": expired,
                 PARAM_DELETION_CODE: self.deletion_code,
             },
+            where=_STILL_MARKED,
         )
 
     def _still_marked_pids(self):
@@ -239,7 +254,7 @@ class MarkedForDeletionJob:
             {
                 "where": {
                     "pid": {"$in": self.dataset_pids},
-                    "datasetlifecycle.archiveStatusMessage": ARCHIVE_STATUS_MARKED_FOR_DELETION,
+                    **_STILL_MARKED,
                 },
                 "fields": ["pid"],
             },
@@ -273,7 +288,14 @@ class MarkedForDeletionJob:
         expired = now >= self.expiry_date
         # Notify (and submit the deletion) first: if it fails, the check-in is
         # not recorded and the job stays due for the next run.
-        self._notify(expired)
+        notified = self._notify(expired)
+        if not notified and not expired:
+            # Nothing marked yet (the listener has not flagged the datasets)
+            # or anymore (all reverted): the check-in is not recorded, so the
+            # job stays due and the owners get their email once flagged. At
+            # expiry it is recorded anyway, so that the job is closed.
+            log.info(f"Job {self.id} has no dataset marked, check-in not recorded")
+            return
         if expired:
             self._submit_delete_job()
         now_iso = now.isoformat()
