@@ -729,15 +729,55 @@ class TestRevertMarkForDeletionJob:
         )
         now = FixturesJobs.creation_time
         job.notify(now)
-        # Reverted datasets are no longer marked: no status filter
+        # Only the datasets actually restored, i.e. no longer marked
         _, kwargs = mock_find_datasets.call_args_list[0]
         assert json.loads(kwargs["filter"])["where"] == {
-            "pid": {"$in": ["pid1", "pid2"]}
+            "pid": {"$in": ["pid1", "pid2"]},
+            "datasetlifecycle.archiveStatusMessage": {"$ne": "markedForDeletion"},
         }
         assert mock_create.call_args_list == [
             call(ANY, self._notification("group1", ["pid1"])),
             call(ANY, self._notification("group2", ["pid2"])),
         ]
+        mock_update.assert_called_once_with(
+            ANY,
+            FixturesJobs.job_id,
+            {"jobResultObject": {"notifiedAt": now.isoformat()}},
+        )
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1"}),
+    )
+    def test_notify_only_restored_datasets(self, _, mock_update, mock_create):
+        # A partly failed revert: pid2 is still marked, so the query leaves
+        # it out and only pid1's owners are told it is cancelled
+        job = scicat.RevertMarkForDeletionJob(
+            FixturesJobs.raw_job(job_result_object={})
+        )
+        job.notify(FixturesJobs.creation_time)
+        mock_create.assert_called_once_with(ANY, self._notification("group1", ["pid1"]))
+        mock_update.assert_called_once()
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({}),
+    )
+    def test_notify_records_when_none_restored(self, _, mock_update, mock_create):
+        # A fully failed revert: nothing to send, but recorded, so that it is
+        # not fetched again
+        job = scicat.RevertMarkForDeletionJob(
+            FixturesJobs.raw_job(job_result_object={})
+        )
+        now = FixturesJobs.creation_time
+        job.notify(now)
+        mock_create.assert_not_called()
         mock_update.assert_called_once_with(
             ANY,
             FixturesJobs.job_id,
@@ -778,8 +818,10 @@ class TestRevertMarkForDeletionJobsRepository:
         assert json.loads(kwargs["filter"]) == {
             "where": {
                 "type": "revertMarkForDeletion",
-                # Only once Node-RED restored all the datasets
-                "jobStatusMessage": "finishedSuccessful",
+                # Only once Node-RED is done restoring, fully or partly
+                "jobStatusMessage": {
+                    "inq": ["finishedSuccessful", "finishedUnsuccessful"]
+                },
                 "datasetList": {"neq": []},
                 "jobResultObject.notifiedAt": None,
             },
