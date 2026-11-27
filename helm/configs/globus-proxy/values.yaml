@@ -1,7 +1,7 @@
 image:
   repository: ghcr.io/swissopenem/scicat-globus-proxy
   pullPolicy: Always
-  tag: 0.6.0
+  tag: 0.6.0@sha256:d767f4ec3ce55608d25ffec3a9cef608e6544a8c4d5872a25838af67ea4baa2c
 
 service:
   type: ClusterIP
