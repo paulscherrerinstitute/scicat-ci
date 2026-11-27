@@ -73,6 +73,11 @@ class TestMarkedForDeletionJob:
         ) as mock_find_reverts:
             yield mock_find_reverts
 
+    @staticmethod
+    def _closed(mock_update):
+        """The closedReason the job was closed with, None if still open."""
+        return mock_update.call_args[0][2]["jobResultObject"].get("closedReason")
+
     def test_id(self):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         assert job.id == FixturesJobs.job_id
@@ -253,8 +258,9 @@ class TestMarkedForDeletionJob:
                 "jobResultObject": {
                     "lastVerifiedAt": now.isoformat(),
                     "verifiedAt": [now.isoformat()],
+                    "closedAt": now.isoformat(),
+                    "closedReason": "expired",
                 },
-                "jobStatusMessage": "retentionExpired",
             },
         )
 
@@ -296,7 +302,7 @@ class TestMarkedForDeletionJob:
         assert mock_create.call_args_list == [
             call(ANY, self._notification("group1", ["pid1", "pid2"], expired=True)),
         ]
-        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+        assert self._closed(mock_update) == "expired"
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
@@ -350,15 +356,17 @@ class TestMarkedForDeletionJob:
         autospec=True,
         side_effect=FixturesJobs.dataset_pages({}),
     )
-    def test_advance_does_not_record_check_in_when_none_still_marked(
+    def test_advance_records_check_in_when_none_still_marked(
         self, _, mock_update, mock_create
     ):
-        # E.g. the listener has not flagged the datasets yet: the job stays
-        # due, so the owners are notified on a later run
+        # Only jobs Node-RED is done with are checked in, so none still
+        # marked (e.g. flagging failed) is not a reason to retry: no email,
+        # and the check-in is recorded, the job still open
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         job.advance(FixturesJobs.creation_time)
         mock_create.assert_not_called()
-        mock_update.assert_not_called()
+        mock_update.assert_called_once()
+        assert self._closed(mock_update) is None
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
@@ -372,7 +380,7 @@ class TestMarkedForDeletionJob:
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         job.advance(FixturesJobs.creation_time + relativedelta(months=3))
         mock_create.assert_not_called()
-        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+        assert self._closed(mock_update) == "expired"
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
@@ -543,7 +551,7 @@ class TestMarkedForDeletionJob:
             call(ANY, self._notification("group1", ["pid1"], expired=True)),
             call(ANY, self._delete(["pid1"])),
         ]
-        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+        assert self._closed(mock_update) == "expired"
 
     @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
     @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
@@ -552,8 +560,8 @@ class TestMarkedForDeletionJob:
         self, mock_find_datasets, mock_update, mock_create, mock_reverts
     ):
         # Nothing left: no dataset query and no notification, but the
-        # check-in is recorded with the status allReverted, so the job is
-        # never due again
+        # check-in is recorded and the job closed, so that it is never due
+        # again
         mock_reverts.side_effect = [
             [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid1", "pid2"])],
             [],
@@ -570,8 +578,9 @@ class TestMarkedForDeletionJob:
                 "jobResultObject": {
                     "lastVerifiedAt": now.isoformat(),
                     "verifiedAt": [now.isoformat()],
+                    "closedAt": now.isoformat(),
+                    "closedReason": "allReverted",
                 },
-                "jobStatusMessage": "allReverted",
             },
         )
 
@@ -581,7 +590,7 @@ class TestMarkedForDeletionJob:
     def test_advance_all_reverted_at_expiry(
         self, mock_find_datasets, mock_update, mock_create, mock_reverts
     ):
-        # allReverted rather than expired: there is nothing to delete
+        # All reverted rather than expired: there is nothing to delete
         mock_reverts.side_effect = [
             [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid1", "pid2"])],
             [],
@@ -590,7 +599,7 @@ class TestMarkedForDeletionJob:
         job.advance(FixturesJobs.creation_time + relativedelta(months=3))
         mock_find_datasets.assert_not_called()
         mock_create.assert_not_called()
-        assert mock_update.call_args[0][2]["jobStatusMessage"] == "allReverted"
+        assert self._closed(mock_update) == "allReverted"
 
 
 class TestMarkedForDeletionJobsRepository:
@@ -611,7 +620,11 @@ class TestMarkedForDeletionJobsRepository:
         assert json.loads(kwargs["filter"]) == {
             "where": {
                 "type": "markedForDeletion",
-                "jobStatusMessage": {"nin": ["retentionExpired", "allReverted"]},
+                # Only once Node-RED is done flagging, until closed
+                "jobStatusMessage": {
+                    "inq": ["finishedSuccessful", "finishedUnsuccessful"]
+                },
+                "jobResultObject.closedAt": None,
                 "datasetList": {"neq": []},
                 "or": [
                     {"jobResultObject.verifiedAt": None},
@@ -765,6 +778,8 @@ class TestRevertMarkForDeletionJobsRepository:
         assert json.loads(kwargs["filter"]) == {
             "where": {
                 "type": "revertMarkForDeletion",
+                # Only once Node-RED restored all the datasets
+                "jobStatusMessage": "finishedSuccessful",
                 "datasetList": {"neq": []},
                 "jobResultObject.notifiedAt": None,
             },

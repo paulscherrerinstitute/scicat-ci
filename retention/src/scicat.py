@@ -24,11 +24,21 @@ PARAM_RETENTION_TIME = "retentionTime"
 RESULT_LAST_VERIFIED_AT = "lastVerifiedAt"
 RESULT_VERIFIED_AT = "verifiedAt"
 RESULT_NOTIFIED_AT = "notifiedAt"
-
-STATUS_RETENTION_EXPIRED = "retentionExpired"
+# When and why this service stopped following a markedForDeletion job, which
+# is then never due again
+RESULT_CLOSED_AT = "closedAt"
+RESULT_CLOSED_REASON = "closedReason"
+CLOSED_REASON_EXPIRED = "expired"
 # All the job's datasets were reverted: none can be added back (a new mark is
-# a new job), so the job is never due again
-STATUS_ALL_REVERTED = "allReverted"
+# a new job)
+CLOSED_REASON_ALL_REVERTED = "allReverted"
+
+# A job's status is only set by whoever carries it out: Node-RED for
+# markedForDeletion (datasets flagged) and revertMarkForDeletion (datasets
+# restored) jobs. This service only records its own follow-up in
+# jobResultObject.
+STATUS_FINISHED_SUCCESSFUL = "finishedSuccessful"
+STATUS_FINISHED_UNSUCCESSFUL = "finishedUnsuccessful"
 
 # retentionTime suffix -> relativedelta keyword.
 _RELATIVEDELTA_KWARG_BY_UNIT = {
@@ -311,17 +321,11 @@ class MarkedForDeletionJob:
         expired = now >= self.expiry_date
         owned_pids = self._owned_pids()
         # Notify (and submit the deletion) first: if it fails, the check-in is
-        # not recorded and the job stays due for the next run. With all
-        # datasets reverted there is nothing to notify, but the check-in is
-        # recorded with the status allReverted, so the job is never due again.
-        notified = self._notify(owned_pids, expired) if owned_pids else 0
-        if owned_pids and not notified and not expired:
-            # Nothing marked yet (the listener has not flagged the datasets):
-            # the check-in is not recorded, so the job stays due and the
-            # owners get their email once flagged. At expiry it is recorded
-            # anyway, so that the job is closed.
-            log.info(f"Job {self.id} has no dataset marked, check-in not recorded")
-            return
+        # not recorded and the job stays due for the next run. With nothing
+        # left to notify (all reverted or none flagged), the check-in is
+        # recorded as usual.
+        if owned_pids:
+            self._notify(owned_pids, expired)
         if expired:
             self._submit_delete_job(owned_pids)
         now_iso = now.isoformat()
@@ -336,13 +340,16 @@ class MarkedForDeletionJob:
                 ],
             }
         }
-        if not owned_pids:
-            # Takes precedence over expired: there is nothing to delete
-            patch["jobStatusMessage"] = STATUS_ALL_REVERTED
-            log.info(f"Job {self.id} has all its datasets reverted, not due anymore")
-        elif expired:
-            patch["jobStatusMessage"] = STATUS_RETENTION_EXPIRED
-            log.info(f"Job {self.id} retention expired, ready for deletion")
+        # All reverted takes precedence over expired: there is nothing to delete
+        reason = (
+            CLOSED_REASON_ALL_REVERTED
+            if not owned_pids
+            else CLOSED_REASON_EXPIRED if expired else None
+        )
+        if reason:
+            patch["jobResultObject"][RESULT_CLOSED_AT] = now_iso
+            patch["jobResultObject"][RESULT_CLOSED_REASON] = reason
+            log.info(f"Job {self.id} closed: {reason}")
         else:
             log.info(f"Job {self.id} verification time updated, not yet expired")
         JobsApi().jobs_controller_update_v3(self.id, patch)
@@ -366,16 +373,19 @@ class MarkedForDeletionJobsRepository:
     ]
 
     def _due_jobs_filter(self, now):
-        # A job is due when this service never checked it in (no verifiedAt
-        # list yet, i.e. right after marking) or when its last check-in is at
-        # least one retention step old. Expired or fully reverted jobs are
-        # never due. A null match also covers missing fields.
+        # Only jobs Node-RED finished, i.e. it is done flagging their
+        # datasets: which ones are actually flagged is checked at every
+        # check-in, so a partly or fully failed job is followed too. Such a
+        # job is due when this service never checked it in (no verifiedAt
+        # list yet) or when its last check-in is at least one retention step
+        # old, until it is closed. A null match also covers missing fields.
         return {
             "where": {
                 "type": JOB_TYPE_MARKED_FOR_DELETION,
                 "jobStatusMessage": {
-                    "nin": [STATUS_RETENTION_EXPIRED, STATUS_ALL_REVERTED]
+                    "inq": [STATUS_FINISHED_SUCCESSFUL, STATUS_FINISHED_UNSUCCESSFUL]
                 },
+                f"jobResultObject.{RESULT_CLOSED_AT}": None,
                 "datasetList": {"neq": []},
                 "or": [
                     {f"jobResultObject.{RESULT_VERIFIED_AT}": None},
@@ -441,7 +451,11 @@ class RevertMarkForDeletionJob:
 
 
 class RevertMarkForDeletionJobsRepository:
-    """Fetches SciCat "revertMarkForDeletion" jobs whose owner groups were not notified yet."""
+    """
+    Fetches SciCat "revertMarkForDeletion" jobs. Node-RED sets them
+    finishedSuccessful once it restored their datasets, or
+    finishedUnsuccessful if it failed for some or all of them.
+    """
 
     page_limit = 100
     max_iterations = 1000
@@ -449,10 +463,13 @@ class RevertMarkForDeletionJobsRepository:
     fields = ["id", "datasetList", "jobResultObject"]
 
     def _unnotified_jobs_filter(self):
-        # A null match also covers jobs without notifiedAt
+        # Only once all the datasets were restored: a pending revert is
+        # notified on a later run, a failed one never. A null match also
+        # covers jobs without notifiedAt.
         return {
             "where": {
                 "type": JOB_TYPE_REVERT_MARK_FOR_DELETION,
+                "jobStatusMessage": STATUS_FINISHED_SUCCESSFUL,
                 "datasetList": {"neq": []},
                 f"jobResultObject.{RESULT_NOTIFIED_AT}": None,
             },
@@ -461,6 +478,8 @@ class RevertMarkForDeletionJobsRepository:
 
     def jobs_listing_since(self, pids, since):
         """Yields revertMarkForDeletion jobs created after `since` listing any of `pids`, as RevertMarkForDeletionJob."""
+        # Whatever their status: a pending or failed revert still keeps its
+        # datasets from being deleted, as the owners asked to keep them.
         batches = _paginate(
             JobsApi().jobs_controller_find_all_v3,
             {
