@@ -14,7 +14,7 @@ For a simpler setup to run and develop the SciCat core components locally, see t
 │   └── configs/<component>/   one folder per component, name = helm release name
 ├── proposals/               source of the proposals component, built from here
 ├── scicat-to-pss/           source of the scicat-to-pss component, built from here
-├── curation/                notebooks and scripts used to curate data
+├── tools/scicat/curation/   notebooks and scripts used to curate data, run by hand
 └── .github/
     ├── workflows/             deploy.yml, lint.yml, test.yml and their reusable building blocks
     └── actions/                select-components, deploy-helmfile, deploy-helm, open-ssh-tunnel
