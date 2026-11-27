@@ -26,6 +26,9 @@ RESULT_VERIFIED_AT = "verifiedAt"
 RESULT_NOTIFIED_AT = "notifiedAt"
 
 STATUS_RETENTION_EXPIRED = "retentionExpired"
+# All the job's datasets were reverted: none can be added back (a new mark is
+# a new job), so the job is never due again
+STATUS_ALL_REVERTED = "allReverted"
 
 # retentionTime suffix -> relativedelta keyword.
 _RELATIVEDELTA_KWARG_BY_UNIT = {
@@ -306,15 +309,17 @@ class MarkedForDeletionJob:
     def advance(self, now):
         """Notifies the owner groups, then records the check-in and whether the grace period has elapsed."""
         expired = now >= self.expiry_date
-        # Notify (and submit the deletion) first: if it fails, the check-in is
-        # not recorded and the job stays due for the next run.
         owned_pids = self._owned_pids()
+        # Notify (and submit the deletion) first: if it fails, the check-in is
+        # not recorded and the job stays due for the next run. With all
+        # datasets reverted there is nothing to notify, but the check-in is
+        # recorded with the status allReverted, so the job is never due again.
         notified = self._notify(owned_pids, expired) if owned_pids else 0
-        if not notified and not expired:
-            # Nothing marked yet (the listener has not flagged the datasets)
-            # or anymore (all reverted): the check-in is not recorded, so the job stays due and the owners
-            # get their email once flagged. At expiry it is recorded anyway,
-            # so that the job is closed.
+        if owned_pids and not notified and not expired:
+            # Nothing marked yet (the listener has not flagged the datasets):
+            # the check-in is not recorded, so the job stays due and the
+            # owners get their email once flagged. At expiry it is recorded
+            # anyway, so that the job is closed.
             log.info(f"Job {self.id} has no dataset marked, check-in not recorded")
             return
         if expired:
@@ -331,7 +336,11 @@ class MarkedForDeletionJob:
                 ],
             }
         }
-        if expired:
+        if not owned_pids:
+            # Takes precedence over expired: there is nothing to delete
+            patch["jobStatusMessage"] = STATUS_ALL_REVERTED
+            log.info(f"Job {self.id} has all its datasets reverted, not due anymore")
+        elif expired:
             patch["jobStatusMessage"] = STATUS_RETENTION_EXPIRED
             log.info(f"Job {self.id} retention expired, ready for deletion")
         else:
@@ -359,11 +368,14 @@ class MarkedForDeletionJobsRepository:
     def _due_jobs_filter(self, now):
         # A job is due when this service never checked it in (no verifiedAt
         # list yet, i.e. right after marking) or when its last check-in is at
-        # least one retention step old. A null match also covers missing fields.
+        # least one retention step old. Expired or fully reverted jobs are
+        # never due. A null match also covers missing fields.
         return {
             "where": {
                 "type": JOB_TYPE_MARKED_FOR_DELETION,
-                "jobStatusMessage": {"neq": STATUS_RETENTION_EXPIRED},
+                "jobStatusMessage": {
+                    "nin": [STATUS_RETENTION_EXPIRED, STATUS_ALL_REVERTED]
+                },
                 "datasetList": {"neq": []},
                 "or": [
                     {f"jobResultObject.{RESULT_VERIFIED_AT}": None},
