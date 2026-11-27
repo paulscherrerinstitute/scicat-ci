@@ -21,13 +21,17 @@
             # for now limited to 3M, more might come later
             jobParams.retentionTime:
               enum: [3M]
-          # Published datasets cannot be deleted, and only retrievable ones
-          # (archived and not deleted yet) can be marked
+          # Published datasets cannot be deleted, only retrievable ones
+          # (archived and not deleted yet) can be marked, and not twice: a
+          # dataset already marked must be reverted first
           datasets:
             isPublished:
               const: false
             "datasetlifecycle.retrievable":
               const: true
+            "datasetlifecycle.archiveStatusMessage":
+              not:
+                const: markedForDeletion
         # Only datasets on PSI storage
         - *psiStorage
         - *rabbitmq
