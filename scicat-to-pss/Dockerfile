@@ -1,4 +1,4 @@
-FROM python:3.10-slim@sha256:6ff506466f8b1e981719b468cc0023b8ef000b983cdec0eafe119d01f379e31d
+FROM python:3.15-slim@sha256:63bb298d2b7b88f176f51b5189f54ce6535c997682ea70885d2132f5d473a8a5
 ENV PYTHONDONTWRITEBYTECODE 1
 WORKDIR /usr/src/app
 # copy and install dependencies
