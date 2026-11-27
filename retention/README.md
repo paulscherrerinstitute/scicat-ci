@@ -72,7 +72,7 @@ The same image runs two independent commands, each meant as its own cronjob:
   `revertMarkForDeletion` jobs (step 5).
 - `python main.py mark-expired`: submits one `markedForDeletion` job per owner
   group (split above 1000 datasets) for the unpublished, retrievable datasets
-  (i.e. archived and not deleted) whose archive
+  (i.e. archived and not deleted) on PSI storage whose archive
   retention time has passed and that are not marked for deletion yet. It only
   submits the jobs: everything after is the same as for a job from the
   frontend or the API.
