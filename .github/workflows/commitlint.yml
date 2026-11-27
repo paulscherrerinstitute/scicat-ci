@@ -1,0 +1,66 @@
+name: Commitlint
+
+# PRs are rebase-merged, so a PR's commits land on main unchanged. Requiring a
+# single commit keeps one commit per PR, and linting it here checks exactly
+# what main gets: a rebase merge offers no message to edit.
+#
+# Any number of commits is fine while a PR is a draft; the check runs once it
+# is ready for review, and only blocks the merge.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-commit-message:
+    name: Lint commit message
+    # Drafts and Renovate's generated messages are not linted.
+    # A skipped job still satisfies the required check.
+    if: >-
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.login != 'renovate[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # checkout for the commit and .github/commitlint.config.mjs
+    env:
+      # cli and config-conventional are released together with the same version.
+      # renovate: datasource=npm depName=@commitlint/cli
+      COMMITLINT_VERSION: 21.2.3
+    steps:
+      - name: Check the PR is a single commit
+        run: |
+          if [ "$COMMITS" -ne 1 ]; then
+            echo "::error::Merging needs a single commit, this PR has $COMMITS. Squash them (git rebase -i origin/main) and force-push, or turn the PR back into a draft while you work."
+            exit 1
+          fi
+        env:
+          COMMITS: ${{ github.event.pull_request.commits }}
+
+      # The PR head, not the default merge commit GitHub creates for the PR.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      # The config extends @commitlint/config-conventional, which must be
+      # installed next to the cli for it to resolve.
+      - name: Install commitlint
+        run: >-
+          npm install --no-save --no-package-lock
+          "@commitlint/cli@$COMMITLINT_VERSION"
+          "@commitlint/config-conventional@$COMMITLINT_VERSION"
+
+      - name: Lint the commit
+        run: npx --no-install commitlint --config .github/commitlint.config.mjs --last --verbose

@@ -45,6 +45,12 @@ and namespace:
 | [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger; `deploy ok` is the check to require |
 | [lint.yml](.github/workflows/lint.yml)                     | PR to `main`                                    | Renders every changed helmfile state for all three environments, and lints changed workflow files with actionlint; `lint ok` is the check to require |
 | [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Runs the `test` service of every changed top-level folder with a `compose.test.yml` and builds its prod image; `test ok` is the check to require |
+| [commitlint.yml](.github/workflows/commitlint.yml)         | PR                                              | Checks the PR is a single commit and lints its message; `Lint commit message` is the check to require |
+
+PRs are rebase-merged and must be a single commit to merge, so each PR lands on
+`main` as exactly the commit that was linted. Commit freely while the PR is a
+draft, where the check is skipped; before marking it ready, squash
+(`git rebase -i origin/main`) and force-push.
 
 ### How deploy.yml picks environment and components
 
