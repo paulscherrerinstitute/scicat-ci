@@ -63,6 +63,16 @@ class TestSciCatAuth:
 
 class TestMarkedForDeletionJob:
 
+    @pytest.fixture(autouse=True)
+    def mock_reverts(self):
+        """No revertMarkForDeletion job by default: the job keeps all its datasets."""
+        with patch(
+            "scicat.JobsApi.jobs_controller_find_all_v3",
+            autospec=True,
+            side_effect=[[]],
+        ) as mock_find_reverts:
+            yield mock_find_reverts
+
     def test_id(self):
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
         assert job.id == FixturesJobs.job_id
@@ -322,7 +332,11 @@ class TestMarkedForDeletionJob:
             FixturesJobs.raw_job(dataset_pids=["pid1", "pid2", "pid3"])
         )
 
-        assert job._still_marked_pids() == ["pid1", "pid2", "pid3"]
+        assert job._still_marked_pids(["pid1", "pid2", "pid3"]) == [
+            "pid1",
+            "pid2",
+            "pid3",
+        ]
         skips = [
             json.loads(kwargs["filter"])["limits"]["skip"]
             for _, kwargs in mock_find_datasets.call_args_list
@@ -466,6 +480,86 @@ class TestMarkedForDeletionJob:
         job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job(deletion_code=None))
         with pytest.raises(KeyError):
             job.advance(FixturesJobs.creation_time)
+        mock_create.assert_not_called()
+        mock_update.assert_not_called()
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1"}),
+    )
+    def test_advance_skips_datasets_reverted_since(
+        self, mock_find_datasets, mock_update, mock_create, mock_reverts
+    ):
+        # pid2 was reverted after the job was created: it is dropped for
+        # good, even if it is marked again later by another job
+        mock_reverts.side_effect = [
+            [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid2", "pid9"])],
+            [],
+        ]
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time)
+
+        _, kwargs = mock_reverts.call_args_list[0]
+        assert json.loads(kwargs["filter"]) == {
+            "where": {
+                "type": "revertMarkForDeletion",
+                "creationTime": {"gt": FixturesJobs.creation_time.isoformat()},
+                "jobParams.datasetList.pid": {"inq": ["pid1", "pid2"]},
+            },
+            "fields": ["datasetList"],
+            "limits": {"skip": 0, "limit": 100},
+        }
+        _, kwargs = mock_find_datasets.call_args_list[0]
+        assert json.loads(kwargs["filter"])["where"]["pid"] == {"$in": ["pid1"]}
+        mock_create.assert_called_once_with(
+            ANY, self._notification("group1", ["pid1"], expired=False)
+        )
+        mock_update.assert_called_once()
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch(
+        "scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4",
+        autospec=True,
+        side_effect=FixturesJobs.dataset_pages({"pid1": "group1"})
+        + FixturesJobs.dataset_pages({"pid1": "group1"}),
+    )
+    def test_advance_expires_only_deletes_datasets_not_reverted(
+        self, mock_find_datasets, mock_update, mock_create, mock_reverts
+    ):
+        mock_reverts.side_effect = [
+            [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid2"])],
+            [],
+        ]
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time + relativedelta(months=3))
+
+        _, kwargs = mock_find_datasets.call_args_list[-1]
+        assert json.loads(kwargs["filter"])["where"]["pid"] == {"$in": ["pid1"]}
+        assert mock_create.call_args_list == [
+            call(ANY, self._notification("group1", ["pid1"], expired=True)),
+            call(ANY, self._delete(["pid1"])),
+        ]
+        assert mock_update.call_args[0][2]["jobStatusMessage"] == "retentionExpired"
+
+    @patch("scicat.JobsApi.jobs_controller_create_v3", autospec=True)
+    @patch("scicat.JobsApi.jobs_controller_update_v3", autospec=True)
+    @patch("scicat.DatasetsV4Api.datasets_v4_controller_find_all_v4", autospec=True)
+    def test_advance_all_datasets_reverted(
+        self, mock_find_datasets, mock_update, mock_create, mock_reverts
+    ):
+        # Nothing left to own: no dataset query, no notification, and the
+        # check-in is not recorded before expiry
+        mock_reverts.side_effect = [
+            [FixturesJobs.raw_job(job_id="revert1", dataset_pids=["pid1", "pid2"])],
+            [],
+        ]
+        job = scicat.MarkedForDeletionJob(FixturesJobs.raw_job())
+        job.advance(FixturesJobs.creation_time)
+        mock_find_datasets.assert_not_called()
         mock_create.assert_not_called()
         mock_update.assert_not_called()
 

@@ -24,13 +24,14 @@ In detail:
 
 1. A SciCat job with `type`: `markedForDeletion`, `datasetList`: the
    datasets, `jobParams.deletionCode`: the reason and
-   `jobParams.retentionTime`: the grace period (e.g. `3M`, a number and a unit
-   among `Y`, `M`, `d`, restricted to the allowed
-   values by the job config) is created, either:
+   `jobParams.retentionTime`: the grace period (e.g. `3M`, a number and a
+   unit among `Y`, `M`, `d`, restricted to the allowed values by the job
+   config) is created, either:
    - from the frontend or the API, when a user marks datasets, or
    - by the `mark-expired` command (see [Commands](#commands)), with
-     `deletionCode` `EXPIRED` and `retentionTime` `EXPIRED_RETENTION_TIME`, for
-     the datasets whose `datasetlifecycle.archiveRetentionTime` has passed.
+     `deletionCode` `EXPIRED` and `retentionTime` `EXPIRED_RETENTION_TIME`,
+     for the datasets whose `datasetlifecycle.archiveRetentionTime` has
+     passed.
 2. A RabbitMQ listener (Node-RED) picks up the job on creation and flags
    each dataset as `markedForDeletion`.
 3. This service runs periodically (e.g. daily) and re-confirms every
@@ -39,12 +40,14 @@ In detail:
    period: a job with a 1-year grace period is still re-checked monthly
    throughout the year, not just once at the end. A job this service never
    checked in is due right away. The grace period is counted from the job's
-   creation. Every check-in notifies the owner groups of the datasets still
-   marked for deletion (see [Notifications](#notifications)).
+   creation. Every check-in notifies the owner groups of the datasets the job
+   still handles (see [Datasets of a job](#datasets-of-a-job) and
+   [Notifications](#notifications)).
 4. Once a job's full grace period has elapsed, it checks which of its
-   datasets are still marked for deletion — a dataset may have been
-   restored in the meantime (by a `revertMarkForDeletion` job).
-   Whatever is still marked gets submitted as a new `delete` job, with the
+   datasets it still handles — a dataset may have been restored in the
+   meantime (by a `revertMarkForDeletion` job), and possibly marked again
+   by a later job (see [Datasets of a job](#datasets-of-a-job)).
+   Whatever it still handles gets submitted as a new `delete` job, with the
    original job's `jobParams.deletionCode` (the reason of the deletion, also
    shown in every notification). The code is required when the job is
    created, so a job without one is reported as an error on every run. The
@@ -56,11 +59,21 @@ In detail:
    notified only once. The two steps are independent: a failure in one does
    not prevent the other.
 
+### Datasets of a job
+
 `datasetList` is never modified once a job is created — it's a snapshot of
-what was originally marked. Whether a dataset is still eligible for deletion
-is decided fresh, at every check-in (for the notification) and right before
-submitting the `delete` job, rather than tracked on the job over time. That
-keeps `revertMarkForDeletion` simple too: restoring a dataset only ever
+what was originally marked, kept for auditing. Which of its datasets the job
+still handles is decided fresh, at every check-in (for the notification) and
+right before submitting the `delete` job, rather than tracked on the job over
+time. A dataset is handled only if:
+
+- it is still marked for deletion (`archiveStatusMessage`), and
+- no `revertMarkForDeletion` job created after the job lists it. A revert
+  drops the dataset from the job for good: if it is marked again later, the
+  new job handles it, with its own grace period, so the earlier job neither
+  notifies about it nor deletes it.
+
+That keeps `revertMarkForDeletion` simple too: restoring a dataset only ever
 touches the dataset itself, never any `markedForDeletion` job.
 
 ## Commands
@@ -70,27 +83,33 @@ The same image runs two independent commands, each meant as its own cronjob:
 - `python main.py retention` (the default): checks in the due
   `markedForDeletion` jobs (steps 3 and 4) and notifies the
   `revertMarkForDeletion` jobs (step 5).
-- `python main.py mark-expired`: submits one `markedForDeletion` job per owner
-  group (split above 1000 datasets) for the unpublished, retrievable datasets
-  (i.e. archived and not deleted) on PSI storage whose archive
-  retention time has passed and that are not marked for deletion yet. It only
-  submits the jobs: everything after is the same as for a job from the
+- `python main.py mark-expired`: submits one `markedForDeletion` job per
+  owner group (split above 1000 datasets) for the unpublished, retrievable
+  datasets (i.e. archived and not deleted) on PSI storage whose archive
+  retention time has passed and that are not marked for deletion yet. It
+  only submits the jobs: everything after is the same as for a job from the
   frontend or the API.
 
 ## Notifications
 
 Every notification is a `notification` job, one per owner group of the
 datasets concerned. Node-RED updates the job with the group's
-contactEmails, and scicat-backend sends the email.
-They are sent:
+`contactEmails`, and scicat-backend sends the email. They are sent:
 
-| When | Datasets | Email |
-| --- | --- | --- |
-| Every check-in of a `markedForDeletion` job before its grace period has elapsed | Those still marked for deletion | Datasets scheduled for deletion, with the expiry date and the deletion code |
-| The check-in at which its grace period has elapsed | Those still marked for deletion, the same ones as the `delete` job | Retention period expired (`jobParams.expired`) |
-| Once per `revertMarkForDeletion` job, at the first run after its creation | All the job's datasets | Deletion cancelled (`jobParams.reverted`) |
+- **Datasets scheduled for deletion**, with the expiry date and the deletion
+  code: at every check-in of a `markedForDeletion` job before its grace
+  period has elapsed, for the datasets it still handles (see
+  [Datasets of a job](#datasets-of-a-job)).
+- **Retention period expired** (`jobParams.expired`): at the check-in at
+  which its grace period has elapsed, for the datasets it still handles, the
+  same ones as the `delete` job.
+- **Deletion cancelled** (`jobParams.reverted`): once per
+  `revertMarkForDeletion` job, at the first run after its creation, for all
+  the job's datasets.
 
-- A `markedForDeletion` check-in with no dataset marked sends no
+Also:
+
+- A `markedForDeletion` check-in with no dataset left to handle sends no
   notification and is not recorded, so the job stays due and is retried on
   the next run. This covers a run before the listener has flagged the
   datasets: the owners are notified once they are flagged. Once the grace
@@ -115,14 +134,16 @@ Variables to be supplied for docker run:
 - SCICAT_ENDPOINT
 - SCICAT_USERNAME
 - SCICAT_PASSWORD
-- EXPIRED_RETENTION_TIME: grace period of the datasets marked by `mark-expired`, e.g. `3M`
-  (`mark-expired` only), one of the values allowed by the job config
+- EXPIRED_RETENTION_TIME (`mark-expired` only): grace period of the datasets
+  marked by `mark-expired`, e.g. `3M`, one of the values allowed by the job
+  config
 
 ```bash
 IMAGE_NAME=<IMAGE_NAME>
 docker build -t $IMAGE_NAME .
-docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
--e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" \
--e "EXPIRED_RETENTION_TIME=<EXPIRED_RETENTION_TIME>" \
-$IMAGE_NAME python main.py [retention|mark-expired]
+docker run -e "SCICAT_ENDPOINT=<SCICAT_ENDPOINT>" \
+  -e "SCICAT_USERNAME=<SCICAT_USERNAME>" \
+  -e "SCICAT_PASSWORD=<SCICAT_PASSWORD>" \
+  -e "EXPIRED_RETENTION_TIME=<EXPIRED_RETENTION_TIME>" \
+  $IMAGE_NAME python main.py [retention|mark-expired]
 ```
