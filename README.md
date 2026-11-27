@@ -12,8 +12,8 @@ For a simpler setup to run and develop the SciCat core components locally, see t
 ├── helm/                    deployment config for every component, see helm/README.md
 │   ├── helmfile-common.yaml   shared defaults and the build hook
 │   └── configs/<component>/   one folder per component, name = helm release name
-├── proposals/               source of the proposals component, built from here
-├── scicat-to-pss/           source of the scicat-to-pss component, built from here
+├── services/scicat/         source of the components built from this repo
+│   └── <component>/           proposals, retention, scicat-to-pss
 ├── tools/scicat/curation/   notebooks and scripts used to curate data, run by hand
 └── .github/
     ├── workflows/             deploy.yml, lint.yml, test.yml and their reusable building blocks
@@ -24,8 +24,9 @@ Most components (backend, frontend, search-api, ...) live in their own repositor
 under the [SciCatProject organisation](https://github.com/SciCatProject) and are
 built from a published image or from a commit sha, as configured in
 `helm/configs/<component>`. A few components (`proposals`, `scicat-to-pss`) live
-directly in this repository; their source folder at the root is the build context
-referenced by their helm config via `sourceDir`.
+directly in this repository, under `services/scicat/`. Their helm config names
+the build context in `sourceDir`, as the folder's path in the `image.tag` commit:
+a tag from before the move to `services/scicat/` still uses the old root path.
 
 ## Environments
 
@@ -44,7 +45,7 @@ and namespace:
 | ---------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [deploy.yml](.github/workflows/deploy.yml)                 | PR to `main`, push to `main`, release published | Deploys every changed component to the environment matching the trigger; `deploy ok` is the check to require |
 | [lint.yml](.github/workflows/lint.yml)                     | PR to `main`                                    | Renders every changed helmfile state for all three environments, and lints changed workflow files with actionlint; `lint ok` is the check to require |
-| [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Runs the `test` service of every changed top-level folder with a `compose.test.yml` and builds its prod image; `test ok` is the check to require |
+| [test.yml](.github/workflows/test.yml)                     | PR to `main`                                    | Runs the `test` service of every changed `services/scicat/<component>` with a `compose.test.yml` and builds its prod image; `test ok` is the check to require |
 
 ### How deploy.yml picks environment and components
 
@@ -74,19 +75,19 @@ component is a folder directly under a root that holds a marker file:
 | ------------ | -------------- | ---------------------- | ----------------------------------------------------------------------- |
 | `deploy.yml` | `helm/configs` | `helmfile.yaml.gotmpl` | `helm/helmfile-common.yaml`                                             |
 | `lint.yml`   | `helm/configs` | `helmfile.yaml.gotmpl` | `helm/helmfile-common.yaml`, `lint.yml`, the `select-components` action |
-| `test.yml`   | `.`            | `compose.test.yml`     | `test.yml`, the `select-components` action                              |
+| `test.yml`   | `services/scicat` | `compose.test.yml`  | `test.yml`, the `select-components` action                              |
 
 A changed folder without the marker is skipped, so a component not yet on helmfile
 is neither linted nor deployed by these workflows.
 
 ### How test.yml picks components
 
-`test.yml` tests every top-level folder with a `compose.test.yml`: it runs that
+`test.yml` tests every `services/scicat/<component>` folder with a `compose.test.yml`: it runs that
 file's `test` service (`docker compose -f compose.test.yml run --rm --build test`),
 then builds the folder's `Dockerfile`. The `test` service defines what testing means
 for the component, in any language; the python components extend their
 `docker-compose.dev.yml` and run `pytest`, `black`, `isort` and `pylint`
-(non-blocking). A new folder with a `compose.test.yml` is tested without touching
+(non-blocking). A new component with a `compose.test.yml` is tested without touching
 the workflow. A change to `test.yml` or to the `select-components` action tests
 every component.
 

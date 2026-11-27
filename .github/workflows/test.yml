@@ -29,12 +29,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # A component is a top-level folder with a compose.test.yml.
+      # A component is a services/scicat/<component> folder with a compose.test.yml.
       - name: Select components to test
         id: select
         uses: ./.github/actions/select-components
         with:
-          components_root: .
+          components_root: services/scicat
           component_marker: compose.test.yml
           # a change here tests every component
           all_components_triggers: |
@@ -54,7 +54,7 @@ jobs:
         component: ${{ fromJSON(needs.changes.outputs.components) }}
     defaults:
       run:
-        working-directory: ${{ matrix.component }}
+        working-directory: services/scicat/${{ matrix.component }}
     steps:
 
       - name: Checkout repository
