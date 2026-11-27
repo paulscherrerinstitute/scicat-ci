@@ -51,7 +51,7 @@
     {
       "description": "Batch automergeable helm updates into one weekly PR, so one dev + one qa deploy per week",
       "matchFileNames": [
-        "helm/**"
+        "deployments/**"
       ],
       "matchUpdateTypes": [
         "minor",

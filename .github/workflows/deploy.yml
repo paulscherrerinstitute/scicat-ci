@@ -1,6 +1,6 @@
 name: deploy
 
-# Deploys every component that owns a helm/configs/<component>/helmfile.yaml.gotmpl.
+# Deploys every component that owns a deployments/<product>/<component>/helmfile.yaml.gotmpl.
 # That config holds the chart, the values, and the secrets the chart receives.
 #
 # Add the config and delete the component's own workflow in the same commit.
@@ -21,7 +21,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/deploy.yml
-      - helm/**
+      - deployments/**
   release:
     types: [published]
 
@@ -46,7 +46,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # A tag names its component, <component>-vX.Y.Z.
+      # A tag names its component, <product>/<component>-vX.Y.Z.
       - name: Select the released component
         id: release
         if: github.event_name == 'release'
@@ -54,8 +54,10 @@ jobs:
           set -euo pipefail
 
           name=${TAG%-v*}
+          # Tags from before the products, <component>-vX.Y.Z, are SciCat's.
+          if [[ "$name" != */* ]]; then name="scicat/$name"; fi
           # A component without a helmfile config deploys from its own workflow.
-          if [ -f "helm/configs/$name/helmfile.yaml.gotmpl" ]; then
+          if [ -f "deployments/$name/helmfile.yaml.gotmpl" ]; then
             components=$(jq -nc --arg name "$name" '[$name]')
           else
             components='[]'
@@ -73,17 +75,18 @@ jobs:
         if: github.event_name != 'release'
         uses: ./.github/actions/select-components
         with:
-          components_root: helm/configs
+          components_root: deployments
           component_marker: helmfile.yaml.gotmpl
+          component_depth: 2
           # a change here can change what every config renders
-          all_components_triggers: helm/helmfile-common.yaml
+          all_components_triggers: deployments/*/helmfile-common.yaml
           canary_components_triggers: |
             .github/workflows/deploy.yml
             .github/actions/select-components/**
           # one per chart: generic-service, cron, proposals-cronjob; none once merged
           canary_components: >-
             ${{ github.event_name == 'pull_request'
-              && 'search-api scicat-to-pss proposals' || '' }}
+              && 'scicat/search-api scicat/scicat-to-pss scicat/proposals' || '' }}
 
   deploy:
     needs:
@@ -125,7 +128,7 @@ jobs:
       - name: deploy
         uses: ./.github/actions/deploy-helmfile
         with:
-          file: helm/configs/${{ matrix.component }}/helmfile.yaml.gotmpl
+          file: deployments/${{ matrix.component }}/helmfile.yaml.gotmpl
           environment: "${{ needs.set_env.outputs.environment }}"
           kubeconfig: "${{ secrets.KUBECONFIG }}"
           secrets: ${{ toJSON(secrets) }}

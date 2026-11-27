@@ -1,9 +1,10 @@
 name: select-components
 description: >-
-  Select the components a change touches, as a JSON array of names for a job
-  matrix. A component is a folder directly under `components_root` that
-  contains `component_marker`. Needs a checkout with full history
-  (fetch-depth: 0) beforehand.
+  Select the components a change touches, as a JSON array of their paths under
+  `components_root`, for a job matrix. A component is a folder
+  `component_depth` levels under `components_root` that contains
+  `component_marker`, e.g. scicat/backend for a depth of 2. Needs a checkout
+  with full history (fetch-depth: 0) beforehand.
 
 inputs:
   components_root:
@@ -12,6 +13,10 @@ inputs:
   component_marker:
     description: file a folder must contain to count as a component, e.g. compose.test.yml
     required: true
+  component_depth:
+    description: how many folder levels under `components_root` a component is, e.g. 2 for <product>/<component>
+    required: false
+    default: "1"
   all_components_triggers:
     description: newline-separated files whose change selects every component
     required: false
@@ -59,10 +64,17 @@ runs:
         set -euo pipefail
 
         if [ "$ALL_CHANGED" = "true" ]; then
-          candidates=$(for marker in "$ROOT"/*/"$MARKER"; do basename "$(dirname "$marker")"; done)
+          # one * per level: ROOT/*/*/MARKER for a depth of 2
+          glob=$ROOT$(printf '/*%.0s' $(seq "$DEPTH"))/$MARKER
+          candidates=$(for marker in $glob; do
+            component=${marker#"$ROOT"/}
+            echo "${component%/*}"
+          done)
         else
           # changed paths are relative to the repository root, whatever ROOT is
-          candidates=$(jq -r --arg root "${ROOT%/}/" '.[] | ltrimstr($root) | split("/")[0]' <<< "$CHANGED")
+          candidates=$(jq -r --arg root "${ROOT%/}/" --argjson depth "$DEPTH" '.[]
+            | ltrimstr($root) | split("/")[0:$depth]
+            | select(length == $depth) | join("/")' <<< "$CHANGED")
         fi
 
         components=$(printf '%s\n' "$candidates" | sort -u | while read -r name; do
@@ -80,6 +92,7 @@ runs:
       env:
         ROOT: ${{ inputs.components_root }}
         MARKER: ${{ inputs.component_marker }}
+        DEPTH: ${{ inputs.component_depth }}
         CANARY: ${{ inputs.canary_components }}
         CHANGED: ${{ steps.changed.outputs.components_all_changed_files }}
         ALL_CHANGED: ${{ steps.changed.outputs.all_any_changed }}
