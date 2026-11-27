@@ -9,10 +9,21 @@
   "platformAutomerge": false,
   "packageRules": [
     {
-      "description": "Automerge minor, patch and pin/digest updates of non-SciCat dependencies, once released for 3 days",
+      "description": "Automerge minor and patch updates of non-SciCat dependencies, once released for 3 days",
       "matchUpdateTypes": [
         "minor",
-        "patch",
+        "patch"
+      ],
+      "matchPackageNames": [
+        "!/scicat/i",
+        "!/openem/i"
+      ],
+      "minimumReleaseAge": "3 days",
+      "automerge": true
+    },
+    {
+      "description": "Automerge pin and digest updates of non-SciCat dependencies right away: digests have no release date to wait on",
+      "matchUpdateTypes": [
         "pin",
         "pinDigest",
         "digest"
@@ -21,7 +32,6 @@
         "!/scicat/i",
         "!/openem/i"
       ],
-      "minimumReleaseAge": "3 days",
       "automerge": true
     },
     {
