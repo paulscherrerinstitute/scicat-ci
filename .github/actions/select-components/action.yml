@@ -12,6 +12,12 @@ inputs:
   component_marker:
     description: file a folder must contain to count as a component, e.g. compose.test.yml
     required: true
+  component_files:
+    description: >-
+      newline-separated globs, relative to a component's folder, of the files
+      whose change selects it, e.g. only one environment's values
+    required: false
+    default: "**"
   all_components_triggers:
     description: newline-separated files whose change selects every component
     required: false
@@ -38,6 +44,19 @@ runs:
   using: composite
   steps:
 
+    - name: Prefix component files with their folder
+      id: files
+      shell: bash
+      run: |
+        {
+          echo "globs<<EOF"
+          sed "/^$/d; s|^|$ROOT/*/|" <<< "$FILES"
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+      env:
+        ROOT: ${{ inputs.components_root }}
+        FILES: ${{ inputs.component_files }}
+
     # toJSON quotes each input as a YAML string, which the action splits on
     # newlines. An empty string drops its key, where an empty list would match
     # every file.
@@ -46,7 +65,7 @@ runs:
       uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       with:
         files_yaml: |
-          components: ${{ toJSON(inputs.components_root == '.' && '**' || format('{0}/**', inputs.components_root)) }}
+          components: ${{ toJSON(steps.files.outputs.globs) }}
           all: ${{ toJSON(inputs.all_components_triggers) }}
           canary: ${{ toJSON(inputs.canary_components_triggers) }}
         json: true

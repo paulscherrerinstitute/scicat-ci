@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/reusable.environment.yml
 
   discover:
-    if: ${{ !github.event.pull_request.draft }}
+    needs: set_env
     runs-on: ubuntu-latest
     outputs:
       components: ${{ steps.release.outputs.components || steps.changed.outputs.components }}
@@ -75,6 +75,11 @@ jobs:
         with:
           components_root: helm/configs
           component_marker: helmfile.yaml.gotmpl
+          # a component's shared files and its folder for this environment;
+          # another environment's folder deploys there, not here
+          component_files: |
+            *
+            ${{ needs.set_env.outputs.environment }}/**
           # a change here can change what every config renders
           all_components_triggers: helm/helmfile-common.yaml
           canary_components_triggers: |

@@ -57,7 +57,10 @@ The trigger determines the environment:
 
 For `pull_request` and `push`, the workflow diffs the changed files and deploys only
 the components whose `helm/configs/<component>` folder changed, or all of them if
-`helm/helmfile-common.yaml` changed. On a PR, a change to `deploy.yml` or to the
+`helm/helmfile-common.yaml` changed. Within a component, only its top-level files
+and the subfolder of the environment being deployed count: a change to
+`<component>/qa/` deploys on merge but not on the PR, and a production-only change
+deploys at the next release. On a PR, a change to `deploy.yml` or to the
 `select-components` action deploys one canary component per chart (`search-api`
 for `generic-service`, `scicat-to-pss` for `cron`, `proposals` for
 `proposals-cronjob`), unless components already deploy alongside it; merged, such a
