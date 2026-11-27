@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-component-in-tag": true,
+  "separate-pull-requests": true,
+  "packages": {
+    "helm/configs/proposals": {
+      "component": "proposals",
+      "exclude-paths": [
+        "helm/configs/proposals/development",
+        "helm/configs/proposals/qa"
+      ]
+    }
+  }
+}
